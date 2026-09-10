@@ -33,11 +33,13 @@ buttons for touch.
 ## Layout
 
 ```
-index.html          markup and page chrome
-assets/styles.css   the dark skin
-assets/app.js       planner logic — reads the JSON, renders everything from it
-assets/icons.js     original inline SVG glyphs (no game assets) + node mapping
-data/perks.json     the perk registry — single source of truth
+index.html            markup and page chrome
+assets/styles.css     the dark skin
+assets/app.js         planner logic — reads the JSON, renders everything from it
+assets/icons.js       original inline SVG glyphs (no game assets) + node mapping
+data/perks.json       the perk registry — single source of truth
+tools/verify_perks.py cross-checks the registry against a published perk list
+VERIFICATION.md       what was checked, and where the sources disagreed
 ```
 
 Nothing about the perks is hard-coded in `app.js` beyond the icon mapping. Adding,
@@ -84,18 +86,37 @@ string. A perk looks like this:
 - `gate` is one of `none`, `manual`, `quest`, or `corruption <n>`.
 - `unlocks` is the exact inverse of `prerequisites` across all three trees; the app
   builds its graph from `prerequisites` and treats `unlocks` as documentation.
+- An ultimate may carry an `alias` when published lists disagree on its name; the
+  planner shows it on the card.
+- `requirement` on an ultimate may name more than one condition — Vampirism reads
+  `"35 points in tree, Corruption 15"` — and all of them must hold.
+- Top-level `source_overrides` records any field where the registry knowingly
+  departs from the external source, with the reason.
 
 Integrity checks that hold for the committed data: every prerequisite and unlock
 resolves to a real node, and every perk's `max_level` matches its number of `levels`
-entries.
+entries. Run them yourself with:
+
+```sh
+python3 tools/verify_perks.py                        # internal consistency
+python3 tools/verify_perks.py path/to/game8-page.html # plus an external source
+```
+
+Every level cost and gate in the registry has been cross-checked against a
+published perk list — see [VERIFICATION.md](VERIFICATION.md) for the method, the
+result, and the three places the sources contradicted each other.
 
 ## Notes and caveats
 
 - Perk data was read from in-game skill screens; node names were resolved by matching
   each icon against the named perk icon set. Some sources label two rows "Lv. 3" — the
   second is Lv. 4, and the in-game pips confirm four slots on those perks.
+- Node positions and the prerequisite graph come from the skill screens alone — no
+  published list records tree topology, so `tools/verify_perks.py` cannot check them.
 - Icons here are original line art, not ripped assets, so they suggest each perk
   rather than reproduce it.
 - Individual level costs are the likeliest thing to drift between game patches. If you
   spot a mismatch, fix `data/perks.json` and the page follows.
+- Stinging Blade's level 4 cost is the one number still worth a second look; see
+  VERIFICATION.md.
 - Fan-made and unofficial. Not affiliated with Rebel Wolves.
