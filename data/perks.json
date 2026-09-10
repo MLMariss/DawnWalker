@@ -1,0 +1,2062 @@
+{
+  "game": "The Blood of Dawnwalker",
+  "subject": "Perk registry",
+  "notes": [
+    "Tree positions, prerequisite links and upgrade-level counts were read from in-game skill screens.",
+    "Node names were resolved by matching each in-game icon against the named perk icon set, then verified by eye.",
+    "Some sources list two rows both labelled 'Lv. 3'. The second is Lv. 4; in-game pips confirm four slots on those perks.",
+    "Font of Life and Mandrake Ward are padlocked '?' nodes with no skill point or time cost - story or quest unlocks."
+  ],
+  "trees": {
+    "Witchcraft": {
+      "key": "wc",
+      "perks": [
+        {
+          "node_id": "W1",
+          "name": "Forager",
+          "row": 1,
+          "x": 148,
+          "max_level": 2,
+          "prerequisites": [],
+          "unlocks": [
+            "W5"
+          ],
+          "quest_unlock": false,
+          "effect": "Double harvest chance when gathering plants.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "50% double harvest",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "100% double harvest",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W2",
+          "name": "Bewitching Influence",
+          "row": 1,
+          "x": 385,
+          "max_level": 3,
+          "prerequisites": [],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Better shop prices and special stock.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "-15% buying prices",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "+15% selling prices",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "Special offers appear in some stores",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "none"
+            }
+          ]
+        },
+        {
+          "node_id": "W3",
+          "name": "Unnatural Resilience",
+          "row": 1,
+          "x": 618,
+          "max_level": 2,
+          "prerequisites": [],
+          "unlocks": [
+            "W7"
+          ],
+          "quest_unlock": false,
+          "effect": "Armour while any Witchcraft ability is active.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+25% armour",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "+50% armour",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W4",
+          "name": "Witchcraft Mastery",
+          "row": 1,
+          "x": 968,
+          "max_level": 4,
+          "prerequisites": [],
+          "unlocks": [
+            "W8",
+            "W9"
+          ],
+          "quest_unlock": false,
+          "effect": "Witchcraft abilities hit harder.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+15% damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "50% chance of +88 damage on cast",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "+25% damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "+40% damage, and the +88 damage always triggers",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W5",
+          "name": "Herbal Remedies I",
+          "row": 2,
+          "x": 148,
+          "max_level": 3,
+          "prerequisites": [
+            "W1"
+          ],
+          "unlocks": [
+            "W6",
+            "W10"
+          ],
+          "quest_unlock": false,
+          "effect": "Time-segment consumables last longer.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+1 time segment",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "+2 time segments",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "+3 time segments",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W6",
+          "name": "Medicus I",
+          "row": 2,
+          "x": 385,
+          "max_level": 3,
+          "prerequisites": [
+            "W5"
+          ],
+          "unlocks": [
+            "W15"
+          ],
+          "quest_unlock": false,
+          "effect": "Higher consumable stack limit in a quickslot.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "6 per quickslot",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "9 per quickslot",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "12 per quickslot",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W7",
+          "name": "Forbidden Sigils",
+          "row": 2,
+          "x": 618,
+          "max_level": 3,
+          "prerequisites": [
+            "W3"
+          ],
+          "unlocks": [
+            "W11"
+          ],
+          "quest_unlock": false,
+          "effect": "More Witchcraft ability slots.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "2 slots",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "2 slots",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "4 slots",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W8",
+          "name": "Lasting Malediction",
+          "row": 2,
+          "x": 855,
+          "max_level": 4,
+          "prerequisites": [
+            "W4"
+          ],
+          "unlocks": [
+            "W12"
+          ],
+          "quest_unlock": false,
+          "effect": "Witchcraft abilities last longer.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+10% duration",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "+20% duration",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "+40% duration",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "Using a Witchcraft ability extends active ones by 20%",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W9",
+          "name": "Frugal Witchcraft",
+          "row": 2,
+          "x": 1090,
+          "max_level": 3,
+          "prerequisites": [
+            "W4"
+          ],
+          "unlocks": [
+            "W17",
+            "W18"
+          ],
+          "quest_unlock": false,
+          "effect": "Killing with a Witchcraft ability refunds part of the health it cost.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Refund 40% of the health cost",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "Refund 80%",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "Refund 120%",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W10",
+          "name": "Amalgam",
+          "row": 3,
+          "x": 148,
+          "max_level": 2,
+          "prerequisites": [
+            "W5"
+          ],
+          "unlocks": [
+            "W14"
+          ],
+          "quest_unlock": false,
+          "effect": "Multiple consumable buffs measured in time segments can run at once.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "2 buffs at once",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "3 buffs at once",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W11",
+          "name": "Aether Flow",
+          "row": 3,
+          "x": 618,
+          "max_level": 3,
+          "prerequisites": [
+            "W7"
+          ],
+          "unlocks": [
+            "W16"
+          ],
+          "quest_unlock": false,
+          "effect": "Reduces Witchcraft ability cooldown.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "-10% cooldowns",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "-20% cooldowns",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "-5% cooldowns on critical hit",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W12",
+          "name": "Evil Eye",
+          "row": 3,
+          "x": 855,
+          "max_level": 2,
+          "prerequisites": [
+            "W8"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Chance for a critical Witchcraft cast.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "10% critical chance",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "20% critical chance",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W13",
+          "name": "Font of Life",
+          "row": 3,
+          "x": 1200,
+          "max_level": 1,
+          "prerequisites": [],
+          "unlocks": [],
+          "quest_unlock": true,
+          "effect": "Passive regeneration of human health.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Story or quest unlock - no skill point or time cost listed",
+              "skill_points": 0,
+              "time_segments": 0,
+              "gate": "quest"
+            }
+          ]
+        },
+        {
+          "node_id": "W14",
+          "name": "Herbal Remedies II",
+          "row": 4,
+          "x": 148,
+          "max_level": 3,
+          "prerequisites": [
+            "W10"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Extra instant heal from every consumable.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+5% health instantly",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "+10% health",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "+15% health",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W15",
+          "name": "Medicus II",
+          "row": 4,
+          "x": 385,
+          "max_level": 3,
+          "prerequisites": [
+            "W6"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Craft more items per batch.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Craft 2 at once",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "Craft 3 at once",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "Each day, craft 1 free item from every unlocked recipe (quest recipes excluded)",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W16",
+          "name": "Blasphemous Echo",
+          "row": 4,
+          "x": 618,
+          "max_level": 2,
+          "prerequisites": [
+            "W11"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Witchcraft damage scales with how many enemies are currently affected.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+10% damage per affected enemy",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "+20% damage per affected enemy",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W17",
+          "name": "Potent Blood",
+          "row": 4,
+          "x": 968,
+          "max_level": 2,
+          "prerequisites": [
+            "W9"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Chance for a Witchcraft ability to cost no health.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "20% chance",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "40% chance",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "W18",
+          "name": "Unholy Fervour",
+          "row": 4,
+          "x": 1200,
+          "max_level": 2,
+          "prerequisites": [
+            "W9"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Chance to refund an activation charge after casting.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "20% refund chance",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "40% refund chance",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        }
+      ],
+      "ultimates": [
+        {
+          "name": "Arcane Cascade",
+          "effect": "+20% Witchcraft damage for each ability used, up to +100%. Resets after combat.",
+          "cost": {
+            "skill_points": 4,
+            "time_segments": 2
+          },
+          "requirement": "35 points in tree"
+        },
+        {
+          "name": "Entwined Torment",
+          "effect": "The first Witchcraft ability used in a fight hits 2 enemies.",
+          "cost": {
+            "skill_points": 4,
+            "time_segments": 2
+          },
+          "requirement": "35 points in tree"
+        },
+        {
+          "name": "Runic Bulwark",
+          "effect": "15% chance to apply a random hex on a perfect block.",
+          "cost": {
+            "skill_points": 4,
+            "time_segments": 2
+          },
+          "requirement": "35 points in tree"
+        }
+      ],
+      "ultimate_rule": "Three per tree, only one can ever be taken; the choice is permanent."
+    },
+    "Swordmastery": {
+      "key": "sm",
+      "perks": [
+        {
+          "node_id": "S1",
+          "name": "Omniblock",
+          "row": 1,
+          "x": 228,
+          "max_level": 4,
+          "prerequisites": [],
+          "unlocks": [
+            "S5",
+            "S6"
+          ],
+          "quest_unlock": false,
+          "effect": "Blocking costs less stamina.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "-10% stamina cost",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "-20% stamina cost",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "-30% stamina cost",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "-40% stamina cost, directional",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S2",
+          "name": "Stinging Blade",
+          "row": 1,
+          "x": 505,
+          "max_level": 4,
+          "prerequisites": [],
+          "unlocks": [
+            "S7"
+          ],
+          "quest_unlock": false,
+          "effect": "More weapon damage.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+5% weapon damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "+10% weapon damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "+15% weapon damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "+20% weapon damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S3",
+          "name": "Endless Effort",
+          "row": 1,
+          "x": 765,
+          "max_level": 4,
+          "prerequisites": [],
+          "unlocks": [
+            "S8",
+            "S9"
+          ],
+          "quest_unlock": false,
+          "effect": "More stamina.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+25% max stamina",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "+50% max stamina",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "+75% max stamina",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "+100% max stamina",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S4",
+          "name": "Vigour",
+          "row": 1,
+          "x": 1245,
+          "max_level": 4,
+          "prerequisites": [],
+          "unlocks": [
+            "S11"
+          ],
+          "quest_unlock": false,
+          "effect": "More health of every type.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+20% max health",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "+10% max health",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "+30% max health",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "+50% max health",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S5",
+          "name": "Perfect Riposte",
+          "row": 2,
+          "x": 143,
+          "max_level": 4,
+          "prerequisites": [
+            "S1"
+          ],
+          "unlocks": [
+            "S12"
+          ],
+          "quest_unlock": false,
+          "effect": "Strike in the critical direction after a perfect block for critical damage.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Unlocks Perfect Riposte",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "+10% riposte damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "Riposte also works after a perfect dodge",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "+20% riposte damage",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S6",
+          "name": "Perfect Block",
+          "row": 2,
+          "x": 315,
+          "max_level": 4,
+          "prerequisites": [
+            "S1"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Perfect blocks give back more stamina and charge.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+30% stamina restored",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "+50% activation charge restored",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "+60% stamina restored",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 4,
+              "effect": "+100% activation charge restored",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "none"
+            }
+          ]
+        },
+        {
+          "node_id": "S7",
+          "name": "Fate’s Favour",
+          "row": 2,
+          "x": 505,
+          "max_level": 4,
+          "prerequisites": [
+            "S2"
+          ],
+          "unlocks": [
+            "S13"
+          ],
+          "quest_unlock": false,
+          "effect": "Chance for a weapon critical hit.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "6% crit chance",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "12% crit chance",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "18% crit chance",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "+25% weapon crit damage",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S8",
+          "name": "Fleet of Foot",
+          "row": 2,
+          "x": 675,
+          "max_level": 4,
+          "prerequisites": [
+            "S3"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Cheaper dodging, with payoffs for good timing.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "-20% stamina cost",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "Last-moment dodges restore some activation charge",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "-30% stamina cost",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 4,
+              "effect": "Kills regenerate stamina",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S9",
+          "name": "Pack Mule",
+          "row": 2,
+          "x": 855,
+          "max_level": 3,
+          "prerequisites": [
+            "S3"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Higher carry weight.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+30 carry weight",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "+60 carry weight",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "+100 carry weight, and you can run while encumbered",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S10",
+          "name": "Sustained Focus",
+          "row": 2,
+          "x": 1050,
+          "max_level": 4,
+          "prerequisites": [],
+          "unlocks": [
+            "S14",
+            "S15"
+          ],
+          "quest_unlock": false,
+          "effect": "More activation charges.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "2 max charges",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "Start each fight with 1 full charge",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "3 max charges",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 4,
+              "effect": "4 max charges",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "none"
+            }
+          ]
+        },
+        {
+          "node_id": "S11",
+          "name": "Second Skin I",
+          "row": 2,
+          "x": 1245,
+          "max_level": 3,
+          "prerequisites": [
+            "S4"
+          ],
+          "unlocks": [
+            "S19"
+          ],
+          "quest_unlock": false,
+          "effect": "Lower medium armour penalties.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "-33% penalties",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "-66% penalties",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "-100% penalties",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S12",
+          "name": "Counterattack",
+          "row": 3,
+          "x": 143,
+          "max_level": 3,
+          "prerequisites": [
+            "S5"
+          ],
+          "unlocks": [
+            "S16"
+          ],
+          "quest_unlock": false,
+          "effect": "Attacking straight after a perfect block hits harder.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+10% damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "+20% damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "+10% bleed",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S13",
+          "name": "Precision",
+          "row": 3,
+          "x": 505,
+          "max_level": 3,
+          "prerequisites": [
+            "S7"
+          ],
+          "unlocks": [
+            "S17"
+          ],
+          "quest_unlock": false,
+          "effect": "Directional attacks hit harder when you do not repeat a direction.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+10% damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "-30% stamina cost",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "+10% damage",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S14",
+          "name": "Master Fencer",
+          "row": 3,
+          "x": 975,
+          "max_level": 3,
+          "prerequisites": [
+            "S10"
+          ],
+          "unlocks": [
+            "S18"
+          ],
+          "quest_unlock": false,
+          "effect": "More Swordmastery ability slots.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "2 slots",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "3 slots",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "4 slots",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S15",
+          "name": "Renewed Focus",
+          "row": 3,
+          "x": 1130,
+          "max_level": 3,
+          "prerequisites": [
+            "S10"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Activation charges come back faster.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+15% passive charge restoration",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "+35% passive charge restoration",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "+50% charge restoration from attacks",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S16",
+          "name": "Sharp Eye",
+          "row": 4,
+          "x": 143,
+          "max_level": 3,
+          "prerequisites": [
+            "S12"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Chance to weaken an enemy on a perfect block - they deal less and take more damage.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "30% chance, 10s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "60% chance, 10s",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "100% chance, 10s",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S17",
+          "name": "Growing Momentum",
+          "row": 4,
+          "x": 505,
+          "max_level": 2,
+          "prerequisites": [
+            "S13"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Weapon damage climbs with each attack; resets when you take damage.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+4% per attack, up to +20%",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "-8% stamina per attack, up to -50%",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S18",
+          "name": "Restless Blade",
+          "row": 4,
+          "x": 975,
+          "max_level": 3,
+          "prerequisites": [
+            "S14"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Shorter Swordmastery cooldowns.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "-10% cooldowns",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "-10% cooldowns",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "-50% cooldowns on critical hits",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "S19",
+          "name": "Second Skin II",
+          "row": 4,
+          "x": 1245,
+          "max_level": 3,
+          "prerequisites": [
+            "S11"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Lower heavy armour penalties.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "-33% penalties",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "-66% penalties",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "-100% penalties",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            }
+          ]
+        }
+      ],
+      "ultimates": [
+        {
+          "name": "Last Stand",
+          "effect": "+100% weapon damage below 30% health.",
+          "cost": {
+            "skill_points": 4,
+            "time_segments": 2
+          },
+          "requirement": "35 points in tree"
+        },
+        {
+          "name": "Sword Sage",
+          "effect": "Killing an enemy resets all active ability cooldowns.",
+          "cost": {
+            "skill_points": 4,
+            "time_segments": 2
+          },
+          "requirement": "35 points in tree"
+        },
+        {
+          "name": "Tactical Mastery",
+          "effect": "All active abilities cost 1 less activation charge.",
+          "cost": {
+            "skill_points": 4,
+            "time_segments": 2
+          },
+          "requirement": "35 points in tree"
+        }
+      ],
+      "ultimate_rule": "Three per tree, only one can ever be taken; the choice is permanent."
+    },
+    "Vampirism": {
+      "key": "vp",
+      "perks": [
+        {
+          "node_id": "V1",
+          "name": "Nourishing Blood",
+          "row": 1,
+          "x": 490,
+          "max_level": 3,
+          "prerequisites": [],
+          "unlocks": [
+            "V6",
+            "V7",
+            "V11"
+          ],
+          "quest_unlock": false,
+          "effect": "Drinking blood restores more health.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+10% restoration",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "+20% restoration",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 3"
+            },
+            {
+              "level": 3,
+              "effect": "+40% restoration",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 8"
+            }
+          ]
+        },
+        {
+          "node_id": "V2",
+          "name": "Endless Hunger",
+          "row": 1,
+          "x": 800,
+          "max_level": 3,
+          "prerequisites": [],
+          "unlocks": [
+            "V12"
+          ],
+          "quest_unlock": false,
+          "effect": "More health segments.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "3 max health segments",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "4 max health segments",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 5"
+            },
+            {
+              "level": 3,
+              "effect": "5 max health segments",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 12"
+            }
+          ]
+        },
+        {
+          "node_id": "V3",
+          "name": "Shadow Dweller",
+          "row": 1,
+          "x": 1025,
+          "max_level": 2,
+          "prerequisites": [],
+          "unlocks": [
+            "V8"
+          ],
+          "quest_unlock": false,
+          "effect": "Longer shadowstep.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "11m range",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "14.5m range and -50% stamina cost",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 11"
+            }
+          ]
+        },
+        {
+          "node_id": "V4",
+          "name": "Razorsharp Claws",
+          "row": 1,
+          "x": 1215,
+          "max_level": 4,
+          "prerequisites": [],
+          "unlocks": [
+            "V9"
+          ],
+          "quest_unlock": false,
+          "effect": "More claw damage.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+5% claw damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "+12% claw damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 4"
+            },
+            {
+              "level": 3,
+              "effect": "+20% claw damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 9"
+            },
+            {
+              "level": 4,
+              "effect": "+100% activation charge restoration from claw attacks",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 12"
+            }
+          ]
+        },
+        {
+          "node_id": "V5",
+          "name": "Vrakhiri Might",
+          "row": 2,
+          "x": 185,
+          "max_level": 3,
+          "prerequisites": [],
+          "unlocks": [
+            "V10"
+          ],
+          "quest_unlock": false,
+          "effect": "More vampiric ability slots.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "2 slots",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 4"
+            },
+            {
+              "level": 2,
+              "effect": "3 slots",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 7"
+            },
+            {
+              "level": 3,
+              "effect": "4 slots",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 11"
+            }
+          ]
+        },
+        {
+          "node_id": "V6",
+          "name": "Crimson Feast",
+          "row": 2,
+          "x": 415,
+          "max_level": 3,
+          "prerequisites": [
+            "V1"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Animal blood grants buffs for 3 time segments.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+10% attack damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 2"
+            },
+            {
+              "level": 2,
+              "effect": "+15% armour",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 5"
+            },
+            {
+              "level": 3,
+              "effect": "+10% crit chance",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 10"
+            }
+          ]
+        },
+        {
+          "node_id": "V7",
+          "name": "Wild Blood",
+          "row": 2,
+          "x": 565,
+          "max_level": 3,
+          "prerequisites": [
+            "V1"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Human blood grants buffs for 3 time segments.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+15% passive charge restoration",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 2"
+            },
+            {
+              "level": 2,
+              "effect": "+30% passive charge restoration",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 5"
+            },
+            {
+              "level": 3,
+              "effect": "+1 filled activation charge at combat start",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 10"
+            }
+          ]
+        },
+        {
+          "node_id": "V8",
+          "name": "Dimension Reach",
+          "row": 2,
+          "x": 1025,
+          "max_level": 3,
+          "prerequisites": [
+            "V3"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Planeshift costs less stamina.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "-45% stamina cost",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 2"
+            },
+            {
+              "level": 2,
+              "effect": "-70% stamina cost",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 6"
+            },
+            {
+              "level": 3,
+              "effect": "-100% stamina cost",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 13"
+            }
+          ]
+        },
+        {
+          "node_id": "V9",
+          "name": "Restless Claws",
+          "row": 2,
+          "x": 1215,
+          "max_level": 3,
+          "prerequisites": [
+            "V4"
+          ],
+          "unlocks": [
+            "V14"
+          ],
+          "quest_unlock": false,
+          "effect": "Claw attacks cost less stamina.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "-15% stamina cost",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 1"
+            },
+            {
+              "level": 2,
+              "effect": "-30% stamina cost",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 4"
+            },
+            {
+              "level": 3,
+              "effect": "Blocked attacks refund 100% of stamina",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 9"
+            }
+          ]
+        },
+        {
+          "node_id": "V10",
+          "name": "Lasting Blood",
+          "row": 3,
+          "x": 185,
+          "max_level": 2,
+          "prerequisites": [
+            "V5"
+          ],
+          "unlocks": [
+            "V15"
+          ],
+          "quest_unlock": false,
+          "effect": "Vampiric abilities cost less health.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "-20% health cost",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 5"
+            },
+            {
+              "level": 2,
+              "effect": "-40% health cost",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 10"
+            }
+          ]
+        },
+        {
+          "node_id": "V11",
+          "name": "Hastened Corruption",
+          "row": 3,
+          "x": 490,
+          "max_level": 3,
+          "prerequisites": [
+            "V1"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Corruption fills faster.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+30% corruption speed",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 1"
+            },
+            {
+              "level": 2,
+              "effect": "Drink at full health to overfeed: temporary health segment and +50% corruption speed",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 4"
+            },
+            {
+              "level": 3,
+              "effect": "+50 corruption speed, and +5% vampiric health per corruption level",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 6"
+            }
+          ]
+        },
+        {
+          "node_id": "V12",
+          "name": "Closing Wounds",
+          "row": 3,
+          "x": 800,
+          "max_level": 2,
+          "prerequisites": [
+            "V2"
+          ],
+          "unlocks": [
+            "V16"
+          ],
+          "quest_unlock": false,
+          "effect": "Slow regeneration within the current vampiric health segment.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+2% per second",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 3"
+            },
+            {
+              "level": 2,
+              "effect": "+4% per second",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 6"
+            }
+          ]
+        },
+        {
+          "node_id": "V13",
+          "name": "Mandrake Ward",
+          "row": 3,
+          "x": 1025,
+          "max_level": 1,
+          "prerequisites": [],
+          "unlocks": [],
+          "quest_unlock": true,
+          "effect": "Once per night, lethal damage instead restores 3 health segments.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Story or quest unlock - no skill point or time cost listed",
+              "skill_points": 0,
+              "time_segments": 0,
+              "gate": "quest"
+            }
+          ]
+        },
+        {
+          "node_id": "V14",
+          "name": "Clawpierce",
+          "row": 3,
+          "x": 1215,
+          "max_level": 3,
+          "prerequisites": [
+            "V9"
+          ],
+          "unlocks": [
+            "V17"
+          ],
+          "quest_unlock": false,
+          "effect": "Chance for a claw critical hit.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "10% crit chance",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 2"
+            },
+            {
+              "level": 2,
+              "effect": "20% crit chance",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 7"
+            },
+            {
+              "level": 3,
+              "effect": "+25% claw crit damage",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 13"
+            }
+          ]
+        },
+        {
+          "node_id": "V15",
+          "name": "Endless Ferocity",
+          "row": 4,
+          "x": 185,
+          "max_level": 2,
+          "prerequisites": [
+            "V10"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Shorter vampiric cooldowns.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "-20% cooldowns",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 5"
+            },
+            {
+              "level": 2,
+              "effect": "-4% cooldowns on critical hits",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 10"
+            }
+          ]
+        },
+        {
+          "node_id": "V16",
+          "name": "Blood Theft",
+          "row": 4,
+          "x": 800,
+          "max_level": 3,
+          "prerequisites": [
+            "V12"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Attacking restores recently lost vampiric health.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Unlocks Blood Theft",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 4"
+            },
+            {
+              "level": 2,
+              "effect": "Longer window to claim it back",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 8"
+            },
+            {
+              "level": 3,
+              "effect": "+30% effect",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 11"
+            }
+          ]
+        },
+        {
+          "node_id": "V17",
+          "name": "Dancing Claws",
+          "row": 4,
+          "x": 1215,
+          "max_level": 2,
+          "prerequisites": [
+            "V14"
+          ],
+          "unlocks": [],
+          "quest_unlock": false,
+          "effect": "Claw crit chance builds per attack; resets on damage taken or on a crit.",
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+4% per attack, up to +40%",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 9"
+            },
+            {
+              "level": 2,
+              "effect": "+8% per attack, up to +40%",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 14"
+            }
+          ]
+        }
+      ],
+      "ultimates": [
+        {
+          "name": "Lethal Crescendo",
+          "effect": "+20% claw damage per kill or per boss health segment broken. Stacks, resets after combat.",
+          "cost": {
+            "skill_points": 4,
+            "time_segments": 2
+          },
+          "requirement": "Corruption 15"
+        },
+        {
+          "name": "Renounce Death",
+          "effect": "Once per fight, gain lifesteal and immortality for 10s instead of dying.",
+          "cost": {
+            "skill_points": 4,
+            "time_segments": 2
+          },
+          "requirement": "Corruption 15"
+        },
+        {
+          "name": "Sanguine Renewal",
+          "effect": "Voracious Bite resets all active ability cooldowns.",
+          "cost": {
+            "skill_points": 4,
+            "time_segments": 2
+          },
+          "requirement": "Corruption 15"
+        }
+      ],
+      "ultimate_rule": "Three per tree, only one can ever be taken; the choice is permanent."
+    }
+  }
+}

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Blood of Dawnwalker — Skill Tree Planner</title>
+<meta name="description" content="Interactive skill tree planner for The Blood of Dawnwalker: Witchcraft, Swordmastery and Vampirism, with prerequisites, corruption gates and ultimate perks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-text">
+      <b>The Blood of Dawnwalker</b>
+      <i>Skill Tree Planner</i>
+    </span>
+  </div>
+
+  <div class="meters" id="meters">
+    <div class="meter" title="Skill points spent on perks and the chosen ultimate">
+      <span class="meter-ico ico-sp" aria-hidden="true"></span>
+      <span class="meter-val" id="m-sp">0</span>
+      <span class="meter-lbl">skill points</span>
+    </div>
+    <div class="meter" title="Time segments spent training">
+      <span class="meter-ico ico-ts" aria-hidden="true"></span>
+      <span class="meter-val" id="m-ts">0</span>
+      <span class="meter-lbl">time segments</span>
+    </div>
+    <div class="meter" title="Levels taken that need a Manual found in the world">
+      <span class="meter-ico ico-bk" aria-hidden="true"></span>
+      <span class="meter-val" id="m-bk">0</span>
+      <span class="meter-lbl">manuals</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <label class="ctl" title="Vampiric perk levels are gated behind Corruption levels">
+      <span class="ctl-lbl">Corruption</span>
+      <input type="range" id="corruption" min="0" max="15" step="1" value="15">
+      <output id="corruption-out">15</output>
+    </label>
+    <label class="ctl ctl-check" title="Some levels can only be learned from a Manual found in the world">
+      <input type="checkbox" id="manuals" checked>
+      <span>Manuals found</span>
+    </label>
+    <button class="btn" id="share" type="button">Copy build link</button>
+    <button class="btn btn-ghost" id="reset" type="button">Reset</button>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs" role="tablist" aria-label="Skill trees"></nav>
+
+<main class="stage">
+  <section class="treewrap">
+    <div class="treescroll" id="treescroll">
+      <div class="tree" id="tree">
+        <svg class="links" id="links" aria-hidden="true"></svg>
+        <div class="nodes" id="nodes"></div>
+      </div>
+    </div>
+
+    <div class="ultbar">
+      <div class="ultbar-head">
+        <h2>Ultimate Perks</h2>
+        <p id="ult-rule">Only one can be unlocked per skill tree. The choice is permanent.</p>
+        <span class="ult-gate" id="ult-gate"></span>
+      </div>
+      <div class="ults" id="ults"></div>
+    </div>
+
+    <p class="hint">Click a node to learn the next level · Right-click to refund · Padlocked nodes are story unlocks, click to toggle</p>
+  </section>
+
+  <aside class="panel" id="panel" aria-live="polite"></aside>
+</main>
+
+<footer class="foot">
+  <span id="foot-note">Fan-made planner. Perk data read from in-game skill screens — see <a href="data/perks.json">data/perks.json</a>.</span>
+</footer>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="assets/icons.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
