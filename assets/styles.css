@@ -218,6 +218,8 @@ a:hover{color:var(--gold-2)}
 .ult .ult-mark svg{width:18px;height:18px;transform:rotate(-45deg);stroke:var(--text-faint);fill:none;stroke-width:1.5}
 .ult b{display:block;font-family:Cinzel, Georgia, serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--text)}
 .ult span{display:block;font-size:13px;color:var(--text-dim);margin-top:3px}
+.ult b .alias{display:block;margin-top:2px;font-family:"EB Garamond",Georgia,serif;font-style:italic;
+  font-size:12px;letter-spacing:0;text-transform:none;color:var(--text-faint)}
 .ult .ult-cost{display:flex;gap:10px;margin-top:6px;font-size:12px;color:var(--text-faint);letter-spacing:.06em}
 .ult .ult-cost .cost{display:inline-flex}
 .ult.locked{opacity:.45;cursor:not-allowed}

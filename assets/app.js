@@ -196,19 +196,33 @@
     }, 0);
   }
 
+  /* A requirement string can name more than one condition, e.g.
+     "35 points in tree, Corruption 15" — all of them must hold. */
   function ultReq(t) {
     var r = (t.ultimates[0] && t.ultimates[0].requirement) || '35 points in tree';
+    var conds = [];
+    var pts = /(\d+)\s*points/i.exec(r);
+    if (pts) conds.push({ type: 'points', n: +pts[1] });
     var c = corruptionOf(r);
-    if (c !== null) return { type: 'corruption', n: c, text: 'Corruption ' + c };
-    var m = /(\d+)\s*points/i.exec(r);
-    var n = m ? +m[1] : 35;
-    return { type: 'points', n: n, text: 'Spend ' + n + ' in this tree' };
+    if (c !== null) conds.push({ type: 'corruption', n: c });
+    if (!conds.length) conds.push({ type: 'points', n: 35 });
+    return conds;
+  }
+
+  function ultProgress(t, spentOverride) {
+    return ultReq(t).map(function (c) {
+      var have = c.type === 'corruption'
+        ? state.corruption
+        : (spentOverride == null ? spent(t) : spentOverride);
+      return {
+        met: have >= c.n, have: have, n: c.n,
+        text: c.type === 'corruption' ? 'Corruption ' + c.n : 'Spend ' + c.n + ' in this tree'
+      };
+    });
   }
 
   function ultMet(t, spentOverride) {
-    var req = ultReq(t);
-    if (req.type === 'corruption') return state.corruption >= req.n;
-    return (spentOverride == null ? spent(t) : spentOverride) >= req.n;
+    return ultProgress(t, spentOverride).every(function (x) { return x.met; });
   }
 
   function nameOf(id) { return BY_ID[id] ? BY_ID[id].name : id; }
@@ -338,22 +352,24 @@
 
   function renderUltimates() {
     var t = tree();
-    var req = ultReq(t);
-    var met = ultMet(t);
-    var have = req.type === 'corruption' ? state.corruption : spent(t);
+    var prog = ultProgress(t);
+    var met = prog.every(function (x) { return x.met; });
 
     el.ultRule.textContent = t.ultimate_rule || '';
     el.ultGate.className = 'ult-gate' + (met ? ' met' : '');
     el.ultGate.textContent = met
-      ? 'Unlocked — ' + req.text
-      : req.text + ' — ' + have + '/' + req.n;
+      ? 'Unlocked — ' + prog.map(function (x) { return x.text; }).join(' · ')
+      : prog.filter(function (x) { return !x.met; })
+            .map(function (x) { return x.text + ' — ' + x.have + '/' + x.n; }).join(' · ');
 
     el.ults.innerHTML = t.ultimates.map(function (u, i) {
       var on = state.ults[t.key] === i;
       return '<button class="ult' + (on ? ' on' : '') + (met ? '' : ' locked') + '" type="button"' +
         ' data-ult="' + i + '" aria-pressed="' + on + '">' +
         '<span class="ult-mark">' + Icons.svg(Icons.forUltimate(u.name)) + '</span>' +
-        '<span><b>' + esc(u.name) + '</b><span>' + esc(u.effect) + '</span>' +
+        '<span><b>' + esc(u.name) +
+          (u.alias ? '<em class="alias">also listed as ' + esc(u.alias) + '</em>' : '') +
+        '</b><span>' + esc(u.effect) + '</span>' +
         '<span class="ult-cost">' + costHTML(u.cost.skill_points, u.cost.time_segments, null) +
         '</span></span></button>';
     }).join('');
@@ -506,7 +522,12 @@
       var b = e.target.closest('[data-ult]');
       if (!b) return;
       var t = tree(), i = +b.dataset.ult;
-      if (!ultMet(t)) { toast(ultReq(t).text + ' before choosing an ultimate.', true); return; }
+      if (!ultMet(t)) {
+        var need = ultProgress(t).filter(function (x) { return !x.met; })
+          .map(function (x) { return x.text.toLowerCase(); }).join(' and ');
+        toast('You need to ' + need + ' before choosing an ultimate.', true);
+        return;
+      }
       state.ults[t.key] = state.ults[t.key] === i ? undefined : i;
       if (state.ults[t.key] === undefined) delete state.ults[t.key];
       renderAll();

@@ -1,0 +1,222 @@
+#!/usr/bin/env python3
+"""Cross-check data/perks.json against a saved Game8 "All Perks List" page.
+
+Game8 publishes every perk's levels with skill point, time segment, manual and
+corruption requirements in a machine-readable table, which makes it a good
+external check on the committed registry. Save the page (Ctrl+S, "Web Page,
+complete") and point this script at the .html file:
+
+    python3 tools/verify_perks.py "All Perks List _ The Blood of Dawnwalker.html"
+
+It reports every difference in level count, skill point cost, time segment cost,
+manual gate, corruption gate and the numbers inside each level's effect text,
+and exits non-zero if anything differs. What it cannot check: node positions and
+the prerequisite graph, which come from in-game skill screens and appear in no
+published table.
+
+Requires: beautifulsoup4, lxml.
+"""
+import json
+import pathlib
+import re
+import sys
+import unicodedata
+
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    sys.exit("beautifulsoup4 is required: pip install beautifulsoup4 lxml")
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+TREES = ("Witchcraft", "Swordmastery", "Vampirism")
+# Every table on the page is preceded by the same tree-navigation row.
+NAV = {"witchcraftswordmasteryvampirism", "witchcraft", "swordmastery", "vampirism"}
+
+
+def key(name):
+    """Fold a perk name to a comparable key (curly quotes, case, punctuation)."""
+    name = unicodedata.normalize("NFKD", name).replace("’", "'").replace("‘", "'")
+    return re.sub(r"[^a-z0-9]", "", name.lower())
+
+
+def parse_cell(td):
+    """Split one description cell into the perk blurb plus a list of levels."""
+    for img in td.find_all("img"):
+        td_alt = (img.get("alt") or "").strip()
+        img.replace_with(f"[[{td_alt}]]")
+    text = re.sub(r"\n+", "\n", td.get_text("\n", strip=True))
+    # Game8 labels the fourth row of four-level perks "Lv. 3" as well, so split
+    # on the marker rather than trusting the number it carries.
+    chunks = re.split(r"\bLv\.\s*\d+:", text)
+    levels = []
+    for chunk in chunks[1:]:
+        c = chunk.replace("\n", " ")
+        sp = re.search(r"\[\[Skill Point\]\]\s*(\d+)", c)
+        ts = re.search(r"\[\[Time\]\]\s*(\d+)", c)
+        corr = re.search(r"\[\[Corruption\]\]\s*Lv\.\s*(\d+)", c) or re.search(r"Lv\.\s*(\d+)\s*$", c.strip())
+        effect = re.sub(r"\[\[[^\]]*\]\]", "", c.split("Cost:")[0]).strip(" .;")
+        levels.append({
+            "effect": re.sub(r"\s+", " ", effect),
+            "skill_points": int(sp.group(1)) if sp else 0,
+            "time_segments": int(ts.group(1)) if ts else 0,
+            "manual": "[[Manual]]" in c,
+            "corruption": int(corr.group(1)) if corr else None,
+        })
+    return chunks[0].replace("\n", " ").strip(), levels
+
+
+def parse_page(path):
+    soup = BeautifulSoup(pathlib.Path(path).read_text(encoding="utf-8", errors="replace"), "lxml")
+    out = {}
+    for table in soup.find_all("table"):
+        heading = table.find_previous(["h2", "h3"])
+        title = heading.get_text(" ", strip=True) if heading else ""
+        m = re.match(r"(%s)\s+(Ultimate\s+)?Perks$" % "|".join(TREES), title)
+        if not m:
+            continue
+        bucket = out.setdefault(m.group(1), {"perks": {}, "ultimates": {}})
+        target = bucket["ultimates"] if m.group(2) else bucket["perks"]
+        for tr in table.find_all("tr")[1:]:
+            cells = tr.find_all("td")
+            if len(cells) < 2:
+                continue
+            name = cells[0].get_text(" ", strip=True)
+            if key(name) in NAV:
+                continue
+            blurb, levels = parse_cell(cells[1])
+            target[name] = {"effect": blurb, "levels": levels}
+    return out
+
+
+def override_index(registry):
+    """Deliberate departures from the source, keyed by (tree, perk, level, field)."""
+    return {
+        (o["tree"], key(o["perk"]), o["level"], o["field"]): o
+        for o in registry.get("source_overrides", [])
+    }
+
+
+def compare(src, registry, overrides=None):
+    findings, expected = [], []
+    overrides = overrides if overrides is not None else override_index(registry)
+    for tree_name, tree in registry["trees"].items():
+        source = src.get(tree_name)
+        if not source:
+            findings.append(f"{tree_name}: no tables found in the source page")
+            continue
+
+        src_perks = {key(k): (k, v) for k, v in source["perks"].items()}
+        our_perks = {key(p["name"]): p for p in tree["perks"]}
+        for k in sorted(set(src_perks) - set(our_perks)):
+            findings.append(f"{tree_name}: in source, missing from registry — {src_perks[k][0]}")
+        for k in sorted(set(our_perks) - set(src_perks)):
+            findings.append(f"{tree_name}: in registry, missing from source — {our_perks[k]['name']}")
+
+        for k in sorted(set(src_perks) & set(our_perks)):
+            perk, (src_name, src_perk) = our_perks[k], src_perks[k]
+            src_levels, our_levels = src_perk["levels"], perk["levels"]
+            if perk["quest_unlock"]:
+                if src_levels:
+                    findings.append(f"{tree_name}/{perk['name']}: registry marks a story unlock, "
+                                    f"source lists {len(src_levels)} levels")
+                continue
+            if len(src_levels) != len(our_levels):
+                findings.append(f"{tree_name}/{perk['name']}: {len(our_levels)} levels in registry, "
+                                f"{len(src_levels)} in source")
+            for i in range(min(len(src_levels), len(our_levels))):
+                ours, theirs = our_levels[i], src_levels[i]
+                where = f"{tree_name}/{perk['name']} Lv{i + 1}"
+                for field in ("skill_points", "time_segments"):
+                    if ours[field] == theirs[field]:
+                        continue
+                    o = overrides.get((tree_name, k, i + 1, field))
+                    if o and o["registry"] == ours[field] and o["source"] == theirs[field]:
+                        expected.append(f"{where}: {field} {ours[field]} in registry, {theirs[field]} "
+                                        f"in source — {o['reason']}")
+                    else:
+                        findings.append(f"{where}: {field} {ours[field]} in registry, {theirs[field]} in source")
+                if (ours["gate"] == "manual") != theirs["manual"]:
+                    findings.append(f"{where}: manual gate {ours['gate'] == 'manual'} in registry, "
+                                    f"{theirs['manual']} in source")
+                m = re.match(r"corruption (\d+)$", ours["gate"])
+                ours_corr = int(m.group(1)) if m else None
+                if ours_corr != theirs["corruption"]:
+                    findings.append(f"{where}: corruption {ours_corr} in registry, {theirs['corruption']} in source")
+                # Effect wording is deliberately condensed in the registry, so
+                # compare the set of numbers rather than the prose or its order.
+                if sorted(re.findall(r"\d+", ours["effect"])) != sorted(re.findall(r"\d+", theirs["effect"])):
+                    findings.append(f"{where}: effect numbers differ — registry \"{ours['effect']}\" "
+                                    f"vs source \"{theirs['effect']}\"")
+
+        src_ults = {key(k): (k, v) for k, v in source["ultimates"].items()}
+        our_ults = {key(u["name"]): u for u in tree["ultimates"]}
+        for k in sorted(set(src_ults) - set(our_ults)):
+            findings.append(f"{tree_name}: ultimate in source, missing from registry — {src_ults[k][0]}")
+        for k in sorted(set(our_ults) - set(src_ults)):
+            findings.append(f"{tree_name}: ultimate in registry, missing from source — {our_ults[k]['name']}")
+        for k in sorted(set(src_ults) & set(our_ults)):
+            ult, (_, src_ult) = our_ults[k], src_ults[k]
+            level = src_ult["levels"][0] if src_ult["levels"] else {}
+            for field in ("skill_points", "time_segments"):
+                if ult["cost"][field] != level.get(field):
+                    findings.append(f"{tree_name}/{ult['name']}: ultimate {field} {ult['cost'][field]} "
+                                    f"in registry, {level.get(field)} in source")
+    return findings, expected
+
+
+def internal_checks(registry):
+    """Checks that need no external source: the graph and level bookkeeping."""
+    findings = []
+    for tree_name, tree in registry["trees"].items():
+        ids = {p["node_id"] for p in tree["perks"]}
+        inverse = {}
+        for perk in tree["perks"]:
+            for req in perk["prerequisites"]:
+                inverse.setdefault(req, set()).add(perk["node_id"])
+        for perk in tree["perks"]:
+            if len(perk["levels"]) != perk["max_level"]:
+                findings.append(f"{tree_name}/{perk['name']}: max_level {perk['max_level']} "
+                                f"but {len(perk['levels'])} level entries")
+            for req in perk["prerequisites"]:
+                if req not in ids:
+                    findings.append(f"{tree_name}/{perk['name']}: prerequisite {req} is not a node in this tree")
+            unlocks = set(perk["unlocks"])
+            expected = inverse.get(perk["node_id"], set())
+            if unlocks != expected:
+                findings.append(f"{tree_name}/{perk['name']}: unlocks {sorted(unlocks)} does not match "
+                                f"the inverse of prerequisites {sorted(expected)}")
+    return findings
+
+
+def main():
+    registry = json.loads((ROOT / "data" / "perks.json").read_text(encoding="utf-8"))
+    findings = internal_checks(registry)
+    label = "internal consistency"
+
+    expected = []
+    if len(sys.argv) > 1:
+        diffs, expected = compare(parse_page(sys.argv[1]), registry)
+        findings += diffs
+        label = "internal consistency and the Game8 source"
+    else:
+        print("No source page given — running internal checks only.\n"
+              "Pass a saved Game8 'All Perks List' page to cross-check costs and gates.\n")
+
+    perks = sum(len(t["perks"]) for t in registry["trees"].values())
+    ults = sum(len(t["ultimates"]) for t in registry["trees"].values())
+    if expected:
+        print(f"{len(expected)} documented deviation(s) from the source:\n")
+        for e in expected:
+            print(" ~", e)
+        print()
+    if findings:
+        print(f"{len(findings)} finding(s) across {perks} perks and {ults} ultimates:\n")
+        for f in findings:
+            print(" -", f)
+        return 1
+    print(f"{perks} perks and {ults} ultimates check out against {label}.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
