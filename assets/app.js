@@ -106,6 +106,8 @@
     // A Phial of Vrakhir Blood is consumed, not a permanent gate — it is
     // counted in the build overview rather than blocking the level.
     if (gate === 'vrakhir blood') return true;
+    // Road shrines are free to reach and never consumed — not a real block.
+    if (gate === 'road shrine') return true;
     var c = corruptionOf(gate);
     return c === null ? true : state.corruption >= c;
   }
@@ -114,6 +116,7 @@
     if (!gate || gate === 'none') return '';
     if (gate === 'manual') return 'Manual required';
     if (gate === 'vrakhir blood') return 'Phial of Vrakhir Blood';
+    if (gate === 'road shrine') return 'Road shrine';
     if (gate === 'quest') return 'Story unlock';
     var c = corruptionOf(gate);
     return c === null ? gate : 'Corruption ' + c;
@@ -241,6 +244,15 @@
   function ultMet(t, o) { return ultProgress(t, o).every(function (x) { return x.met; }); }
 
   function activeTime(p) { return p.active_time || TREE_OF[p.node_id].active_time || ''; }
+
+  /* The banner above a perk name is one of three, each with its own mark in
+     game: a sun for DAY ONLY, a crescent for NIGHT ONLY, both for ANYTIME. */
+  function whenMark(when) {
+    var w = String(when || '').toUpperCase();
+    if (w.indexOf('DAY') === 0) return 'day';
+    if (w.indexOf('NIGHT') === 0) return 'night';
+    return w ? 'any' : '';
+  }
 
   /* ------------------------------------------------- effect interpretation */
 
@@ -750,6 +762,9 @@
     if (sp) out.push('<span class="cost sp"><i></i>' + sp + '</span>');
     if (ts) out.push('<span class="cost ts"><i></i>' + ts + '</span>');
     if (gate === 'manual') out.push('<span class="cost bk"><i></i></span>');
+    if (gate === 'road shrine') out.push('<span class="cost shr"><i></i></span>');
+    var c = corruptionOf(gate);
+    if (c !== null) out.push('<span class="cost cor"><i></i>' + c + '</span>');
     return out.join(' ');
   }
 
@@ -797,12 +812,16 @@
         '<span class="hero-tree">' + esc(t.name) + '</span>' +
         '<span class="hero-lv">Level ' + n + ' / ' + p.max_level + '</span></div>' +
       '<div class="panel-body">' +
-        (when ? '<p class="panel-when">' + esc(when) + '</p>' : '') +
+        (when ? '<p class="panel-when"><i class="when-mark ' + whenMark(when) + '"></i>' +
+          esc(when) + '</p>' : '') +
+        (p.cooldown ? '<p class="panel-cd"><i class="cd-mark"></i>Cooldown: ' +
+          esc(p.cooldown) + '</p>' : '') +
         (nl && gateLabel(nl.gate) ? '<p class="panel-gate' + (gateOk(nl.gate) ? ' ok' : '') + '">' +
           esc(gateLabel(nl.gate)) + '</p>' : '') +
         '<h3>' + esc(p.name) +
           (p.story_granted ? '<span class="story-tag">Story</span>' : '') + '</h3>' +
-        '<p class="desc">' + esc(p.effect) + '</p>' + reqLine +
+        '<p class="desc">' + esc(p.effect) + '</p>' +
+        (p.note ? '<p class="desc-note">' + esc(p.note) + '</p>' : '') + reqLine +
         '<ul class="levels">' + levels + '</ul>' +
       '</div>' +
       '<div class="panel-foot">' +

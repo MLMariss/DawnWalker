@@ -2,13 +2,16 @@
   "game": "The Blood of Dawnwalker",
   "subject": "Perk registry",
   "notes": [
+    "Level costs, gates and every line of effect text are transcribed from the in-game skill screens; the wording is verbatim.",
     "Tree positions, prerequisite links and upgrade-level counts were read from in-game skill screens.",
     "Node names were resolved by matching each in-game icon against the named perk icon set, then verified by eye.",
-    "Level costs and gates were cross-checked against the Game8 'All Perks List' page with tools/verify_perks.py.",
+    "`active_time` is recorded per perk: ANYTIME, DAY ONLY or NIGHT ONLY, exactly as the banner above the perk name reads. It is not uniform within a tree - Witchcraft mixes ANYTIME and DAY ONLY.",
+    "Gates are per level, read from the icon on each level row: a book means that level needs a manual, a plain diamond means skill points only. `road shrine` is a gate the published sources do not list at all.",
+    "A level row whose cost is hidden in game is one the capture's save had already bought; those costs are kept from the Game8 cross-check rather than guessed. Ownership itself is never recorded - it is save state, not perk data.",
+    "Some levels cost skill points but no time segments, so `time_segments` can be 0. The published tables list a time segment everywhere.",
     "Some sources list two rows both labelled 'Lv. 3'. The second is Lv. 4; in-game pips confirm four slots on those perks.",
     "Font of Life and Mandrake Ward are padlocked '?' nodes with no skill point or time cost - story or quest unlocks.",
     "Vampirism ultimates are gated by Corruption 15 alone; only Witchcraft and Swordmastery show the 35-point spend counter.",
-    "active_time is set per tree where the skill screen shows one value throughout, and per perk where a screen confirms it.",
     "Where the registry knowingly departs from the Game8 page, source_overrides records the field and the reason."
   ],
   "trees": {
@@ -26,23 +29,24 @@
             "W5"
           ],
           "quest_unlock": false,
-          "effect": "Double harvest chance when gathering plants.",
+          "effect": "Double Harvest chance when gathering plants.",
           "levels": [
             {
               "level": 1,
-              "effect": "50% double harvest",
+              "effect": "Double Harvest : 50% chance.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "100% double harvest",
+              "effect": "Double Harvest : 100% chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "W2",
@@ -53,30 +57,31 @@
           "prerequisites": [],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Better shop prices and special stock.",
+          "effect": "Better Prices and special offers in stores.",
           "levels": [
             {
               "level": 1,
-              "effect": "-15% buying prices",
+              "effect": "-15% buying Prices.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "+15% selling prices",
+              "effect": "+15% selling Prices.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "Special offers appear in some stores",
+              "effect": "Special offers will be available in some stores.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "none"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "W3",
@@ -89,23 +94,24 @@
             "W7"
           ],
           "quest_unlock": false,
-          "effect": "Armour while any Witchcraft ability is active.",
+          "effect": "Grants Armour when any Witchcraft Ability is active.",
           "levels": [
             {
               "level": 1,
-              "effect": "+25% armour",
+              "effect": "+25% Armour.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "+50% armour",
+              "effect": "+50% Armour.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY"
         },
         {
           "node_id": "W4",
@@ -119,37 +125,38 @@
             "W9"
           ],
           "quest_unlock": false,
-          "effect": "Witchcraft abilities hit harder.",
+          "effect": "Witchcraft Abilities deal more Damage.",
           "levels": [
             {
               "level": 1,
-              "effect": "+15% damage",
+              "effect": "+15% Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "50% chance of +88 damage on cast",
+              "effect": "50% chance to deal additional 154 Damage when using a Witchcraft Ability.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "+25% damage",
+              "effect": "+25% Damage.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 4,
-              "effect": "+40% damage, and the +88 damage triggers 100% of the time",
+              "effect": "+40% Damage. 100% chance to deal additional 154 Damage when using a Witchcraft Ability.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY"
         },
         {
           "node_id": "W5",
@@ -165,30 +172,31 @@
             "W10"
           ],
           "quest_unlock": false,
-          "effect": "Time-segment consumables last longer.",
+          "effect": "Consumables with duration measured in time segments last longer.",
           "levels": [
             {
               "level": 1,
-              "effect": "+1 time segment",
+              "effect": "+1 time segment to duration.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "+2 time segments",
+              "effect": "+2 time segments to duration.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "+3 time segments",
+              "effect": "+3 time segments to duration.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "W6",
@@ -203,30 +211,31 @@
             "W15"
           ],
           "quest_unlock": false,
-          "effect": "Higher consumable stack limit in a quickslot.",
+          "effect": "Increases the limit of Consumables in a Quickslot.",
           "levels": [
             {
               "level": 1,
-              "effect": "6 per quickslot",
+              "effect": "6 maximum instances in a Quickslot.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "9 per quickslot",
+              "effect": "9 maximum instances in a Quickslot.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "12 per quickslot",
+              "effect": "12 maximum instances in a Quickslot.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "W7",
@@ -241,30 +250,31 @@
             "W11"
           ],
           "quest_unlock": false,
-          "effect": "More Witchcraft ability slots.",
+          "effect": "Increases Witchcraft Ability Slots number.",
           "levels": [
             {
               "level": 1,
-              "effect": "2 slots",
+              "effect": "2 Slots available.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 2,
-              "effect": "2 slots",
+              "effect": "3 Slots available.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "none"
             },
             {
               "level": 3,
-              "effect": "4 slots",
+              "effect": "4 Slots available.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY"
         },
         {
           "node_id": "W8",
@@ -279,37 +289,38 @@
             "W12"
           ],
           "quest_unlock": false,
-          "effect": "Witchcraft abilities last longer.",
+          "effect": "Witchcraft Abilities last longer.",
           "levels": [
             {
               "level": 1,
-              "effect": "+10% duration",
+              "effect": "+10% Duration.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "+20% duration",
+              "effect": "+20% Duration.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "+40% duration",
-              "skill_points": 1,
+              "effect": "+40% Duration.",
+              "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 4,
-              "effect": "Using a Witchcraft ability extends active ones by 20%",
+              "effect": "Extends Duration of active Witchcraft Abilities by 20% after using a Witchcraft Ability.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY"
         },
         {
           "node_id": "W9",
@@ -325,30 +336,31 @@
             "W18"
           ],
           "quest_unlock": false,
-          "effect": "Killing with a Witchcraft ability refunds part of the health it cost.",
+          "effect": "Defeating an enemy with a Witchcraft Ability restores Health based on the amount spent to cast it.",
           "levels": [
             {
               "level": 1,
-              "effect": "Refund 40% of the health cost",
+              "effect": "Restores 40% of the Health cost after defeating an enemy affected by Witchcraft Abilities.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "Refund 80%",
+              "effect": "Restores 80% of the Health cost after defeating an enemy affected by Witchcraft Abilities.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "Refund 120%",
+              "effect": "Restores 120% of the Health cost after defeating an enemy affected by Witchcraft Abilities.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY"
         },
         {
           "node_id": "W10",
@@ -363,23 +375,24 @@
             "W14"
           ],
           "quest_unlock": false,
-          "effect": "Multiple consumable buffs measured in time segments can run at once.",
+          "effect": "Multiple Buffs from Consumables with time segments set as the duration, can be applied simultaneously.",
           "levels": [
             {
               "level": 1,
-              "effect": "2 buffs at once",
+              "effect": "2 maximum simultaneous Buffs.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "3 buffs at once",
+              "effect": "3 maximum simultaneous Buffs.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "W11",
@@ -394,30 +407,31 @@
             "W16"
           ],
           "quest_unlock": false,
-          "effect": "Reduces Witchcraft ability cooldown.",
+          "effect": "Reduces Witchcraft Ability Cooldown.",
           "levels": [
             {
               "level": 1,
-              "effect": "-10% cooldowns",
+              "effect": "-10% Cooldowns.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "-20% cooldowns",
+              "effect": "-20% Cooldowns.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "-5% cooldowns on critical hit",
+              "effect": "-5% Cooldowns on Critical Hit.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY"
         },
         {
           "node_id": "W12",
@@ -430,23 +444,24 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Chance for a critical Witchcraft cast.",
+          "effect": "Chance for Critical Witchcraft Ability cast.",
           "levels": [
             {
               "level": 1,
-              "effect": "10% critical chance",
+              "effect": "Critical Witchcraft Ability: 10% chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "20% critical chance",
-              "skill_points": 1,
+              "effect": "Critical Witchcraft Ability: 20% chance.",
+              "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY"
         },
         {
           "node_id": "W13",
@@ -466,7 +481,8 @@
               "time_segments": 0,
               "gate": "quest"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY"
         },
         {
           "node_id": "W14",
@@ -479,30 +495,31 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Extra instant heal from every consumable.",
+          "effect": "Additional instant Heal from all Consumables.",
           "levels": [
             {
               "level": 1,
-              "effect": "+5% health instantly",
+              "effect": "5% Health to the additional instant Heal.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "+10% health",
-              "skill_points": 1,
+              "effect": "10% Health to the additional instant Heal.",
+              "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "+15% health",
+              "effect": "15% Health to the additional instant Heal.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "W15",
@@ -515,30 +532,31 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Craft more items per batch.",
+          "effect": "Craft more Items in a single batch.",
           "levels": [
             {
               "level": 1,
-              "effect": "Craft 2 at once",
+              "effect": "Craft 2 Items items at once.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "Craft 3 at once",
-              "skill_points": 1,
+              "effect": "Craft 3 Items items at once.",
+              "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "Each day, craft 1 free item from every unlocked recipe (quest recipes excluded)",
+              "effect": "At the start of each Day, Craft 1 Item for free from all unlocked Recipes (Excluding Quest Recipes).",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "W16",
@@ -551,23 +569,24 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Witchcraft damage scales with how many enemies are currently affected.",
+          "effect": "Increases Witchcraft Abilities Damage for each enemy currently affected by Witchcraft Abilities.",
           "levels": [
             {
               "level": 1,
-              "effect": "+10% damage per affected enemy",
+              "effect": "+10% Witchcraft Abilities Damage per enemy affected by Witchcraft Abilities.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "+20% damage per affected enemy",
+              "effect": "+20% Witchcraft Abilities Damage per enemy affected by Witchcraft Abilities.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY"
         },
         {
           "node_id": "W17",
@@ -580,23 +599,24 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Chance for a Witchcraft ability to cost no health.",
+          "effect": "Chance for Witchcraft Abilities to not cost Health.",
           "levels": [
             {
               "level": 1,
-              "effect": "20% chance",
+              "effect": "No Health cost: 20% chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "40% chance",
+              "effect": "No Health cost: 40% chance.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY"
         },
         {
           "node_id": "W18",
@@ -609,18 +629,18 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Chance to refund an activation charge after casting.",
+          "effect": "Chance for a refund of an Activation Charge after Witchcraft Ability use.",
           "levels": [
             {
               "level": 1,
-              "effect": "20% refund chance",
+              "effect": "Activation Charge refund : 20% chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "40% refund chance",
+              "effect": "Activation Charge refund : 40% chance.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
@@ -631,14 +651,14 @@
       ],
       "ultimates": [
         {
-          "name": "Arcane Cascade",
+          "name": "Aether Cascade",
           "effect": "+20% Witchcraft damage for each ability used, up to +100%. Resets after combat.",
           "cost": {
             "skill_points": 4,
             "time_segments": 2
           },
           "requirement": "35 points in tree",
-          "alias": "Aether Cascade"
+          "alias": "Arcane Cascade"
         },
         {
           "name": "Entwined Torment",
@@ -676,37 +696,38 @@
             "S6"
           ],
           "quest_unlock": false,
-          "effect": "Blocking costs less stamina.",
+          "effect": "Omniblock costs less Stamina.",
           "levels": [
             {
               "level": 1,
-              "effect": "-10% stamina cost",
+              "effect": "-10% Stamina cost.",
               "skill_points": 1,
               "time_segments": 0,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "-20% stamina cost",
+              "effect": "-20% Stamina cost.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "-30% stamina cost",
+              "effect": "-30% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 4,
-              "effect": "-40% stamina cost, directional",
+              "effect": "-40% Stamina cost. Directional Block works like Omniblock if wrong direction is chosen.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S2",
@@ -719,37 +740,38 @@
             "S7"
           ],
           "quest_unlock": false,
-          "effect": "More weapon damage.",
+          "effect": "Increases Weapon Damage.",
           "levels": [
             {
               "level": 1,
-              "effect": "+5% weapon damage",
+              "effect": "+5% Weapon Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "+10% weapon damage",
+              "effect": "+10% Weapon Damage.",
               "skill_points": 1,
-              "time_segments": 1,
+              "time_segments": 0,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "+15% weapon damage",
+              "effect": "+15% Weapon Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "none"
             },
             {
               "level": 4,
-              "effect": "+20% weapon damage",
+              "effect": "+20% Weapon Damage.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S3",
@@ -763,37 +785,38 @@
             "S9"
           ],
           "quest_unlock": false,
-          "effect": "More stamina.",
+          "effect": "Increases Stamina.",
           "levels": [
             {
               "level": 1,
-              "effect": "+25% max stamina",
+              "effect": "+25% maximum Stamina.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "none"
             },
             {
               "level": 2,
-              "effect": "+50% max stamina",
+              "effect": "+50% maximum Stamina.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "+75% max stamina",
+              "effect": "+75% maximum Stamina.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 4,
-              "effect": "+100% max stamina",
+              "effect": "+100% maximum Stamina.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S4",
@@ -806,37 +829,38 @@
             "S11"
           ],
           "quest_unlock": false,
-          "effect": "More health of every type.",
+          "effect": "Increases All Health Types.",
           "levels": [
             {
               "level": 1,
-              "effect": "+20% max health",
+              "effect": "+10% maximum Health.",
               "skill_points": 1,
               "time_segments": 0,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "+10% max health",
+              "effect": "+20% maximum Health.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "+30% max health",
+              "effect": "+30% maximum Health.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 4,
-              "effect": "+50% max health",
+              "effect": "+50% maximum Health.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S5",
@@ -851,37 +875,38 @@
             "S12"
           ],
           "quest_unlock": false,
-          "effect": "Strike in the critical direction after a perfect block for critical damage.",
+          "effect": "Attack in Critical Direction after Perfect Block to deal Critical Damage.",
           "levels": [
             {
               "level": 1,
-              "effect": "Unlocks Perfect Riposte",
+              "effect": "Unlocks Perfect Riposte.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 2,
-              "effect": "+10% riposte damage",
+              "effect": "+10% Damage on Perfect Riposte.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "Riposte also works after a perfect dodge",
+              "effect": "Perfect Riposte can be performed after Perfect Dodge.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 4,
-              "effect": "+20% riposte damage",
+              "effect": "+20% Damage on Perfect Riposte.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S6",
@@ -894,37 +919,38 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Perfect blocks give back more stamina and charge.",
+          "effect": "Perfect Block restores more Stamina and Activation Charge.",
           "levels": [
             {
               "level": 1,
-              "effect": "+30% stamina restored",
+              "effect": "+30% Stamina Restoration.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 2,
-              "effect": "+50% activation charge restored",
+              "effect": "+50% Activation Charge Restoration.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "+60% stamina restored",
+              "effect": "+60% Stamina Restoration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "manual"
             },
             {
               "level": 4,
-              "effect": "+100% activation charge restored",
+              "effect": "+100% Activation Charge Restoration.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S7",
@@ -939,37 +965,38 @@
             "S13"
           ],
           "quest_unlock": false,
-          "effect": "Chance for a weapon critical hit.",
+          "effect": "Chance for Weapon Critical Hit.",
           "levels": [
             {
               "level": 1,
-              "effect": "6% crit chance",
+              "effect": "Weapon Critical Hit : 6% chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 2,
-              "effect": "12% crit chance",
+              "effect": "Weapon Critical Hit : 12% chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "18% crit chance",
+              "effect": "Weapon Critical Hit : 18% chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 4,
-              "effect": "+25% weapon crit damage",
+              "effect": "+25% Weapon Critical Damage.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S8",
@@ -982,37 +1009,38 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Cheaper dodging, with payoffs for good timing.",
+          "effect": "Dodging cost less Stamina.",
           "levels": [
             {
               "level": 1,
-              "effect": "-20% stamina cost",
+              "effect": "-20% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "Last-moment dodges restore some activation charge",
+              "effect": "Dodging an Attack at the last moment restores a portion of Activation Charge",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "-30% stamina cost",
+              "effect": "-30% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "manual"
             },
             {
               "level": 4,
-              "effect": "Kills regenerate stamina",
+              "effect": "Killing an enemy Regenerates Stamina.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S9",
@@ -1025,30 +1053,31 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Higher carry weight.",
+          "effect": "Increases Carry Weight.",
           "levels": [
             {
               "level": 1,
-              "effect": "+30 carry weight",
+              "effect": "+30 maximum Carry Weight.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "+60 carry weight",
+              "effect": "+60 maximum Carry Weight.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "+100 carry weight, and you can run while encumbered",
+              "effect": "+100 maximum Carry Weight. You can run while Encumbered.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S10",
@@ -1062,37 +1091,38 @@
             "S15"
           ],
           "quest_unlock": false,
-          "effect": "More activation charges.",
+          "effect": "Increases Activation Charges number.",
           "levels": [
             {
               "level": 1,
-              "effect": "2 max charges",
+              "effect": "2 maximum Activation Charges.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "Start each fight with 1 full charge",
+              "effect": "Start each combat with 1 full Activation Charge.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "3 max charges",
+              "effect": "3 maximum Activation Charges.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 4,
-              "effect": "4 max charges",
+              "effect": "4 maximum Activation Charges.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "none"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S11",
@@ -1107,30 +1137,31 @@
             "S19"
           ],
           "quest_unlock": false,
-          "effect": "Lower medium armour penalties.",
+          "effect": "Decreases Medium Armour penalties.",
           "levels": [
             {
               "level": 1,
-              "effect": "-33% penalties",
+              "effect": "-33% Medium Armour penalties.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 2,
-              "effect": "-66% penalties",
+              "effect": "-66% Medium Armour penalties.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "-100% penalties",
+              "effect": "-100% Medium Armour penalties.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S12",
@@ -1145,30 +1176,31 @@
             "S16"
           ],
           "quest_unlock": false,
-          "effect": "Attacking straight after a perfect block hits harder.",
+          "effect": "Attack after Perfect Block deals more Damage.",
           "levels": [
             {
               "level": 1,
-              "effect": "+10% damage",
+              "effect": "+10% Damage on Attack after Perfect Block.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "+20% damage",
+              "effect": "+20% Damage on Attack after Perfect Block.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "+10% bleed",
+              "effect": "+10% Bleed chance on Attack after Perfect Block.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S13",
@@ -1183,30 +1215,31 @@
             "S17"
           ],
           "quest_unlock": false,
-          "effect": "Directional attacks hit harder when you do not repeat a direction.",
+          "effect": "Deal more Damage with Directional Attacks when directions don't repeat.",
           "levels": [
             {
               "level": 1,
-              "effect": "+10% damage",
+              "effect": "+10% Damage.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "-30% stamina cost",
+              "effect": "-30% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "+10% damage",
+              "effect": "+20% Damage.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S14",
@@ -1221,30 +1254,31 @@
             "S18"
           ],
           "quest_unlock": false,
-          "effect": "More Swordmastery ability slots.",
+          "effect": "Increases Swordmastery Ability Slots number.",
           "levels": [
             {
               "level": 1,
-              "effect": "2 slots",
+              "effect": "2 Slots available.",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "road shrine"
+            },
+            {
+              "level": 2,
+              "effect": "3 Slots available.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
-              "level": 2,
-              "effect": "3 slots",
-              "skill_points": 1,
-              "time_segments": 1,
-              "gate": "manual"
-            },
-            {
               "level": 3,
-              "effect": "4 slots",
+              "effect": "4 Slots available.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S15",
@@ -1257,30 +1291,31 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Activation charges come back faster.",
+          "effect": "Increases Activation Charge Restoration.",
           "levels": [
             {
               "level": 1,
-              "effect": "+15% passive charge restoration",
+              "effect": "+15% Activation Charge passive Restoration.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "+35% passive charge restoration",
+              "effect": "+30% Activation Charge passive Restoration.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "+50% charge restoration from attacks",
+              "effect": "+50% Activation Charge Restoration from Attacks.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S16",
@@ -1293,30 +1328,31 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Chance to weaken an enemy on a perfect block - they deal less and take more damage.",
+          "effect": "Chance to Weaken enemy on Perfect Block. Weak enemy deals less and receives more Damage.",
           "levels": [
             {
               "level": 1,
-              "effect": "30% chance, 10s",
+              "effect": "Weak chance 30%. Weak Duration 10s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "60% chance, 10s",
+              "effect": "Weak chance 60%. Weak Duration 10s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "100% chance, 10s",
+              "effect": "Weak chance 100%. Weak Duration 10s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S17",
@@ -1329,23 +1365,24 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Weapon damage climbs with each attack; resets when you take damage.",
+          "effect": "Increases Weapon Damage with each Attack. Buff resets after receiving Damage.",
           "levels": [
             {
               "level": 1,
-              "effect": "+4% per attack, up to +20%",
+              "effect": "+4% Weapon Damage per Attack. Up to +20% Weapon Damage.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "-8% stamina per attack, up to -50%",
+              "effect": "-8% Stamina cost per Weapon Attack. Up to -50% Stamina cost.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S18",
@@ -1358,30 +1395,31 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Shorter Swordmastery cooldowns.",
+          "effect": "Reduces Cooldowns of Swordmastery Abilities.",
           "levels": [
             {
               "level": 1,
-              "effect": "-10% cooldowns",
+              "effect": "-10% Cooldowns.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "-10% cooldowns",
+              "effect": "-20% Cooldowns.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "-50% cooldowns on critical hits",
+              "effect": "-5% Cooldowns on Critical Hits.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         },
         {
           "node_id": "S19",
@@ -1394,59 +1432,63 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Lower heavy armour penalties.",
+          "effect": "Decreases Heavy Armour penalties.",
           "levels": [
             {
               "level": 1,
-              "effect": "-33% penalties",
+              "effect": "-33% Heavy Armour penalties.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "-66% penalties",
+              "effect": "-66% Heavy Armour penalties.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "-100% penalties",
+              "effect": "-100% Heavy Armour penalties.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME"
         }
       ],
       "ultimates": [
         {
           "name": "Last Stand",
-          "effect": "+100% weapon damage below 30% health.",
+          "effect": "+100% Weapon Damage when Health is below 30%.",
           "cost": {
             "skill_points": 4,
             "time_segments": 2
           },
-          "requirement": "35 points in tree"
+          "requirement": "35 points in tree",
+          "active_time": "ANYTIME"
         },
         {
           "name": "Sword Sage",
-          "effect": "Killing an enemy resets all active ability cooldowns.",
+          "effect": "Reset Active Ability Cooldowns on enemy killing.",
           "cost": {
             "skill_points": 4,
             "time_segments": 2
           },
-          "requirement": "35 points in tree"
+          "requirement": "35 points in tree",
+          "active_time": "ANYTIME"
         },
         {
           "name": "Tactical Mastery",
-          "effect": "All active abilities cost 1 less activation charge (minimum 1).",
+          "effect": "-1 Activation Charge cost to all Active Abilities (minimum 1).",
           "cost": {
             "skill_points": 4,
             "time_segments": 2
           },
-          "requirement": "35 points in tree"
+          "requirement": "35 points in tree",
+          "active_time": "ANYTIME"
         }
       ],
       "ultimate_rule": "Three per tree, only one can ever be taken; the choice is permanent.",
@@ -1468,30 +1510,31 @@
             "V11"
           ],
           "quest_unlock": false,
-          "effect": "Drinking blood restores more health.",
+          "effect": "Blood Drinking restores more Health.",
           "levels": [
             {
               "level": 1,
-              "effect": "+10% restoration",
+              "effect": "+10% Health Restoration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "+20% restoration",
+              "effect": "+20% Health Restoration.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 3"
             },
             {
               "level": 3,
-              "effect": "+40% restoration",
+              "effect": "+40% Health Restoration.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 8"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V2",
@@ -1504,30 +1547,31 @@
             "V12"
           ],
           "quest_unlock": false,
-          "effect": "More health segments.",
+          "effect": "Increase Health Segments number.",
           "levels": [
             {
               "level": 1,
-              "effect": "3 max health segments",
+              "effect": "3 maximum Health Segments.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "4 max health segments",
+              "effect": "4 maximum Health Segments.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 5"
             },
             {
               "level": 3,
-              "effect": "5 max health segments",
-              "skill_points": 2,
+              "effect": "5 maximum Health Segments.",
+              "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 12"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V3",
@@ -1540,23 +1584,24 @@
             "V8"
           ],
           "quest_unlock": false,
-          "effect": "Longer shadowstep.",
+          "effect": "Increases Shadowstep range.",
           "levels": [
             {
               "level": 1,
-              "effect": "11m range",
+              "effect": "11m Shadowstep range.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "14.5m range and -50% stamina cost",
+              "effect": "14.5m Shadowstep range. -50% Shadowstep Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 11"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V4",
@@ -1569,37 +1614,38 @@
             "V9"
           ],
           "quest_unlock": false,
-          "effect": "More claw damage.",
+          "effect": "Increases Claw Damage.",
           "levels": [
             {
               "level": 1,
-              "effect": "+5% claw damage",
+              "effect": "+5% Claw Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "+12% claw damage",
+              "effect": "+12% Claw Damage.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 4"
             },
             {
               "level": 3,
-              "effect": "+20% claw damage",
+              "effect": "+20% Claw Damage.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 9"
             },
             {
               "level": 4,
-              "effect": "+100% activation charge restoration from claw attacks",
+              "effect": "+100% Activation Charge Restoration from Claw Attacks.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 12"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V5",
@@ -1612,30 +1658,31 @@
             "V10"
           ],
           "quest_unlock": false,
-          "effect": "More vampiric ability slots.",
+          "effect": "Increases Vampiric Ability Slots number.",
           "levels": [
             {
               "level": 1,
-              "effect": "2 slots",
+              "effect": "2 Slots available.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 4"
             },
             {
               "level": 2,
-              "effect": "3 slots",
+              "effect": "3 Slots available.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 7"
             },
             {
               "level": 3,
-              "effect": "4 slots",
+              "effect": "4 Slots available.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 11"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V6",
@@ -1648,30 +1695,31 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Animal blood grants buffs for 3 time segments.",
+          "effect": "Grants Buffs when drinking Human Blood. Duration: 3 time segments.",
           "levels": [
             {
               "level": 1,
-              "effect": "+10% attack damage",
+              "effect": "+10% Attack Damage.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 2"
             },
             {
               "level": 2,
-              "effect": "+15% armour",
+              "effect": "+15% Armour.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 5"
             },
             {
               "level": 3,
-              "effect": "+10% crit chance",
+              "effect": "+10% Critical Hit chance.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 10"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V7",
@@ -1684,30 +1732,31 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Human blood grants buffs for 3 time segments.",
+          "effect": "Grants Buffs when drinking Animal Blood. Duration: 3 time segments.",
           "levels": [
             {
               "level": 1,
-              "effect": "+15% passive charge restoration",
+              "effect": "15% Activation Charge Passive Restoration.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 2"
             },
             {
               "level": 2,
-              "effect": "+30% passive charge restoration",
+              "effect": "30% Activation Charge Passive Restoration.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 5"
             },
             {
               "level": 3,
-              "effect": "+1 filled activation charge at combat start",
+              "effect": "+1 filled Activation Charge at combat start.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 10"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V8",
@@ -1720,30 +1769,31 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Planeshift costs less stamina.",
+          "effect": "Decrease Planeshift Stamina cost.",
           "levels": [
             {
               "level": 1,
-              "effect": "-45% stamina cost",
+              "effect": "-45% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 2"
             },
             {
               "level": 2,
-              "effect": "-70% stamina cost",
+              "effect": "-70% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 6"
             },
             {
               "level": 3,
-              "effect": "-100% stamina cost",
+              "effect": "-100% Stamina cost.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 13"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V9",
@@ -1758,30 +1808,31 @@
             "V14"
           ],
           "quest_unlock": false,
-          "effect": "Claw attacks cost less stamina.",
+          "effect": "Decrease Stamina cost of Claw Attacks.",
           "levels": [
             {
               "level": 1,
-              "effect": "-15% stamina cost",
+              "effect": "-15% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 1"
             },
             {
               "level": 2,
-              "effect": "-30% stamina cost",
+              "effect": "-30% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 4"
             },
             {
               "level": 3,
-              "effect": "Blocked attacks refund 100% of stamina",
+              "effect": "Refund 100% of Stamina spent on Attack, if blocked.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 9"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V10",
@@ -1796,23 +1847,24 @@
             "V15"
           ],
           "quest_unlock": false,
-          "effect": "Vampiric abilities cost less health.",
+          "effect": "Vampiric Abilities cost less Health.",
           "levels": [
             {
               "level": 1,
-              "effect": "-20% health cost",
+              "effect": "-20% Health cost.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 5"
             },
             {
               "level": 2,
-              "effect": "-40% health cost",
+              "effect": "-40% Health cost.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 10"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V11",
@@ -1825,30 +1877,31 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Corruption fills faster.",
+          "effect": "Corruption fills up faster.",
           "levels": [
             {
               "level": 1,
-              "effect": "+30% corruption speed",
+              "effect": "+30% Corruption filling speed.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 1"
             },
             {
               "level": 2,
-              "effect": "Drink at full health to overfeed: temporary health segment and +50% corruption speed",
+              "effect": "Drink Blood at full Health to Overfeed. Temporary Health Segment and +50% Corruption filling speed while Overfed.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 4"
             },
             {
               "level": 3,
-              "effect": "+50 corruption speed, and +5% vampiric health per corruption level",
+              "effect": "+50% Corruption filling speed. +5% Vampiric Health for each Corruption Level.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 6"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V12",
@@ -1863,23 +1916,24 @@
             "V16"
           ],
           "quest_unlock": false,
-          "effect": "Slow regeneration within the current vampiric health segment.",
+          "effect": "Slowly Regenerates Vampiric Health within the current Health Segment.",
           "levels": [
             {
               "level": 1,
-              "effect": "+2% per second",
+              "effect": "+2% Vampiric Health Segment Regeneration per second.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 3"
             },
             {
               "level": 2,
-              "effect": "+4% per second",
+              "effect": "+4% Vampiric Health Segment Regeneration per second.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 6"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V13",
@@ -1899,7 +1953,8 @@
               "time_segments": 0,
               "gate": "quest"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V14",
@@ -1914,30 +1969,31 @@
             "V17"
           ],
           "quest_unlock": false,
-          "effect": "Chance for a claw critical hit.",
+          "effect": "Chance for Claw Critical Hit.",
           "levels": [
             {
               "level": 1,
-              "effect": "10% crit chance",
+              "effect": "Claw Critical Hit : 10% chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 2"
             },
             {
               "level": 2,
-              "effect": "20% crit chance",
+              "effect": "Claw Critical Hit : 20% chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 7"
             },
             {
               "level": 3,
-              "effect": "+25% claw crit damage",
+              "effect": "+25% Claw Critical Damage.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 13"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V15",
@@ -1950,23 +2006,24 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Shorter vampiric cooldowns.",
+          "effect": "Reduces Cooldowns of Vampiric Abilities.",
           "levels": [
             {
               "level": 1,
-              "effect": "-20% cooldowns",
+              "effect": "-20% Cooldowns.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 5"
+              "gate": "corruption 6"
             },
             {
               "level": 2,
-              "effect": "-4% cooldowns on critical hits",
+              "effect": "-4% Cooldowns on Critical Hits.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 10"
+              "gate": "corruption 12"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V16",
@@ -1979,30 +2036,31 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Attacking restores recently lost vampiric health.",
+          "effect": "Attacking restores Recently Lost Vampiric Health.",
           "levels": [
             {
               "level": 1,
-              "effect": "Unlocks Blood Theft",
+              "effect": "Unlocks Blood Theft.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 4"
             },
             {
               "level": 2,
-              "effect": "Longer window to claim it back",
-              "skill_points": 1,
+              "effect": "Time window for restoring Recently Lost Vampiric Health lasts longer.",
+              "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 8"
             },
             {
               "level": 3,
-              "effect": "+30% effect",
+              "effect": "30% increased effect of Blood Theft.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 11"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         },
         {
           "node_id": "V17",
@@ -2015,52 +2073,56 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Claw crit chance builds per attack; resets on damage taken or on a crit.",
+          "effect": "Increases Claw Critical Chance with each Attack. Buff resets after receiving Damage or after a Critical Hit.",
           "levels": [
             {
               "level": 1,
-              "effect": "+4% per attack, up to +40%",
+              "effect": "+4% Claw Critical Chance per Attack. Up to +40% Claw Critical Hit chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 9"
             },
             {
               "level": 2,
-              "effect": "+8% per attack, up to +40%",
+              "effect": "+8% Claw Critical Chance per Attack. Up to +40% Claw Critical Hit chance.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 14"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY"
         }
       ],
       "ultimates": [
         {
           "name": "Lethal Crescendo",
-          "effect": "+20% claw damage per kill or per boss health segment broken. Stacks, resets after combat.",
+          "effect": "+20% Claw Damage after killing an enemy or depleting a Health Segment of a Boss. Can stack. Resets at the end of combat.",
           "cost": {
             "skill_points": 4,
             "time_segments": 2
           },
-          "requirement": "Corruption 15"
+          "requirement": "Corruption 15",
+          "active_time": "NIGHT ONLY"
         },
         {
           "name": "Renounce Death",
-          "effect": "Once per fight, gain lifesteal and immortality for 10s instead of dying.",
+          "effect": "Gain Lifesteal on Attacks and Immortality instead of dying once per combat. Duration 10s.",
           "cost": {
             "skill_points": 4,
             "time_segments": 2
           },
-          "requirement": "Corruption 15"
+          "requirement": "Corruption 15",
+          "active_time": "NIGHT ONLY"
         },
         {
           "name": "Sanguine Renewal",
-          "effect": "Voracious Bite resets all active ability cooldowns.",
+          "effect": "Voracious Bite resets all Active Abilities Cooldowns.",
           "cost": {
             "skill_points": 4,
             "time_segments": 2
           },
-          "requirement": "Corruption 15"
+          "requirement": "Corruption 15",
+          "active_time": "NIGHT ONLY"
         }
       ],
       "ultimate_rule": "Three per tree, only one can ever be taken; the choice is permanent.",
@@ -2076,6 +2138,123 @@
       "registry": 2,
       "source": 1,
       "reason": "The in-game skill screen shows 2 skill points for the final level. Every other four-level perk ends at 2, including Omniblock in the same Game8 table, so the source appears to have mis-transcribed this field."
+    },
+    {
+      "tree": "Witchcraft",
+      "perk": "Lasting Malediction",
+      "level": 3,
+      "field": "skill_points",
+      "registry": 2,
+      "source": 1,
+      "reason": "The in-game skill screen shows 2 for this level; the Game8 table gives 1. Read from the in-game skill screen (screenshot capture 2026-09-12)."
+    },
+    {
+      "tree": "Witchcraft",
+      "perk": "Evil Eye",
+      "level": 2,
+      "field": "skill_points",
+      "registry": 2,
+      "source": 1,
+      "reason": "The in-game skill screen shows 2 for this level; the Game8 table gives 1. Read from the in-game skill screen (screenshot capture 2026-09-12)."
+    },
+    {
+      "tree": "Witchcraft",
+      "perk": "Herbal Remedies II",
+      "level": 2,
+      "field": "skill_points",
+      "registry": 2,
+      "source": 1,
+      "reason": "The in-game skill screen shows 2 for this level; the Game8 table gives 1. Read from the in-game skill screen (screenshot capture 2026-09-12)."
+    },
+    {
+      "tree": "Witchcraft",
+      "perk": "Medicus II",
+      "level": 2,
+      "field": "skill_points",
+      "registry": 2,
+      "source": 1,
+      "reason": "The in-game skill screen shows 2 for this level; the Game8 table gives 1. Read from the in-game skill screen (screenshot capture 2026-09-12)."
+    },
+    {
+      "tree": "Swordmastery",
+      "perk": "Stinging Blade",
+      "level": 2,
+      "field": "time_segments",
+      "registry": 0,
+      "source": 1,
+      "reason": "The in-game skill screen shows 0 for this level; the Game8 table gives 1. Read from the in-game skill screen (screenshot capture 2026-09-12)."
+    },
+    {
+      "tree": "Vampirism",
+      "perk": "Endless Hunger",
+      "level": 3,
+      "field": "skill_points",
+      "registry": 1,
+      "source": 2,
+      "reason": "The in-game skill screen shows 1 for this level; the Game8 table gives 2. Read from the in-game skill screen (screenshot capture 2026-09-12)."
+    },
+    {
+      "tree": "Vampirism",
+      "perk": "Blood Theft",
+      "level": 2,
+      "field": "skill_points",
+      "registry": 2,
+      "source": 1,
+      "reason": "The in-game skill screen shows 2 for this level; the Game8 table gives 1. Read from the in-game skill screen (screenshot capture 2026-09-12)."
+    },
+    {
+      "tree": "Vampirism",
+      "perk": "Shapeshift",
+      "level": 1,
+      "field": "time_segments",
+      "registry": 0,
+      "source": 1,
+      "reason": "The in-game skill screen shows 0 for this level; the Game8 table gives 1. Read from the in-game skill screen (screenshot capture 2026-09-12)."
+    },
+    {
+      "tree": "Vampirism",
+      "perk": "Shapeshift",
+      "level": 2,
+      "field": "time_segments",
+      "registry": 0,
+      "source": 1,
+      "reason": "The in-game skill screen shows 0 for this level; the Game8 table gives 1. Read from the in-game skill screen (screenshot capture 2026-09-12)."
+    },
+    {
+      "tree": "Vampirism",
+      "perk": "Shapeshift",
+      "level": 3,
+      "field": "skill_points",
+      "registry": 1,
+      "source": 2,
+      "reason": "The in-game skill screen shows 1 for this level; the Game8 table gives 2. Read from the in-game skill screen (screenshot capture 2026-09-12)."
+    },
+    {
+      "tree": "Vampirism",
+      "perk": "Shapeshift",
+      "level": 3,
+      "field": "time_segments",
+      "registry": 0,
+      "source": 1,
+      "reason": "The in-game skill screen shows 0 for this level; the Game8 table gives 1. Read from the in-game skill screen (screenshot capture 2026-09-12)."
+    },
+    {
+      "tree": "Vampirism",
+      "perk": "Shapeshift",
+      "level": 4,
+      "field": "skill_points",
+      "registry": 1,
+      "source": 3,
+      "reason": "The in-game skill screen shows 1 for this level; the Game8 table gives 3. Read from the in-game skill screen (screenshot capture 2026-09-12)."
+    },
+    {
+      "tree": "Vampirism",
+      "perk": "Shapeshift",
+      "level": 4,
+      "field": "time_segments",
+      "registry": 0,
+      "source": 2,
+      "reason": "The in-game skill screen shows 0 for this level; the Game8 table gives 2. Read from the in-game skill screen (screenshot capture 2026-09-12)."
     }
   ]
 }
