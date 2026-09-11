@@ -304,7 +304,14 @@ a:hover{color:var(--gold-2)}
 
 /* ---------------------------------------------------------- abilities */
 .abils{padding:0 14px 14px}
-.abils-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+/* auto-FIT, not auto-fill. auto-fill keeps every track it can fit even when
+   nothing is in it, so five cards in a seven-track row sat at their minimum
+   width with two empty tracks of dead space beside them — and the text wrapped
+   itself tall to fit a column it never needed to be. auto-fit drops the empty
+   tracks and the cards take the width back, which costs rows rather than
+   buying them. */
+.abils-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;
+  align-items:start}
 .abil-group + .abil-group{margin-top:16px}
 .abil-head{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin:0 0 8px;
   font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
