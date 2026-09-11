@@ -129,6 +129,18 @@ the script each time it runs so the change is never silent:
 | Charge | `…everyone on your way. "` | `…everyone on your way.` | stray quote mark in the blurb |
 | Shapeshift | `2 Gain Haste` | `Gain Haste` | stray leading digit in the level 1 text |
 
+Of the 27, **14 are active and 13 passive**. The split is read from `use_cost`
+rather than from the blurb: anything that pays an activation charge or health is
+active, and nothing else does. That agrees with the wiki's own wording wherever
+it states it — Swordmastery's three passives come out as Adrenaline Rush,
+Swiftness and Walking Fortress, which are exactly the three whose text says "this
+Ability works passively once equipped". `verify_perks.py` re-derives `kind` on
+every run, so the field cannot drift from the cost it was read from.
+
+Worth knowing: passive does not mean free of slots. The same text says they work
+"once equipped in the Active Ability panel", so passives compete with actives for
+the slots that Forbidden Sigils, Master Fencer and Vrakhiri Might hand out.
+
 Abilities introduce one gate the perks do not have: `vrakhir blood`, a Phial of
 Vrakhir Blood spent to learn certain Vampirism ability levels. The planner
 treats it as a consumable to count rather than a lock to satisfy — it is an item

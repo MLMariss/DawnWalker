@@ -123,6 +123,19 @@ def parse_fextra(path):
     return out
 
 
+def ability_kind(cost):
+    """Active or passive, decided by what the ability costs to fire.
+
+    Nothing pays an activation charge or health to be passive, and no passive
+    ability lists a cost. The wiki says so in words ("N/A", or "This Ability
+    works passively once equipped") but the cost column is the reliable half, so
+    the split is read from there. Note that passives still occupy an ability
+    slot — they work "once equipped in the Active Ability panel" — so both kinds
+    compete for the same slots.
+    """
+    return "passive" if cost["charges"] == 0 and cost["health_percent"] == 0 else "active"
+
+
 def use_cost(raw):
     """'3 Activation Charges 25% Health' -> structured, with the text kept."""
     if not raw or raw.upper() == "N/A":
@@ -165,12 +178,14 @@ def main():
                 mismatch.append("%s: Game8 says %s, Fextralife says %s" % (name, tree, f["tree"]))
             if not f:
                 missing.append("%s (%s): no use cost on the wiki table" % (name, tree))
+            cost = use_cost(f["use_cost"] if f else None)
             abilities.append({
                 "node_id": "A%s%d" % (KEYS[tree][0].upper() if tree != "Swordmastery" else "S", i),
                 "name": name,
                 "effect": e["effect"],
+                "kind": ability_kind(cost),
                 "max_level": len(e["levels"]),
-                "use_cost": use_cost(f["use_cost"] if f else None),
+                "use_cost": cost,
                 "levels": e["levels"],
             })
         data["trees"][tree] = {"key": KEYS[tree], "abilities": abilities}

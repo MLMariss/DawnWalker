@@ -7,7 +7,8 @@
     "The source labels the fourth row of four-level abilities 'Lv. 3'; levels here are numbered by position.",
     "Abilities have no prerequisites in either source - they are learned independently of the perk graph.",
     "Gates: manual, corruption <n>, vrakhir blood (a Phial of Vrakhir Blood), or none.",
-    "Two source typos are corrected on extraction; tools/extract_abilities.py names them."
+    "Two source typos are corrected on extraction; tools/extract_abilities.py names them.",
+    "`kind` is active or passive, decided by use_cost: anything that pays an activation charge or health is active. Passive abilities still take an ability slot - they work once equipped in the Active Ability panel."
   ],
   "trees": {
     "Witchcraft": {
@@ -17,6 +18,7 @@
           "node_id": "AW1",
           "name": "Astral Communion",
           "effect": "Activates dormant magic in places of power scattered throughout the Valley.",
+          "kind": "passive",
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -58,6 +60,7 @@
           "node_id": "AW2",
           "name": "Burning Blood",
           "effect": "Deal Damage over time to a target.",
+          "kind": "active",
           "max_level": 4,
           "use_cost": {
             "text": "1 Activation Charge 15% Health",
@@ -99,6 +102,7 @@
           "node_id": "AW3",
           "name": "Compel Soul",
           "effect": "Allows you to speak with the restless souls. Use together with objects associated with the dead to obtain additional information.",
+          "kind": "passive",
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -140,6 +144,7 @@
           "node_id": "AW4",
           "name": "Cycle of Ruin",
           "effect": "Extends duration of currently active Witchcraft Abilities with each landed Attack, Block, and Perfect Block.",
+          "kind": "passive",
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -181,6 +186,7 @@
           "node_id": "AW5",
           "name": "Life Lock",
           "effect": "Blocks Damage and Reflects it back to the enemy.",
+          "kind": "active",
           "max_level": 4,
           "use_cost": {
             "text": "1 Activation Charge 10% Health",
@@ -222,6 +228,7 @@
           "node_id": "AW6",
           "name": "Mercurial Fervour",
           "effect": "Gain Haste in exploration by briefly slowing down the world around you.",
+          "kind": "passive",
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -263,6 +270,7 @@
           "node_id": "AW7",
           "name": "Ravenous Flock",
           "effect": "Area Attack and Stun on target. Attacking the target triggers additional Area Attacks.",
+          "kind": "active",
           "max_level": 4,
           "use_cost": {
             "text": "2 Activation Charges 40% Health",
@@ -304,6 +312,7 @@
           "node_id": "AW8",
           "name": "Soul Reaping",
           "effect": "Lifesteals target over time and keep him away.",
+          "kind": "active",
           "max_level": 4,
           "use_cost": {
             "text": "2 Activation Charges 15% Health",
@@ -345,6 +354,7 @@
           "node_id": "AW9",
           "name": "Soul Stigma",
           "effect": "Higher Critical Chance and Critical Damage on target.",
+          "kind": "active",
           "max_level": 4,
           "use_cost": {
             "text": "1 Activation Charge 35% Health",
@@ -386,6 +396,7 @@
           "node_id": "AW10",
           "name": "Unholy Vitality",
           "effect": "Regenerates Health after using Active Abilities.",
+          "kind": "passive",
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -432,6 +443,7 @@
           "node_id": "AS1",
           "name": "Adrenaline Rush",
           "effect": "Increases Attack Damage after using Active Abilities. This Ability works passively once equipped in the Active Ability panel.",
+          "kind": "passive",
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -473,6 +485,7 @@
           "node_id": "AS2",
           "name": "Artery Strike",
           "effect": "Critical Attack with a chance of Decapitating the target.",
+          "kind": "active",
           "max_level": 4,
           "use_cost": {
             "text": "2 Activation Charges",
@@ -514,6 +527,7 @@
           "node_id": "AS3",
           "name": "Broadswing",
           "effect": "Weapon Area Attack.",
+          "kind": "active",
           "max_level": 4,
           "use_cost": {
             "text": "2 Activation Charges",
@@ -555,6 +569,7 @@
           "node_id": "AS4",
           "name": "Charge",
           "effect": "Charge dealing Damage and Stunning a target and everyone on your way.",
+          "kind": "active",
           "max_level": 4,
           "use_cost": {
             "text": "1 Activation Charge",
@@ -596,6 +611,7 @@
           "node_id": "AS5",
           "name": "Dirty Trick",
           "effect": "Stuns and Damages a target and makes them vulnerable to Active Abilities.",
+          "kind": "active",
           "max_level": 4,
           "use_cost": {
             "text": "1 Activation Charge",
@@ -637,6 +653,7 @@
           "node_id": "AS6",
           "name": "Swiftness",
           "effect": "Boost Attack Speed after Perfect Block. This Ability works passively once equipped in the Active Ability panel.",
+          "kind": "passive",
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -678,6 +695,7 @@
           "node_id": "AS7",
           "name": "Walking Fortress",
           "effect": "Perfect Block restores a portion of Activity Charge.",
+          "kind": "passive",
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -724,6 +742,7 @@
           "node_id": "AV1",
           "name": "Blood Surge",
           "effect": "Explodes target. Bosses receive Damage instead.",
+          "kind": "active",
           "max_level": 4,
           "use_cost": {
             "text": "3 Activation Charges 25% Health",
@@ -765,6 +784,7 @@
           "node_id": "AV2",
           "name": "Crimson Rush",
           "effect": "Increase Damage of Active Abilities, the higher your Health percentage is.",
+          "kind": "passive",
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -806,6 +826,7 @@
           "node_id": "AV3",
           "name": "Death From Above",
           "effect": "Instantly Kill a target below you. Bosses receive Damage instead.",
+          "kind": "passive",
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -847,6 +868,7 @@
           "node_id": "AV4",
           "name": "Mesmerise",
           "effect": "Mind Control a target and force him to Fight on your side.",
+          "kind": "active",
           "max_level": 4,
           "use_cost": {
             "text": "2 Activation Charges 30% Health",
@@ -888,6 +910,7 @@
           "node_id": "AV5",
           "name": "Piercing Shriek",
           "effect": "Stuns all enemies in front of you, Weakens their Defence and Attack Damage. Blocking their attacks reflects Damage back at them.",
+          "kind": "active",
           "max_level": 3,
           "use_cost": {
             "text": "1 Activation Charge 20% Health",
@@ -922,6 +945,7 @@
           "node_id": "AV6",
           "name": "Scarlet Shield",
           "effect": "Health Regeneration chance after Block.",
+          "kind": "passive",
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -963,6 +987,7 @@
           "node_id": "AV7",
           "name": "Shadow Storm",
           "effect": "Slows down Time around you.",
+          "kind": "active",
           "max_level": 4,
           "use_cost": {
             "text": "1 Activation Charge 15% Health",
@@ -1004,6 +1029,7 @@
           "node_id": "AV8",
           "name": "Shapeshift",
           "effect": "Shapeshift into a Wolf and gain Haste in exploration.",
+          "kind": "passive",
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -1045,6 +1071,7 @@
           "node_id": "AV9",
           "name": "Shred",
           "effect": "Increase Damage of Active Abilities, the higher your Health percentage is.",
+          "kind": "passive",
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -1086,6 +1113,7 @@
           "node_id": "AV10",
           "name": "Voracious Bite",
           "effect": "Restores Health by drinking target's blood.",
+          "kind": "active",
           "max_level": 4,
           "use_cost": {
             "text": "1 Activation Charge",
