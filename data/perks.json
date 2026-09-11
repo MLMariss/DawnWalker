@@ -7,6 +7,8 @@
     "Level costs and gates were cross-checked against the Game8 'All Perks List' page with tools/verify_perks.py.",
     "Some sources list two rows both labelled 'Lv. 3'. The second is Lv. 4; in-game pips confirm four slots on those perks.",
     "Font of Life and Mandrake Ward are padlocked '?' nodes with no skill point or time cost - story or quest unlocks.",
+    "Vampirism ultimates are gated by Corruption 15 alone; only Witchcraft and Swordmastery show the 35-point spend counter.",
+    "active_time is set per tree where the skill screen shows one value throughout, and per perk where a screen confirms it.",
     "Where the registry knowingly departs from the Game8 page, source_overrides records the field and the reason."
   ],
   "trees": {
@@ -623,7 +625,8 @@
               "time_segments": 1,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY"
         }
       ],
       "ultimates": [
@@ -1446,7 +1449,8 @@
           "requirement": "35 points in tree"
         }
       ],
-      "ultimate_rule": "Three per tree, only one can ever be taken; the choice is permanent."
+      "ultimate_rule": "Three per tree, only one can ever be taken; the choice is permanent.",
+      "active_time": "ANYTIME"
     },
     "Vampirism": {
       "key": "vp",
@@ -2038,7 +2042,7 @@
             "skill_points": 4,
             "time_segments": 2
           },
-          "requirement": "35 points in tree, Corruption 15"
+          "requirement": "Corruption 15"
         },
         {
           "name": "Renounce Death",
@@ -2047,7 +2051,7 @@
             "skill_points": 4,
             "time_segments": 2
           },
-          "requirement": "35 points in tree, Corruption 15"
+          "requirement": "Corruption 15"
         },
         {
           "name": "Sanguine Renewal",
@@ -2056,10 +2060,11 @@
             "skill_points": 4,
             "time_segments": 2
           },
-          "requirement": "35 points in tree, Corruption 15"
+          "requirement": "Corruption 15"
         }
       ],
-      "ultimate_rule": "Three per tree, only one can ever be taken; the choice is permanent."
+      "ultimate_rule": "Three per tree, only one can ever be taken; the choice is permanent.",
+      "active_time": "NIGHT ONLY"
     }
   },
   "source_overrides": [

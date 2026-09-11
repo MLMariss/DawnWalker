@@ -63,6 +63,22 @@
 
   var TREE_GLYPH = { Witchcraft:'sigil', Swordmastery:'sword', Vampirism:'fang' };
 
+  /* Abilities are keyed by name — there are 27 of them and they change less
+     often than the perk grid. */
+  var ABILITY_GLYPH = {
+    'Astral Communion':'star', 'Burning Blood':'flame', 'Compel Soul':'ward',
+    'Cycle of Ruin':'spiral', 'Life Lock':'shield', 'Mercurial Fervour':'boot',
+    'Ravenous Flock':'bat', 'Soul Reaping':'drop', 'Soul Stigma':'eye',
+    'Unholy Vitality':'heart',
+    'Adrenaline Rush':'muscle', 'Artery Strike':'sword', 'Broadswing':'swords',
+    'Charge':'arrow', 'Dirty Trick':'gauntlet', 'Swiftness':'boot',
+    'Walking Fortress':'block',
+    'Blood Surge':'waves', 'Crimson Rush':'chalice', 'Death From Above':'claw',
+    'Mesmerise':'eye', 'Piercing Shriek':'waves', 'Scarlet Shield':'shield',
+    'Shadow Storm':'hourglass', 'Shapeshift':'fang', 'Shred':'claw',
+    'Voracious Bite':'fang'
+  };
+
   var ULT_GLYPH = {
     'Arcane Cascade':'waves', 'Entwined Torment':'hex', 'Runic Bulwark':'shield',
     'Last Stand':'gauntlet', 'Sword Sage':'swords', 'Tactical Mastery':'focus',
@@ -81,6 +97,7 @@
     forNode: function (id) { return NODE_GLYPH[id] || 'hex'; },
     forTree: function (n) { return TREE_GLYPH[n] || 'hex'; },
     forUltimate: function (n) { return ULT_GLYPH[n] || 'star'; },
+    forAbility: function (n) { return ABILITY_GLYPH[n] || 'hex'; },
     svg: svg
   };
 })(window);

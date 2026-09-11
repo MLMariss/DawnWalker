@@ -68,10 +68,69 @@ Fextralife is the weaker source here: its Witchcraft section also files Fate's
 Favour and Nourishing Blood under Witchcraft (they are Swordmastery and
 Vampirism perks), and omits Herbal Remedies I and Witchcraft Mastery entirely.
 
-## One rule change this check produced
+## Correction: Vampirism ultimates are gated by Corruption alone
 
-Both sources state that unlocking an ultimate takes 35 skill points spent in the
-tree, for every tree. The Game8 Vampirism ultimate rows additionally carry a
-Corruption 15 requirement. The registry previously recorded only the Corruption
-gate for Vampirism; it now records both, and the planner requires both before a
-Vampirism ultimate can be selected.
+An earlier pass read "unlocking an ultimate takes 35 skill points spent in the
+tree" as applying to all three trees, and made Vampirism require both that and
+Corruption 15. **That was wrong.** The in-game Vampirism skill screen shows no
+"Spend to unlock: N/35" counter at all, where Swordmastery and Witchcraft both
+do (7/35 and 0/35 in the screens checked). A guide search agrees: the Vampirism
+ultimates unlock at Corruption 15, full stop.
+
+The registry and the planner now gate Vampirism ultimates on Corruption 15 only.
+The multi-condition `requirement` format stays — it costs nothing and the parser
+is more honest about what a requirement string can say — but no tree uses two
+conditions today.
+
+## Patch currency
+
+Checked on 11 September 2026 against the game's patch history: Hotfix 1.0.2
+(3 Sep), 1.0.3 and 1.0.4 (9 Sep) are quest, stability, save and input fixes.
+None of them touches perks, skill trees, skill point costs or corruption, so
+the values here are current as of the latest build.
+
+Two caveats on that check. The sandbox this ran in cannot reach `game8.co` or
+`bloodofdawnwalker.wiki.fextralife.com` directly — its egress proxy blocks both
+— so the per-perk pages could not be re-fetched live; the structured comparison
+still runs against the saved copy of the Game8 page. And no source found
+publishes a second independent per-level cost table, so Endless Effort and
+Stinging Blade (below) rest where they are.
+
+## Day and night
+
+The skill screens label each perk with when it works. Swordmastery reads
+ANYTIME throughout and Vampirism NIGHT ONLY throughout, so those are recorded
+per tree. Witchcraft is mixed — Unholy Fervour reads DAY ONLY, and one published
+description calls the tree "a mix of perks that can only be used during the day
+and at both time periods" — so only the perk actually seen on a screen carries a
+value, and the rest show nothing rather than a guess.
+
+## Abilities
+
+`data/abilities.json` is generated from two saved pages rather than hand-written:
+Game8's *All Abilities List* for the upgrade levels and their costs, and the
+Fextralife *Abilities* table for what each ability costs to use. Re-run
+`tools/extract_abilities.py` against fresh saves to rebuild it.
+
+27 abilities, 107 levels. **The two sources agree on every tree assignment**,
+which is worth noting given that the same wiki misfiled two perks on its perk
+page — its ability table is the better half of that site. Every ability has an
+activation cost recorded.
+
+Two typos in the Game8 ability text are corrected during extraction, listed by
+the script each time it runs so the change is never silent:
+
+| Ability | Source text | Corrected to | Why |
+| --- | --- | --- | --- |
+| Charge | `…everyone on your way. "` | `…everyone on your way.` | stray quote mark in the blurb |
+| Shapeshift | `2 Gain Haste` | `Gain Haste` | stray leading digit in the level 1 text |
+
+Abilities introduce one gate the perks do not have: `vrakhir blood`, a Phial of
+Vrakhir Blood spent to learn certain Vampirism ability levels. The planner
+treats it as a consumable to count rather than a lock to satisfy — it is an item
+you can go and get, not a threshold you have to reach — and totals it beside the
+manuals in the build overview.
+
+**Not verifiable:** whether ability points count toward the 35-point ultimate
+threshold. The planner assumes they do, and the README says so. Nothing found
+states it either way.
