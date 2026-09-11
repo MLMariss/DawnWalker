@@ -10,11 +10,16 @@ complete") and point this script at the .html file:
 
 It reports every difference in level count, skill point cost, time segment cost,
 manual gate, corruption gate and the numbers inside each level's effect text,
-and exits non-zero if anything differs. What it cannot check: node positions and
-the prerequisite graph, which come from in-game skill screens and appear in no
-published table.
+and exits non-zero if anything differs. It also checks data/mechanics.json —
+that every node it maps exists, every system it names is declared, and no edge
+dangles.
 
-Requires: beautifulsoup4, lxml.
+Node positions and the prerequisite graph come from in-game skill screens and
+appear in no published table, so there is nothing here to check them against.
+They are read directly off the screens rather than inferred.
+
+Requires: beautifulsoup4 and lxml, but only to read a source page. The internal
+checks run without them.
 """
 import json
 import pathlib
@@ -22,10 +27,15 @@ import re
 import sys
 import unicodedata
 
-try:
-    from bs4 import BeautifulSoup
-except ImportError:
-    sys.exit("beautifulsoup4 is required: pip install beautifulsoup4 lxml")
+def _soup():
+    """Imported only when a source page is actually being parsed — the internal
+    checks need no HTML parser, and should run in a bare checkout."""
+    try:
+        from bs4 import BeautifulSoup
+    except ImportError:
+        sys.exit("beautifulsoup4 is required to read a source page: "
+                 "pip install beautifulsoup4 lxml")
+    return BeautifulSoup
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TREES = ("Witchcraft", "Swordmastery", "Vampirism")
@@ -66,7 +76,7 @@ def parse_cell(td):
 
 
 def parse_page(path):
-    soup = BeautifulSoup(pathlib.Path(path).read_text(encoding="utf-8", errors="replace"), "lxml")
+    soup = _soup()(pathlib.Path(path).read_text(encoding="utf-8", errors="replace"), "lxml")
     out = {}
     for table in soup.find_all("table"):
         heading = table.find_previous(["h2", "h3"])
@@ -221,13 +231,139 @@ def internal_checks(registry):
     return findings
 
 
+
+def _breadth(mech, scoring):
+    """Recompute which systems are hubs, so a stale declaration is caught."""
+    trans = scoring["transmission"]
+    hops = scoring.get("hop_limit", 2)
+    hub_pairs = scoring.get("hub_pairs", 150)
+    out_adj, in_adj = {}, {}
+    for e in mech["edges"]:
+        if e.get("strength") not in trans:
+            return {}          # graded badly; the strength check reports it
+        out_adj.setdefault(e["from"], []).append(e)
+        in_adj.setdefault(e["to"], []).append(e)
+
+    def walk(starts):
+        best = {s: 0 for s in starts}
+        for hop in range(hops):
+            for cur in list(best):
+                if best[cur] != hop:
+                    continue
+                for e in out_adj.get(cur, []):
+                    if e["to"] not in best:
+                        best[e["to"]] = hop + 1
+        return best
+
+    reachers, readers = {}, {}
+    for rec in mech["nodes"].values():
+        for s in walk(rec["provides"]):
+            reachers[s] = reachers.get(s, 0) + 1
+        for s in rec["scales_with"]:
+            readers[s] = readers.get(s, 0) + 1
+    return {s: ("hub" if reachers.get(s, 0) * readers.get(s, 0) >= hub_pairs else "normal")
+            for s in mech["systems"]}
+
+
+def mechanics_checks(registry, abilities):
+    """data/mechanics.json is an interpretation, but it still has to refer to
+    nodes and systems that exist, or the planner silently drops synergies."""
+    path = ROOT / "data" / "mechanics.json"
+    if not path.exists():
+        return ["data/mechanics.json is missing — the planner needs it to draw synergies"]
+    mech = json.loads(path.read_text(encoding="utf-8"))
+    findings = []
+
+    real = {}
+    for tree in registry["trees"].values():
+        for perk in tree["perks"]:
+            real[perk["node_id"]] = perk["name"]
+        for i, ult in enumerate(tree["ultimates"], 1):
+            real[f"U{tree['key']}{i}"] = ult["name"]
+    if abilities:
+        for tree in abilities["trees"].values():
+            for ab in tree["abilities"]:
+                real[ab["node_id"]] = ab["name"]
+
+    systems = set(mech.get("systems", {}))
+    referenced = set()
+
+    for nid, rec in mech.get("nodes", {}).items():
+        if nid not in real:
+            findings.append(f"mechanics: {nid} is not a perk, ability or ultimate")
+            continue
+        if rec.get("name") != real[nid]:
+            findings.append(f"mechanics/{nid}: name {rec.get('name')!r} "
+                            f"does not match the registry's {real[nid]!r}")
+        for field in ("provides", "scales_with"):
+            for sysid in rec.get(field, []):
+                referenced.add(sysid)
+                if sysid not in systems:
+                    findings.append(f"mechanics/{nid}: {field} names unknown system {sysid!r}")
+        both = set(rec.get("provides", [])) & set(rec.get("scales_with", []))
+        if both:
+            findings.append(f"mechanics/{nid}: {sorted(both)} is both provided and scaled with, "
+                            "which makes the node its own synergy")
+
+    for nid, name in sorted(real.items()):
+        if nid not in mech.get("nodes", {}):
+            findings.append(f"mechanics: no entry for {nid} ({name})")
+
+    scoring = mech.get("scoring")
+    if not scoring:
+        findings.append("mechanics: no scoring block — the planner cannot grade impact")
+    else:
+        trans = scoring.get("transmission", {})
+        for grade in ("strong", "moderate", "weak"):
+            v = trans.get(grade)
+            if not isinstance(v, (int, float)) or not 0 < v <= 1:
+                findings.append(f"mechanics/scoring: transmission[{grade}] must be in (0, 1], got {v!r}")
+        if trans.get("strong", 0) <= trans.get("moderate", 0) or trans.get("moderate", 0) <= trans.get("weak", 0):
+            findings.append("mechanics/scoring: transmission must fall strong > moderate > weak")
+        bands = scoring.get("bands", {})
+        if not (bands.get("green", 0) > bands.get("yellow", 0) > bands.get("red", 0)):
+            findings.append("mechanics/scoring: bands must fall green > yellow > red")
+
+    # `breadth` is derived, so it must still agree with the graph it describes.
+    if scoring:
+        recomputed = _breadth(mech, scoring)
+        for sysid, want in sorted(recomputed.items()):
+            got = mech["systems"][sysid].get("breadth")
+            if got != want:
+                findings.append(f"mechanics/{sysid}: breadth is {got!r} but the graph now makes it "
+                                f"{want!r} — re-run tools/build_mechanics.py")
+
+    seen_edges = set()
+    for edge in mech.get("edges", []):
+        pair = (edge.get("from"), edge.get("to"))
+        for end in pair:
+            referenced.add(end)
+            if end not in systems:
+                findings.append(f"mechanics: edge names unknown system {end!r}")
+        if pair[0] == pair[1]:
+            findings.append(f"mechanics: {pair[0]} is an edge to itself")
+        if pair in seen_edges:
+            findings.append(f"mechanics: duplicate edge {pair[0]} -> {pair[1]}")
+        seen_edges.add(pair)
+        if not edge.get("why"):
+            findings.append(f"mechanics: edge {pair[0]} -> {pair[1]} has no reason given")
+        if edge.get("strength") not in ("strong", "moderate", "weak"):
+            findings.append(f"mechanics: edge {pair[0]} -> {pair[1]} has strength "
+                            f"{edge.get('strength')!r}, not strong/moderate/weak")
+
+    for sysid in sorted(systems - referenced):
+        findings.append(f"mechanics: system {sysid!r} is declared but never used")
+    return findings
+
+
 def main():
     registry = json.loads((ROOT / "data" / "perks.json").read_text(encoding="utf-8"))
     ability_path = ROOT / "data" / "abilities.json"
     abilities = json.loads(ability_path.read_text(encoding="utf-8")) if ability_path.exists() else None
 
     perk_ids = {p["node_id"] for t in registry["trees"].values() for p in t["perks"]}
-    findings = internal_checks(registry) + ability_checks(abilities, perk_ids)
+    findings = (internal_checks(registry) + ability_checks(abilities, perk_ids)
+                + mechanics_checks(registry, abilities))
     label = "internal consistency"
 
     expected = []
@@ -253,8 +389,16 @@ def main():
         for f in findings:
             print(" -", f)
         return 1
-    print(f"{perks} perks, {ults} ultimates and {abils} abilities "
-          f"check out against {label}.")
+    mech_path = ROOT / "data" / "mechanics.json"
+    if mech_path.exists():
+        mech = json.loads(mech_path.read_text(encoding="utf-8"))
+        print(f"{perks} perks, {ults} ultimates and {abils} abilities "
+              f"check out against {label}.")
+        print(f"Mechanics graph: {len(mech['systems'])} systems, {len(mech['edges'])} edges, "
+              f"{len(mech['nodes'])} nodes mapped.")
+    else:
+        print(f"{perks} perks, {ults} ultimates and {abils} abilities "
+              f"check out against {label}.")
     return 0
 
 

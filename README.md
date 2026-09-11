@@ -14,7 +14,8 @@ Pages and it works as the site index.
   connector lines drawn from the prerequisite graph.
 - **All 27 active abilities**, in a collapsible drawer per tree, with what each
   costs to *use* (activation charges and health) as well as to learn. They are
-  learned independently of the perk graph and count toward the same totals.
+  learned independently of the perk graph and count toward what a tree costs you
+  — but not toward the 35 points an ultimate needs.
 - **Point spending with real rules** — a perk level only becomes learnable when every
   prerequisite has at least one level, and refunding is blocked while a downstream
   perk still depends on it.
@@ -22,8 +23,8 @@ Pages and it works as the site index.
   the header, 0–15). Levels that need a Manual found in the world are gated behind the
   "Manuals found" toggle. The two padlocked story nodes — *Font of Life* and
   *Mandrake Ward* — are click-to-toggle and cost nothing.
-- **Ultimates.** Three per tree, one selectable, unlocked at 35 points spent in that
-  tree (Witchcraft, Swordmastery) or Corruption 15 (Vampirism).
+- **Ultimates.** Three per tree, one selectable, unlocked at 35 points spent on
+  *perks* in that tree (Witchcraft, Swordmastery) or Corruption 15 (Vampirism).
 - **Running totals** for skill points, time segments and manuals across all trees,
   plus a per-treepoint count and manual count on each tab — so you can see what a
   given tree actually costs you to find in the world.
@@ -31,9 +32,14 @@ Pages and it works as the site index.
   perk a later level replaces the earlier one for the same stat (Endless Effort's
   +100% is not also +25% and +50%); across different perks the same stat adds up.
   Conditional effects and the manuals you still need are listed separately.
-- **Synergy marks (experimental).** Selecting a perk puts a small bright point on
-  every other perk in the tree that acts on the same system — stamina, critical
-  hits, claws, cooldowns and so on — derived from the effect text. Toggleable.
+- **Synergy, graded.** Selecting a node scores every other perk, ability and
+  ultimate by how much of this one's effect actually reaches it, and colours the
+  result: **green** at 100%, **amber** from 75%, **red** from 50%. Below 50% it
+  is not shown at all. The causal chain is printed on every row — more attack
+  speed lands more attacks, more attacks roll more criticals, and Restless Blade
+  turns criticals into cooldown, so Swiftness reaches it at 81%. Hovering gives
+  the mechanic behind each link. The board marks the same grades as coloured
+  dots. Toggleable.
 - **Shareable builds.** The URL hash carries the whole build; "Copy build link" puts
   it on the clipboard. Lowering Corruption or switching Manuals off peels back any
   level that is no longer legal rather than leaving an impossible build on screen.
@@ -51,7 +57,13 @@ labels below a readable size. Nothing on the page is set under 12px. The
 Ultimate Perks and Build overview sections are collapsible, so a short screen can
 give the tree its height back.
 
-## Layout
+Below 1000px the columns stack and the page itself scrolls, so nothing inside it
+claims a slice of viewport height. Below 640px fitting the board to the window
+would put the names on top of each other, so the floor on column spacing wins
+instead and the board scrolls sideways — a name you can read beats a tree that
+fits. Scrollbars are themed to the page rather than left as system chrome.
+
+## Repository layout
 
 ```
 index.html                 markup and page chrome
@@ -60,8 +72,10 @@ assets/app.js              planner logic — reads the JSON, renders from it
 assets/icons.js            original inline SVG glyphs (no game assets) + mapping
 data/perks.json            the perk registry — single source of truth
 data/abilities.json        the ability registry, generated from two saved pages
-tools/verify_perks.py      checks both registries, and perks against a source page
+data/mechanics.json        the synergy graph — systems, causal edges, per-node mapping
+tools/verify_perks.py      checks all three registries, and perks against a source page
 tools/extract_abilities.py rebuilds data/abilities.json from saved ability pages
+tools/build_mechanics.py   rebuilds data/mechanics.json
 VERIFICATION.md            what was checked, and where the sources disagreed
 ```
 
@@ -152,16 +166,89 @@ string. A perk looks like this:
 - Top-level `source_overrides` records any field where the registry knowingly
   departs from the external source, with the reason.
 
-**Assumption worth knowing:** skill points spent on abilities count toward the
-tree total, and therefore toward the 35-point ultimate threshold on Witchcraft
-and Swordmastery. Abilities sit on the same tree screen and the published rule
-says "35 skill points in a tree", so this is the natural reading — but no source
-states it outright and no screenshot pins it down. It is one line in `app.js`
-(`spent()`) if it turns out otherwise.
+**Ability points do not count toward the ultimate.** The "35 skill points in a
+tree" threshold reads perk spend alone, so a tree full of abilities and no perks
+never unlocks its ultimate. The planner keeps two totals: `spent()` — perks and
+abilities together — is what a tree costs you and what the tab badges show;
+`perkSpent()` is what the ultimate gate reads. Refunding an ability can never
+cost you a selected ultimate.
+
+### `data/mechanics.json`
+
+Generated from `tools/build_mechanics.py`. This is the one file in the repo that
+is an interpretation rather than a transcription, and it is written to be argued
+with. It has three parts:
+
+```json
+{
+  "systems": {
+    "crit_events": { "name": "Critical hits landed",
+                     "note": "Chance times hits, not chance alone." }
+  },
+  "edges": [
+    { "from": "attacks_landed", "to": "crit_events",
+      "why": "Critical chance is rolled per hit, so more hits mean more criticals." }
+  ],
+  "nodes": {
+    "S18": { "name": "Restless Blade", "provides": ["cooldown_reduction"],
+             "scales_with": ["crit_events"],
+             "note": "Level 3 is -50% cooldowns on a critical hit." }
+  }
+}
+```
+
+- **`systems`** are the things a build can act on — attack speed, criticals
+  landed, ability uptime, corruption, and so on.
+- **`edges`** are directed: `from` A `to` B means more A produces more B. Every
+  edge carries a `why` naming the perk or mechanic that makes it true and a
+  `strength` of `strong`, `moderate` or `weak`, so a reader can disagree with one
+  link rather than the whole file.
+- **`nodes`** map all 90 perks, abilities and ultimates onto those systems.
+  `provides` is what the node raises; `scales_with` is what makes it worth more.
+
+Synergy is `provides` meeting `scales_with`, directly or along a chain, and it
+is scored as a **multiplier** rather than a distance. Each link passes on part of
+what went in — strong 0.9, moderate 0.75, weak 0.5 — and a chain multiplies, so
+two strong links carry 81%. Meeting at a **hub** system multiplies by a further
+0.6, because a claim true of hundreds of pairs is a generic one. The result is a
+percentage:
+
+| Score | Colour | Meaning |
+| --- | --- | --- |
+| 100% | green | Direct meeting on a non-hub system — this node provides exactly what the other is paid by |
+| 75–99% | amber | One or two firm links away |
+| 50–74% | red | Generic, conditional, or a stretch |
+| under 50% | — | Not shown. A fifth of an effect is not a synergy |
+
+The whole model lives in the file's `scoring` block, so changing it is a data
+edit. The planner walks at most two edges: past that the graph is connected
+enough that everything is a synergy.
+
+`breadth` on each system is **derived, not hand-picked** — `meeting_pairs`
+counts how many node pairs can actually meet there, and anything at or above 150
+is a hub. Today that is ability uptime (783 pairs), attacks landed (216) and
+activation charges (180). `tools/verify_perks.py` recomputes both and fails if
+the committed values have gone stale.
+
+Edge `strength` follows one rule worth knowing: an edge that exists only because
+*one named perk* provides it is `moderate`, however plainly that perk states it.
+"Ability uptime raises weapon damage" is true of anyone carrying Adrenaline Rush
+and of nobody else, so a chain through it is conditional on a build choice.
+`strong` is reserved for the mechanic itself, or a rule several separate perks
+attest to independently.
+
+Ultimates have no `node_id` in the perk registry, so they are keyed here as
+`U<tree key><index from 1>` — `Usm2` is Sword Sage.
+
+The graph has cycles on purpose. Criticals cut cooldowns, cooldowns raise
+uptime, uptime raises damage, damage kills, and kills cut cooldowns again; that
+loop is the game, so any reader has to bound its own traversal rather than
+assume a DAG.
 
 Integrity checks that hold for the committed data: every prerequisite and unlock
-resolves to a real node, and every perk's `max_level` matches its number of `levels`
-entries. Run them yourself with:
+resolves to a real node, every perk's `max_level` matches its number of `levels`
+entries, and every node in the mechanics graph is a real perk, ability or
+ultimate naming declared systems. Run them yourself with:
 
 ```sh
 python3 tools/verify_perks.py                        # internal consistency
@@ -177,8 +264,9 @@ result, and the three places the sources contradicted each other.
 - Perk data was read from in-game skill screens; node names were resolved by matching
   each icon against the named perk icon set. Some sources label two rows "Lv. 3" — the
   second is Lv. 4, and the in-game pips confirm four slots on those perks.
-- Node positions and the prerequisite graph come from the skill screens alone — no
-  published list records tree topology, so `tools/verify_perks.py` cannot check them.
+- Node positions and the prerequisite graph are read from the in-game skill screens.
+  No published list records tree topology, so `tools/verify_perks.py` has nothing to
+  compare them against — a limit on the script, not on the data.
 - Icons here are original line art, not ripped assets, so they suggest each perk
   rather than reproduce it.
 - Individual level costs are the likeliest thing to drift between game patches. If you
