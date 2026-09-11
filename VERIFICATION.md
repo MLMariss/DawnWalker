@@ -18,16 +18,58 @@ script exits non-zero on any undocumented difference.
 
 | Source | What it carries | Verdict |
 | --- | --- | --- |
-| Game8, *All Perks List* | Every perk, every level, with skill point, time segment, manual and corruption costs in structured tables | Primary external check — machine-readable and internally consistent |
+| In-game skill screens | Titles, every line of effect text, per-level costs and gates, cooldowns, activation charge and health costs, the ANYTIME/DAY ONLY/NIGHT ONLY banner, node positions, prerequisite links and level counts | **Primary.** The game is the authority; the registry is transcribed from it |
+| Game8, *All Perks List* | Every perk, every level, with skill point, time segment, manual and corruption costs in structured tables | Cross-check, and the fallback for a cost the game hides |
 | Fextralife, *Perks* | Perk names and one-line summaries; no costs | Useful for names only; its tree categorisation has errors (see below) |
-| In-game skill screens | Node positions, prerequisite links, level counts | The only source for the tree graph |
+
+### The screenshot sweep
+
+A capture of every skill screen — 92 shots across the three trees, one per
+node — is what the registry is transcribed from. It covers all 27 abilities,
+53 of the 54 perks and all 9 ultimates. **Unholy Fervour (Witchcraft) is the
+one perk not captured**, and its entry still rests on the Game8 tables alone.
+
+Three things the screenshots settled that no published source carries:
+
+- **Cooldowns.** Every active ability shows one. The registry had none.
+- **`active_time`.** Per entity, not per tree: Witchcraft mixes ANYTIME and
+  DAY ONLY, so it cannot be a tree-level field.
+- **Per-level gates.** The book icon sits on individual level rows, so
+  Witchcraft Mastery needs a manual for levels 3 and 4 only. This also turned
+  up `road shrine`, a gate neither published source lists — it gates the
+  entry perk of each branch, 15 perks in all.
+
+Effect text is now verbatim, including the game's own typos (`Craft 2 Items
+items at once.`, `Active Abilites`). They are kept as the game prints them.
+
+Two limits worth knowing when reading the data:
+
+- A level the capture's save had already bought shows **no cost** in game.
+  Those costs are kept from the Game8 cross-check rather than guessed, and are
+  listed in the transcription flags. Ownership itself is never recorded — it
+  belongs to a save, not to the registry.
+- Long level lists **scroll** in the panel, so a fourth level was sometimes
+  cut off. Where only part of a row was visible the registry text is kept and
+  the fragment noted.
 
 The saved pages are not committed — they are third-party page dumps of some
 size, and the script reads whatever copy you have locally.
 
 ## Result
 
-All 54 perks and 9 ultimates agree with the Game8 tables on:
+Thirteen level costs disagree with the Game8 tables. Every one is recorded in
+`source_overrides` in `data/perks.json` with the field and the reason; the
+game wins. The largest is **Shapeshift**, which the game prices at one skill
+point and no time segments per level against the table's 1/1/2/3 skill points
+and 1/1/1/2 time segments. `time_segments` can now be 0, which the published
+tables never show.
+
+Three names were the source's rather than the game's, and are corrected with
+the old name kept as an alias: **Arcane Cascade → Aether Cascade**,
+**Broadswing → Broad Swing**, **Shadow Storm → Shadowstorm**.
+
+Setting those aside, all 54 perks and 9 ultimates agree with the Game8 tables
+on:
 
 - level counts per perk,
 - skill point cost per level,
