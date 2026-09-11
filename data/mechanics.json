@@ -3,457 +3,610 @@
   "subject": "Mechanical synergy graph",
   "notes": [
     "This file is an interpretation, not a transcription. Perk and ability costs come from published tables; the causal links here are read off the effect text in data/perks.json and data/abilities.json.",
-    "`systems` are the things a build can act on. `edges` are directed: from A to B means more A produces more B, and `why` names the perk or mechanic that makes it true.",
+    "`systems` are the things a build can act on. `edges` are directed: from A to B means more A produces more B, `why` names the perk or mechanic that makes it true, and `strength` grades how firmly it holds.",
+    "Each system carries `meeting_pairs` (how many node pairs can meet there) and `breadth`. A system at or above 150 pairs is a `hub`: ability uptime, activation charges and attacks landed. Meeting at a hub is priced +4, because a claim true of hundreds of pairs is a generic one. Both fields are derived from the graph, not hand-picked, and verify_perks.py recomputes them.",
+    "Edge `strength` is strong (a perk says so in its own effect text, or it is the mechanic itself), moderate (real but conditional on build, level or state), or weak (true in the abstract and nearly useless as advice).",
+    "Impact is a multiplier held in `scoring`. Each link passes on part of the effect - strong 0.9, moderate 0.75, weak 0.5 - and a chain multiplies, so two strong links carry 81%. Meeting at a hub system multiplies by a further 0.6. The result is a percentage: 100 is green, 75 and up amber, 50 and up red, and anything under 50 is not shown at all rather than drawn as a synergy nobody should act on.",
+    "Green is therefore reserved for a direct meeting on a non-hub system - this node provides exactly what that node is paid by, with nothing in between.",
     "Each node declares `provides` (systems it raises) and `scales_with` (systems that make it worth more). Synergy is provides meeting scales_with, directly or along a chain of edges.",
     "Edges are deliberately specific. 'Both mention stamina' is not a synergy; 'cheaper blocks mean more attacks, which means more critical rolls, which means shorter cooldowns' is.",
     "The graph contains cycles on purpose - criticals cut cooldowns, cooldowns raise uptime, uptime raises damage, damage kills, kills cut cooldowns. Readers must bound their own traversal depth; the planner walks two hops.",
     "Edges are kept specific enough to mean something. 'Staying alive lets you keep attacking' is true of every defensive perk and every offensive one, so it is deliberately not an edge - it would link the whole graph to itself and make the marks worthless.",
     "Ultimates have no node_id in the perk registry; they are keyed here as U<tree key><index from 1>."
   ],
+  "scoring": {
+    "transmission": {
+      "strong": 0.9,
+      "moderate": 0.75,
+      "weak": 0.5
+    },
+    "hub_factor": 0.6,
+    "hop_limit": 2,
+    "hub_pairs": 150,
+    "bands": {
+      "green": 100,
+      "yellow": 75,
+      "red": 50
+    }
+  },
   "systems": {
     "attack_speed": {
       "name": "Attack speed",
-      "note": "How fast swings come out."
+      "note": "How fast swings come out.",
+      "meeting_pairs": 14,
+      "breadth": "normal"
     },
     "attacks_landed": {
       "name": "Attacks landed",
-      "note": "Hits put on a target per fight. The hinge of the melee loop: almost everything that rolls a chance rolls it per hit."
+      "note": "Hits put on a target per fight. The hinge of the melee loop: almost everything that rolls a chance rolls it per hit.",
+      "meeting_pairs": 216,
+      "breadth": "hub"
     },
     "weapon_damage": {
       "name": "Weapon damage",
-      "note": "Damage from sword attacks."
+      "note": "Damage from sword attacks.",
+      "meeting_pairs": 96,
+      "breadth": "normal"
     },
     "claw_damage": {
       "name": "Claw damage",
-      "note": "Damage from claw attacks."
+      "note": "Damage from claw attacks.",
+      "meeting_pairs": 0,
+      "breadth": "normal"
     },
     "witchcraft_damage": {
       "name": "Witchcraft damage",
-      "note": "Damage from Witchcraft abilities."
+      "note": "Damage from Witchcraft abilities.",
+      "meeting_pairs": 15,
+      "breadth": "normal"
     },
     "ability_damage": {
       "name": "Ability damage",
-      "note": "Damage from active abilities generally."
+      "note": "Damage from active abilities generally.",
+      "meeting_pairs": 0,
+      "breadth": "normal"
     },
     "damage_over_time": {
       "name": "Damage over time",
-      "note": "Bleed and lingering damage effects."
+      "note": "Bleed and lingering damage effects.",
+      "meeting_pairs": 0,
+      "breadth": "normal"
     },
     "damage_output": {
       "name": "Damage output",
-      "note": "Total damage dealt — where every damage line ends up."
+      "note": "Total damage dealt — where every damage line ends up.",
+      "meeting_pairs": 65,
+      "breadth": "normal"
     },
     "crit_chance": {
       "name": "Critical chance",
-      "note": "The odds a given hit crits."
+      "note": "The odds a given hit crits.",
+      "meeting_pairs": 0,
+      "breadth": "normal"
     },
     "crit_events": {
       "name": "Critical hits landed",
-      "note": "How many criticals actually happen. Chance times hits, not chance alone."
+      "note": "How many criticals actually happen. Chance times hits, not chance alone.",
+      "meeting_pairs": 72,
+      "breadth": "normal"
     },
     "crit_damage": {
       "name": "Critical damage",
-      "note": "How hard a critical lands once it does."
+      "note": "How hard a critical lands once it does.",
+      "meeting_pairs": 22,
+      "breadth": "normal"
     },
     "stamina_pool": {
       "name": "Stamina pool",
-      "note": "Maximum stamina."
+      "note": "Maximum stamina.",
+      "meeting_pairs": 1,
+      "breadth": "normal"
     },
     "stamina_economy": {
       "name": "Stamina economy",
-      "note": "Stamina actually available to spend — costs cut and stamina returned."
+      "note": "Stamina actually available to spend — costs cut and stamina returned.",
+      "meeting_pairs": 0,
+      "breadth": "normal"
     },
     "charges": {
       "name": "Activation charges",
-      "note": "The pool and regeneration of activation charges abilities are paid for with."
+      "note": "The pool and regeneration of activation charges abilities are paid for with.",
+      "meeting_pairs": 180,
+      "breadth": "hub"
     },
     "cooldown_reduction": {
       "name": "Cooldown reduction",
-      "note": "How quickly abilities come back."
+      "note": "How quickly abilities come back.",
+      "meeting_pairs": 40,
+      "breadth": "normal"
     },
     "ability_uptime": {
       "name": "Ability uptime",
-      "note": "How often an ability is actually available and cast."
+      "note": "How often an ability is actually available and cast.",
+      "meeting_pairs": 783,
+      "breadth": "hub"
     },
     "ability_duration": {
       "name": "Ability duration",
-      "note": "How long an active effect stays up."
+      "note": "How long an active effect stays up.",
+      "meeting_pairs": 12,
+      "breadth": "normal"
     },
     "ability_slots": {
       "name": "Ability slots",
-      "note": "How many abilities can be equipped at once. Passive abilities only work while slotted."
+      "note": "How many abilities can be equipped at once. Passive abilities only work while slotted.",
+      "meeting_pairs": 33,
+      "breadth": "normal"
     },
     "ability_health_cost": {
       "name": "Ability health cost",
-      "note": "The health price of casting — lower is better."
+      "note": "The health price of casting — lower is better.",
+      "meeting_pairs": 9,
+      "breadth": "normal"
     },
     "health_pool": {
       "name": "Health pool",
-      "note": "Maximum health and health segments."
+      "note": "Maximum health and health segments.",
+      "meeting_pairs": 12,
+      "breadth": "normal"
     },
     "health_regen": {
       "name": "Health regeneration",
-      "note": "Health coming back."
+      "note": "Health coming back.",
+      "meeting_pairs": 84,
+      "breadth": "normal"
     },
     "health_percent": {
       "name": "Health percentage",
-      "note": "How full the bar is. Two Vampirism abilities scale their damage off this directly."
+      "note": "How full the bar is. Two Vampirism abilities scale their damage off this directly.",
+      "meeting_pairs": 57,
+      "breadth": "normal"
     },
     "blood_restore": {
       "name": "Blood restoration",
-      "note": "How much is gained from drinking blood."
+      "note": "How much is gained from drinking blood.",
+      "meeting_pairs": 4,
+      "breadth": "normal"
     },
     "armour": {
       "name": "Armour",
-      "note": "Damage reduction from armour."
+      "note": "Damage reduction from armour.",
+      "meeting_pairs": 0,
+      "breadth": "normal"
     },
     "perfect_block": {
       "name": "Perfect block",
-      "note": "Blocking on the beat. Swordmastery's whole economy hangs off it."
+      "note": "Blocking on the beat. Swordmastery's whole economy hangs off it.",
+      "meeting_pairs": 11,
+      "breadth": "normal"
     },
     "dodge": {
       "name": "Dodging",
-      "note": "Evasion, and the last-moment dodge window."
+      "note": "Evasion, and the last-moment dodge window.",
+      "meeting_pairs": 1,
+      "breadth": "normal"
     },
     "enemy_weakened": {
       "name": "Enemy weakened",
-      "note": "Debuffs that make a target deal less and take more."
+      "note": "Debuffs that make a target deal less and take more.",
+      "meeting_pairs": 0,
+      "breadth": "normal"
     },
     "stun": {
       "name": "Stun and control",
-      "note": "Enemies stopped from acting."
+      "note": "Enemies stopped from acting.",
+      "meeting_pairs": 0,
+      "breadth": "normal"
     },
     "kills": {
       "name": "Kills",
-      "note": "Enemies actually dying — several effects trigger only here."
+      "note": "Enemies actually dying — several effects trigger only here.",
+      "meeting_pairs": 144,
+      "breadth": "normal"
     },
     "survivability": {
       "name": "Survivability",
-      "note": "Staying alive. The precondition for every other system."
+      "note": "Staying alive. The precondition for every other system.",
+      "meeting_pairs": 37,
+      "breadth": "normal"
     },
     "corruption_rate": {
       "name": "Corruption rate",
-      "note": "How fast Corruption fills."
+      "note": "How fast Corruption fills.",
+      "meeting_pairs": 0,
+      "breadth": "normal"
     },
     "corruption_level": {
       "name": "Corruption level",
-      "note": "The Corruption threshold reached. Gates Vampirism levels and all three Vampirism ultimates at 15."
+      "note": "The Corruption threshold reached. Gates Vampirism levels and all three Vampirism ultimates at 15.",
+      "meeting_pairs": 0,
+      "breadth": "normal"
     },
     "consumables": {
       "name": "Consumables",
-      "note": "Potions, food and buffs in hand."
+      "note": "Potions, food and buffs in hand.",
+      "meeting_pairs": 7,
+      "breadth": "normal"
     },
     "crafting": {
       "name": "Crafting",
-      "note": "Making and gathering what consumables are built from."
+      "note": "Making and gathering what consumables are built from.",
+      "meeting_pairs": 8,
+      "breadth": "normal"
     },
     "carry_weight": {
       "name": "Carry weight",
-      "note": "How much can be hauled."
+      "note": "How much can be hauled.",
+      "meeting_pairs": 1,
+      "breadth": "normal"
     },
     "economy": {
       "name": "Trade and coin",
-      "note": "Prices, stock and what loot is worth."
+      "note": "Prices, stock and what loot is worth.",
+      "meeting_pairs": 0,
+      "breadth": "normal"
     },
     "haste": {
       "name": "Haste",
-      "note": "Moving faster than the world around you."
+      "note": "Moving faster than the world around you.",
+      "meeting_pairs": 0,
+      "breadth": "normal"
     },
     "exploration": {
       "name": "Exploration",
-      "note": "Reaching, reading and opening things in the world."
+      "note": "Reaching, reading and opening things in the world.",
+      "meeting_pairs": 0,
+      "breadth": "normal"
     }
   },
   "edges": [
     {
       "from": "attack_speed",
       "to": "attacks_landed",
+      "strength": "strong",
       "why": "Faster swings land more attacks in the same window."
     },
     {
       "from": "stamina_pool",
       "to": "stamina_economy",
+      "strength": "strong",
       "why": "A bigger pool is more actions before you run dry."
     },
     {
       "from": "stamina_economy",
       "to": "attacks_landed",
-      "why": "Attacks you can afford are attacks you make; cheaper actions and returned stamina mean more swings per fight."
+      "strength": "moderate",
+      "why": "Cheaper actions mean more swings per fight - but only while stamina is what is actually stopping you."
     },
     {
       "from": "stun",
       "to": "attacks_landed",
-      "why": "A stunned enemy is a free window to swing into."
+      "strength": "moderate",
+      "why": "A stunned enemy is a free window to swing into, for as long as the stun lasts."
     },
     {
       "from": "attacks_landed",
       "to": "crit_events",
+      "strength": "strong",
       "why": "Critical chance is rolled per hit, so more hits mean more criticals at the same chance."
     },
     {
       "from": "crit_chance",
       "to": "crit_events",
+      "strength": "strong",
       "why": "A better roll on every hit."
     },
     {
       "from": "crit_events",
       "to": "crit_damage",
+      "strength": "strong",
       "why": "Critical damage only ever applies on a critical."
     },
     {
       "from": "crit_events",
       "to": "cooldown_reduction",
-      "why": "Aether Flow, Restless Blade and Endless Ferocity all cut cooldowns on a critical hit — criticals are cooldown."
+      "strength": "strong",
+      "why": "Aether Flow, Restless Blade and Endless Ferocity each say 'on critical hit' in their own level text - criticals are cooldown."
     },
     {
       "from": "crit_events",
       "to": "damage_output",
+      "strength": "strong",
       "why": "A critical is the biggest single hit most builds land."
     },
     {
       "from": "crit_damage",
       "to": "damage_output",
+      "strength": "strong",
       "why": "Harder criticals, more damage."
     },
     {
       "from": "weapon_damage",
       "to": "damage_output",
+      "strength": "strong",
       "why": "Sword damage is damage dealt."
     },
     {
       "from": "claw_damage",
       "to": "damage_output",
+      "strength": "strong",
       "why": "Claw damage is damage dealt."
     },
     {
       "from": "witchcraft_damage",
       "to": "damage_output",
+      "strength": "strong",
       "why": "Witchcraft damage is damage dealt."
     },
     {
       "from": "ability_damage",
       "to": "damage_output",
+      "strength": "strong",
       "why": "Ability damage is damage dealt."
     },
     {
       "from": "damage_over_time",
       "to": "damage_output",
-      "why": "Lingering damage is damage dealt."
+      "strength": "moderate",
+      "why": "Lingering damage adds up, though it needs the target to live long enough to tick."
     },
     {
       "from": "enemy_weakened",
       "to": "damage_output",
+      "strength": "strong",
       "why": "A weakened target takes more from everything."
     },
     {
       "from": "damage_output",
       "to": "kills",
-      "why": "Damage is how enemies die."
+      "strength": "moderate",
+      "why": "Damage is how enemies die, but this is the broadest link in the graph - nearly every offensive perk runs through it."
     },
     {
       "from": "kills",
       "to": "cooldown_reduction",
+      "strength": "moderate",
       "why": "Sword Sage resets every active cooldown on a kill."
     },
     {
       "from": "kills",
       "to": "stamina_economy",
-      "why": "Fleet of Foot's last level regenerates stamina on a kill."
+      "strength": "moderate",
+      "why": "Fleet of Foot regenerates stamina on a kill - its last level only."
     },
     {
       "from": "kills",
       "to": "claw_damage",
+      "strength": "moderate",
       "why": "Lethal Crescendo stacks +20% claw damage per kill."
     },
     {
       "from": "kills",
       "to": "health_regen",
-      "why": "Frugal Witchcraft refunds the health a killing cast cost."
+      "strength": "moderate",
+      "why": "Frugal Witchcraft refunds the health a killing cast cost - Witchcraft kills only."
     },
     {
       "from": "cooldown_reduction",
       "to": "ability_uptime",
+      "strength": "strong",
       "why": "A shorter cooldown is an ability ready sooner."
     },
     {
       "from": "charges",
       "to": "ability_uptime",
+      "strength": "strong",
       "why": "Abilities are paid for in charges; more charges, more casts."
     },
     {
       "from": "ability_health_cost",
       "to": "ability_uptime",
-      "why": "A lower health price is a cast you can afford to make again."
+      "strength": "moderate",
+      "why": "A lower health price is a cast you can afford to repeat, where health is the binding cost."
     },
     {
       "from": "ability_slots",
       "to": "ability_uptime",
-      "why": "More slots is more abilities ready at once — and passive abilities only work while slotted."
+      "strength": "strong",
+      "why": "More slots is more abilities ready at once - and passive abilities only work while slotted."
     },
     {
       "from": "ability_duration",
       "to": "ability_uptime",
+      "strength": "moderate",
       "why": "An effect still running is one you do not have to recast."
     },
     {
       "from": "ability_uptime",
       "to": "ability_damage",
+      "strength": "strong",
       "why": "Damage an ability never gets cast for is damage you do not deal."
     },
     {
       "from": "ability_uptime",
       "to": "damage_output",
-      "why": "More casts, more damage."
+      "strength": "moderate",
+      "why": "More casts, more damage - true of every ability at once, so it says little about any one of them."
     },
     {
       "from": "ability_uptime",
       "to": "weapon_damage",
+      "strength": "moderate",
       "why": "Adrenaline Rush raises attack damage after every ability used."
     },
     {
       "from": "ability_uptime",
       "to": "health_regen",
+      "strength": "moderate",
       "why": "Unholy Vitality regenerates health after every ability used."
     },
     {
       "from": "ability_uptime",
       "to": "armour",
+      "strength": "moderate",
       "why": "Unnatural Resilience grants armour for as long as a Witchcraft ability is running."
     },
     {
       "from": "perfect_block",
       "to": "stamina_economy",
+      "strength": "strong",
       "why": "Perfect Block gives stamina back on the beat."
     },
     {
       "from": "perfect_block",
       "to": "charges",
+      "strength": "strong",
       "why": "Perfect Block and Walking Fortress both return activation charge."
     },
     {
       "from": "perfect_block",
       "to": "attack_speed",
+      "strength": "moderate",
       "why": "Swiftness boosts attack speed after a perfect block."
     },
     {
       "from": "perfect_block",
       "to": "crit_events",
+      "strength": "moderate",
       "why": "Perfect Riposte turns a perfect block into a critical strike."
     },
     {
       "from": "perfect_block",
       "to": "enemy_weakened",
+      "strength": "moderate",
       "why": "Sharp Eye weakens the enemy on a perfect block."
     },
     {
       "from": "perfect_block",
       "to": "weapon_damage",
+      "strength": "moderate",
       "why": "Counterattack hits harder straight after a perfect block."
     },
     {
       "from": "perfect_block",
       "to": "survivability",
+      "strength": "strong",
       "why": "A blocked hit is a hit you did not take."
     },
     {
       "from": "dodge",
       "to": "crit_events",
-      "why": "Perfect Riposte's third level fires after a perfect dodge too."
+      "strength": "moderate",
+      "why": "Perfect Riposte fires after a perfect dodge too - at its third level."
     },
     {
       "from": "dodge",
       "to": "charges",
-      "why": "Fleet of Foot returns activation charge on a last-moment dodge."
+      "strength": "moderate",
+      "why": "Fleet of Foot returns activation charge on a last-moment dodge - at its second level."
     },
     {
       "from": "dodge",
       "to": "survivability",
+      "strength": "strong",
       "why": "A dodged hit is a hit you did not take."
     },
     {
       "from": "armour",
       "to": "survivability",
+      "strength": "strong",
       "why": "Less damage taken per hit."
     },
     {
       "from": "health_pool",
       "to": "survivability",
+      "strength": "strong",
       "why": "More to lose before it matters."
     },
     {
       "from": "health_pool",
       "to": "health_percent",
-      "why": "A bigger bar holds a high percentage longer."
+      "strength": "moderate",
+      "why": "A bigger bar holds a high percentage longer, though the percentage is what is read, not the size."
     },
     {
       "from": "health_regen",
       "to": "health_percent",
+      "strength": "strong",
       "why": "Regeneration is what pushes the bar back up."
     },
     {
       "from": "health_regen",
       "to": "survivability",
+      "strength": "strong",
       "why": "Health coming back is health you can spend again."
     },
     {
       "from": "blood_restore",
       "to": "health_regen",
+      "strength": "strong",
       "why": "Drinking is the main way vampiric health returns."
     },
     {
       "from": "health_percent",
       "to": "ability_damage",
+      "strength": "strong",
       "why": "Crimson Rush and Shred scale ability damage with how full your health is."
     },
     {
       "from": "ability_health_cost",
       "to": "survivability",
+      "strength": "moderate",
       "why": "Every cast you do not pay for in health is health kept."
     },
     {
       "from": "enemy_weakened",
       "to": "survivability",
-      "why": "A weakened enemy deals less."
+      "strength": "moderate",
+      "why": "A weakened enemy deals less, for as long as the debuff holds."
     },
     {
       "from": "corruption_rate",
       "to": "corruption_level",
+      "strength": "strong",
       "why": "Filling faster reaches the thresholds sooner."
     },
     {
       "from": "corruption_level",
       "to": "health_pool",
+      "strength": "moderate",
       "why": "Hastened Corruption's last level grants +5% vampiric health per Corruption level."
     },
     {
       "from": "crafting",
       "to": "consumables",
+      "strength": "strong",
       "why": "What you gather and craft is what you carry."
     },
     {
       "from": "economy",
       "to": "consumables",
-      "why": "Better prices and stock mean more in the pack."
+      "strength": "moderate",
+      "why": "Better prices and stock mean more in the pack, if you spend the coin on them."
     },
     {
       "from": "carry_weight",
       "to": "economy",
-      "why": "Loot you can carry out is loot you can sell."
+      "strength": "weak",
+      "why": "Loot you can carry out is loot you can sell. True, and a long way from a build decision."
     },
     {
       "from": "consumables",
       "to": "health_regen",
+      "strength": "moderate",
       "why": "Herbal Remedies II heals off every consumable used."
     },
     {
       "from": "consumables",
       "to": "survivability",
+      "strength": "moderate",
       "why": "A potion in a quickslot is a fight you do not lose."
     },
     {
       "from": "consumables",
       "to": "damage_output",
-      "why": "Blood and food buffs raise attack damage outright."
+      "strength": "weak",
+      "why": "Blood and food buffs raise attack damage, but any build can eat - this is not a synergy between two perks."
     }
   ],
   "nodes": {

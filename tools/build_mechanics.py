@@ -47,81 +47,149 @@ sys("haste",          "Haste",               "Moving faster than the world aroun
 sys("exploration",    "Exploration",         "Reaching, reading and opening things in the world.")
 
 E = []
-def edge(a, b, why):
-    E.append({"from": a, "to": b, "why": why})
+def edge(a, b, strength, why):
+    """strength grades how firmly the link holds, and it is what colours the
+    planner's synergy rows:
+
+      strong   — the mechanic itself ("critical chance is rolled per hit"), or
+                 a rule several separate perks attest to independently.
+      moderate — real and load-bearing, but conditional. In particular, an edge
+                 that exists only because ONE named perk provides it is moderate,
+                 however plainly that perk states it: the link holds only for a
+                 build that actually took the perk. "Ability uptime raises weapon
+                 damage" is true of anyone carrying Adrenaline Rush and of nobody
+                 else.
+      weak     — true in the abstract and nearly useless as advice. Generic,
+                 or far enough downstream that calling it synergy oversells it.
+    """
+    assert strength in ("strong", "moderate", "weak"), strength
+    E.append({"from": a, "to": b, "strength": strength, "why": why})
 
 # --- the melee loop -------------------------------------------------------
-edge("attack_speed", "attacks_landed", "Faster swings land more attacks in the same window.")
-edge("stamina_pool", "stamina_economy", "A bigger pool is more actions before you run dry.")
-edge("stamina_economy", "attacks_landed", "Attacks you can afford are attacks you make; cheaper actions and returned stamina mean more swings per fight.")
-edge("stun", "attacks_landed", "A stunned enemy is a free window to swing into.")
-edge("attacks_landed", "crit_events", "Critical chance is rolled per hit, so more hits mean more criticals at the same chance.")
-edge("crit_chance", "crit_events", "A better roll on every hit.")
-edge("crit_events", "crit_damage", "Critical damage only ever applies on a critical.")
+edge("attack_speed", "attacks_landed", "strong",
+     "Faster swings land more attacks in the same window.")
+edge("stamina_pool", "stamina_economy", "strong",
+     "A bigger pool is more actions before you run dry.")
+edge("stamina_economy", "attacks_landed", "moderate",
+     "Cheaper actions mean more swings per fight - but only while stamina is what is actually stopping you.")
+edge("stun", "attacks_landed", "moderate",
+     "A stunned enemy is a free window to swing into, for as long as the stun lasts.")
+edge("attacks_landed", "crit_events", "strong",
+     "Critical chance is rolled per hit, so more hits mean more criticals at the same chance.")
+edge("crit_chance", "crit_events", "strong",
+     "A better roll on every hit.")
+edge("crit_events", "crit_damage", "strong",
+     "Critical damage only ever applies on a critical.")
 
 # --- criticals are the engine room ---------------------------------------
-edge("crit_events", "cooldown_reduction", "Aether Flow, Restless Blade and Endless Ferocity all cut cooldowns on a critical hit — criticals are cooldown.")
-edge("crit_events", "damage_output", "A critical is the biggest single hit most builds land.")
-edge("crit_damage", "damage_output", "Harder criticals, more damage.")
+edge("crit_events", "cooldown_reduction", "strong",
+     "Aether Flow, Restless Blade and Endless Ferocity each say 'on critical hit' in their own level text - criticals are cooldown.")
+edge("crit_events", "damage_output", "strong",
+     "A critical is the biggest single hit most builds land.")
+edge("crit_damage", "damage_output", "strong",
+     "Harder criticals, more damage.")
 
 # --- damage collects, and killing pays out -------------------------------
-for src, label in [("weapon_damage", "Sword"), ("claw_damage", "Claw"),
-                   ("witchcraft_damage", "Witchcraft"), ("ability_damage", "Ability"),
-                   ("damage_over_time", "Lingering")]:
-    edge(src, "damage_output", label + " damage is damage dealt.")
-edge("enemy_weakened", "damage_output", "A weakened target takes more from everything.")
-edge("damage_output", "kills", "Damage is how enemies die.")
-edge("kills", "cooldown_reduction", "Sword Sage resets every active cooldown on a kill.")
-edge("kills", "stamina_economy", "Fleet of Foot's last level regenerates stamina on a kill.")
-edge("kills", "claw_damage", "Lethal Crescendo stacks +20% claw damage per kill.")
-edge("kills", "health_regen", "Frugal Witchcraft refunds the health a killing cast cost.")
+edge("weapon_damage", "damage_output", "strong", "Sword damage is damage dealt.")
+edge("claw_damage", "damage_output", "strong", "Claw damage is damage dealt.")
+edge("witchcraft_damage", "damage_output", "strong", "Witchcraft damage is damage dealt.")
+edge("ability_damage", "damage_output", "strong", "Ability damage is damage dealt.")
+edge("damage_over_time", "damage_output", "moderate",
+     "Lingering damage adds up, though it needs the target to live long enough to tick.")
+edge("enemy_weakened", "damage_output", "strong",
+     "A weakened target takes more from everything.")
+edge("damage_output", "kills", "moderate",
+     "Damage is how enemies die, but this is the broadest link in the graph - nearly every offensive perk runs through it.")
+edge("kills", "cooldown_reduction", "moderate",
+     "Sword Sage resets every active cooldown on a kill.")
+edge("kills", "stamina_economy", "moderate",
+     "Fleet of Foot regenerates stamina on a kill - its last level only.")
+edge("kills", "claw_damage", "moderate",
+     "Lethal Crescendo stacks +20% claw damage per kill.")
+edge("kills", "health_regen", "moderate",
+     "Frugal Witchcraft refunds the health a killing cast cost - Witchcraft kills only.")
 
 # --- the ability loop ----------------------------------------------------
-edge("cooldown_reduction", "ability_uptime", "A shorter cooldown is an ability ready sooner.")
-edge("charges", "ability_uptime", "Abilities are paid for in charges; more charges, more casts.")
-edge("ability_health_cost", "ability_uptime", "A lower health price is a cast you can afford to make again.")
-edge("ability_slots", "ability_uptime", "More slots is more abilities ready at once — and passive abilities only work while slotted.")
-edge("ability_duration", "ability_uptime", "An effect still running is one you do not have to recast.")
-edge("ability_uptime", "ability_damage", "Damage an ability never gets cast for is damage you do not deal.")
-edge("ability_uptime", "damage_output", "More casts, more damage.")
-edge("ability_uptime", "weapon_damage", "Adrenaline Rush raises attack damage after every ability used.")
-edge("ability_uptime", "health_regen", "Unholy Vitality regenerates health after every ability used.")
-edge("ability_uptime", "armour", "Unnatural Resilience grants armour for as long as a Witchcraft ability is running.")
+edge("cooldown_reduction", "ability_uptime", "strong",
+     "A shorter cooldown is an ability ready sooner.")
+edge("charges", "ability_uptime", "strong",
+     "Abilities are paid for in charges; more charges, more casts.")
+edge("ability_health_cost", "ability_uptime", "moderate",
+     "A lower health price is a cast you can afford to repeat, where health is the binding cost.")
+edge("ability_slots", "ability_uptime", "strong",
+     "More slots is more abilities ready at once - and passive abilities only work while slotted.")
+edge("ability_duration", "ability_uptime", "moderate",
+     "An effect still running is one you do not have to recast.")
+edge("ability_uptime", "ability_damage", "strong",
+     "Damage an ability never gets cast for is damage you do not deal.")
+edge("ability_uptime", "damage_output", "moderate",
+     "More casts, more damage - true of every ability at once, so it says little about any one of them.")
+edge("ability_uptime", "weapon_damage", "moderate",
+     "Adrenaline Rush raises attack damage after every ability used.")
+edge("ability_uptime", "health_regen", "moderate",
+     "Unholy Vitality regenerates health after every ability used.")
+edge("ability_uptime", "armour", "moderate",
+     "Unnatural Resilience grants armour for as long as a Witchcraft ability is running.")
 
 # --- blocking and dodging pay into everything ----------------------------
-edge("perfect_block", "stamina_economy", "Perfect Block gives stamina back on the beat.")
-edge("perfect_block", "charges", "Perfect Block and Walking Fortress both return activation charge.")
-edge("perfect_block", "attack_speed", "Swiftness boosts attack speed after a perfect block.")
-edge("perfect_block", "crit_events", "Perfect Riposte turns a perfect block into a critical strike.")
-edge("perfect_block", "enemy_weakened", "Sharp Eye weakens the enemy on a perfect block.")
-edge("perfect_block", "weapon_damage", "Counterattack hits harder straight after a perfect block.")
-edge("perfect_block", "survivability", "A blocked hit is a hit you did not take.")
-edge("dodge", "crit_events", "Perfect Riposte's third level fires after a perfect dodge too.")
-edge("dodge", "charges", "Fleet of Foot returns activation charge on a last-moment dodge.")
-edge("dodge", "survivability", "A dodged hit is a hit you did not take.")
+edge("perfect_block", "stamina_economy", "strong",
+     "Perfect Block gives stamina back on the beat.")
+edge("perfect_block", "charges", "strong",
+     "Perfect Block and Walking Fortress both return activation charge.")
+edge("perfect_block", "attack_speed", "moderate",
+     "Swiftness boosts attack speed after a perfect block.")
+edge("perfect_block", "crit_events", "moderate",
+     "Perfect Riposte turns a perfect block into a critical strike.")
+edge("perfect_block", "enemy_weakened", "moderate",
+     "Sharp Eye weakens the enemy on a perfect block.")
+edge("perfect_block", "weapon_damage", "moderate",
+     "Counterattack hits harder straight after a perfect block.")
+edge("perfect_block", "survivability", "strong",
+     "A blocked hit is a hit you did not take.")
+edge("dodge", "crit_events", "moderate",
+     "Perfect Riposte fires after a perfect dodge too - at its third level.")
+edge("dodge", "charges", "moderate",
+     "Fleet of Foot returns activation charge on a last-moment dodge - at its second level.")
+edge("dodge", "survivability", "strong",
+     "A dodged hit is a hit you did not take.")
 
 # --- staying alive, and health as a damage stat --------------------------
-edge("armour", "survivability", "Less damage taken per hit.")
-edge("health_pool", "survivability", "More to lose before it matters.")
-edge("health_pool", "health_percent", "A bigger bar holds a high percentage longer.")
-edge("health_regen", "health_percent", "Regeneration is what pushes the bar back up.")
-edge("health_regen", "survivability", "Health coming back is health you can spend again.")
-edge("blood_restore", "health_regen", "Drinking is the main way vampiric health returns.")
-edge("health_percent", "ability_damage", "Crimson Rush and Shred scale ability damage with how full your health is.")
-edge("ability_health_cost", "survivability", "Every cast you do not pay for in health is health kept.")
-edge("enemy_weakened", "survivability", "A weakened enemy deals less.")
+edge("armour", "survivability", "strong", "Less damage taken per hit.")
+edge("health_pool", "survivability", "strong", "More to lose before it matters.")
+edge("health_pool", "health_percent", "moderate",
+     "A bigger bar holds a high percentage longer, though the percentage is what is read, not the size.")
+edge("health_regen", "health_percent", "strong",
+     "Regeneration is what pushes the bar back up.")
+edge("health_regen", "survivability", "strong",
+     "Health coming back is health you can spend again.")
+edge("blood_restore", "health_regen", "strong",
+     "Drinking is the main way vampiric health returns.")
+edge("health_percent", "ability_damage", "strong",
+     "Crimson Rush and Shred scale ability damage with how full your health is.")
+edge("ability_health_cost", "survivability", "moderate",
+     "Every cast you do not pay for in health is health kept.")
+edge("enemy_weakened", "survivability", "moderate",
+     "A weakened enemy deals less, for as long as the debuff holds.")
 
 # --- corruption ----------------------------------------------------------
-edge("corruption_rate", "corruption_level", "Filling faster reaches the thresholds sooner.")
-edge("corruption_level", "health_pool", "Hastened Corruption's last level grants +5% vampiric health per Corruption level.")
+edge("corruption_rate", "corruption_level", "strong",
+     "Filling faster reaches the thresholds sooner.")
+edge("corruption_level", "health_pool", "moderate",
+     "Hastened Corruption's last level grants +5% vampiric health per Corruption level.")
 
 # --- the support economy -------------------------------------------------
-edge("crafting", "consumables", "What you gather and craft is what you carry.")
-edge("economy", "consumables", "Better prices and stock mean more in the pack.")
-edge("carry_weight", "economy", "Loot you can carry out is loot you can sell.")
-edge("consumables", "health_regen", "Herbal Remedies II heals off every consumable used.")
-edge("consumables", "survivability", "A potion in a quickslot is a fight you do not lose.")
-edge("consumables", "damage_output", "Blood and food buffs raise attack damage outright.")
+edge("crafting", "consumables", "strong",
+     "What you gather and craft is what you carry.")
+edge("economy", "consumables", "moderate",
+     "Better prices and stock mean more in the pack, if you spend the coin on them.")
+edge("carry_weight", "economy", "weak",
+     "Loot you can carry out is loot you can sell. True, and a long way from a build decision.")
+edge("consumables", "health_regen", "moderate",
+     "Herbal Remedies II heals off every consumable used.")
+edge("consumables", "survivability", "moderate",
+     "A potion in a quickslot is a fight you do not lose.")
+edge("consumables", "damage_output", "weak",
+     "Blood and food buffs raise attack damage, but any build can eat - this is not a synergy between two perks.")
 
 # node_id -> what it raises, and what raises it
 N = {}
@@ -251,19 +319,86 @@ node("Uvp2", "Renounce Death",    ["survivability", "health_regen"], [])
 node("Uvp3", "Sanguine Renewal",  ["cooldown_reduction"], ["charges", "ability_uptime"],
      "Runs through Voracious Bite, so it needs the charge to keep biting.")
 
+# --- breadth ---------------------------------------------------------------
+# How generic a synergy claim is depends on where the two nodes meet. If 27
+# different perks can drive ability uptime and 29 read it, "this feeds that"
+# through uptime is true of hundreds of pairs and says almost nothing. Count
+# the pairs that actually meet at each system and mark the hubs, so the planner
+# can price a meeting there accordingly. Derived, not hand-picked — the numbers
+# move with the graph, and tools/verify_perks.py recomputes them.
+# Impact is a multiplier, not a distance. A link passes on only part of the
+# effect, and a chain multiplies: two strong links carry 0.9 x 0.9 = 81% of what
+# the first perk put in. Meeting at a hub is worth less again, because a claim
+# true of hundreds of pairs is a generic one.
+TRANSMISSION = {"strong": 0.9, "moderate": 0.75, "weak": 0.5}
+HUB_FACTOR = 0.6
+HOP_LIMIT = 2
+HUB_PAIRS = 150
+# Below 50% nothing is shown at all: a fifth of an effect is not a synergy.
+BANDS = {"green": 100, "yellow": 75, "red": 50}
+
+
+def _reach(starts, out_adj, in_adj, direction):
+    """Best-carrying route to each system, keeping the highest product rather
+    than the fewest hops — three firm links beat one vague one."""
+    best = {s: {"carry": 1.0, "dist": 0} for s in starts}
+    for hop in range(HOP_LIMIT):
+        for cur in list(best):
+            rec = best[cur]
+            if rec["dist"] != hop:
+                continue
+            for e in (out_adj if direction == "out" else in_adj).get(cur, []):
+                nxt = e["to"] if direction == "out" else e["from"]
+                carry = rec["carry"] * TRANSMISSION[e["strength"]]
+                if nxt in best and best[nxt]["carry"] >= carry:
+                    continue
+                best[nxt] = {"carry": carry, "dist": rec["dist"] + 1}
+    return best
+
+
+def annotate_breadth(systems, edges, nodes):
+    out_adj, in_adj = {}, {}
+    for e in edges:
+        out_adj.setdefault(e["from"], []).append(e)
+        in_adj.setdefault(e["to"], []).append(e)
+    reachers = collections.Counter()
+    readers = collections.Counter()
+    for rec in nodes.values():
+        for s in _reach(rec["provides"], out_adj, in_adj, "out"):
+            reachers[s] += 1
+        for s in rec["scales_with"]:
+            readers[s] += 1
+    for sid, rec in systems.items():
+        pairs = reachers[sid] * readers[sid]
+        rec["meeting_pairs"] = pairs
+        rec["breadth"] = "hub" if pairs >= HUB_PAIRS else "normal"
+    return systems
+
+
 out = collections.OrderedDict()
 out["game"] = "The Blood of Dawnwalker"
 out["subject"] = "Mechanical synergy graph"
 out["notes"] = [
     "This file is an interpretation, not a transcription. Perk and ability costs come from published tables; the causal links here are read off the effect text in data/perks.json and data/abilities.json.",
-    "`systems` are the things a build can act on. `edges` are directed: from A to B means more A produces more B, and `why` names the perk or mechanic that makes it true.",
+    "`systems` are the things a build can act on. `edges` are directed: from A to B means more A produces more B, `why` names the perk or mechanic that makes it true, and `strength` grades how firmly it holds.",
+    "Each system carries `meeting_pairs` (how many node pairs can meet there) and `breadth`. A system at or above 150 pairs is a `hub`: ability uptime, activation charges and attacks landed. Meeting at a hub is priced +4, because a claim true of hundreds of pairs is a generic one. Both fields are derived from the graph, not hand-picked, and verify_perks.py recomputes them.",
+    "Edge `strength` is strong (a perk says so in its own effect text, or it is the mechanic itself), moderate (real but conditional on build, level or state), or weak (true in the abstract and nearly useless as advice).",
+    "Impact is a multiplier held in `scoring`. Each link passes on part of the effect - strong 0.9, moderate 0.75, weak 0.5 - and a chain multiplies, so two strong links carry 81%. Meeting at a hub system multiplies by a further 0.6. The result is a percentage: 100 is green, 75 and up amber, 50 and up red, and anything under 50 is not shown at all rather than drawn as a synergy nobody should act on.",
+    "Green is therefore reserved for a direct meeting on a non-hub system - this node provides exactly what that node is paid by, with nothing in between.",
     "Each node declares `provides` (systems it raises) and `scales_with` (systems that make it worth more). Synergy is provides meeting scales_with, directly or along a chain of edges.",
     "Edges are deliberately specific. 'Both mention stamina' is not a synergy; 'cheaper blocks mean more attacks, which means more critical rolls, which means shorter cooldowns' is.",
     "The graph contains cycles on purpose - criticals cut cooldowns, cooldowns raise uptime, uptime raises damage, damage kills, kills cut cooldowns. Readers must bound their own traversal depth; the planner walks two hops.",
     "Edges are kept specific enough to mean something. 'Staying alive lets you keep attacking' is true of every defensive perk and every offensive one, so it is deliberately not an edge - it would link the whole graph to itself and make the marks worthless.",
     "Ultimates have no node_id in the perk registry; they are keyed here as U<tree key><index from 1>.",
 ]
-out["systems"] = S
+out["scoring"] = {
+    "transmission": TRANSMISSION,
+    "hub_factor": HUB_FACTOR,
+    "hop_limit": HOP_LIMIT,
+    "hub_pairs": HUB_PAIRS,
+    "bands": BANDS,
+}
+out["systems"] = annotate_breadth(S, E, N)
 out["edges"] = E
 out["nodes"] = N
 

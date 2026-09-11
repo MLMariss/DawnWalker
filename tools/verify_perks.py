@@ -232,6 +232,39 @@ def internal_checks(registry):
 
 
 
+def _breadth(mech, scoring):
+    """Recompute which systems are hubs, so a stale declaration is caught."""
+    trans = scoring["transmission"]
+    hops = scoring.get("hop_limit", 2)
+    hub_pairs = scoring.get("hub_pairs", 150)
+    out_adj, in_adj = {}, {}
+    for e in mech["edges"]:
+        if e.get("strength") not in trans:
+            return {}          # graded badly; the strength check reports it
+        out_adj.setdefault(e["from"], []).append(e)
+        in_adj.setdefault(e["to"], []).append(e)
+
+    def walk(starts):
+        best = {s: 0 for s in starts}
+        for hop in range(hops):
+            for cur in list(best):
+                if best[cur] != hop:
+                    continue
+                for e in out_adj.get(cur, []):
+                    if e["to"] not in best:
+                        best[e["to"]] = hop + 1
+        return best
+
+    reachers, readers = {}, {}
+    for rec in mech["nodes"].values():
+        for s in walk(rec["provides"]):
+            reachers[s] = reachers.get(s, 0) + 1
+        for s in rec["scales_with"]:
+            readers[s] = readers.get(s, 0) + 1
+    return {s: ("hub" if reachers.get(s, 0) * readers.get(s, 0) >= hub_pairs else "normal")
+            for s in mech["systems"]}
+
+
 def mechanics_checks(registry, abilities):
     """data/mechanics.json is an interpretation, but it still has to refer to
     nodes and systems that exist, or the planner silently drops synergies."""
@@ -276,6 +309,30 @@ def mechanics_checks(registry, abilities):
         if nid not in mech.get("nodes", {}):
             findings.append(f"mechanics: no entry for {nid} ({name})")
 
+    scoring = mech.get("scoring")
+    if not scoring:
+        findings.append("mechanics: no scoring block — the planner cannot grade impact")
+    else:
+        trans = scoring.get("transmission", {})
+        for grade in ("strong", "moderate", "weak"):
+            v = trans.get(grade)
+            if not isinstance(v, (int, float)) or not 0 < v <= 1:
+                findings.append(f"mechanics/scoring: transmission[{grade}] must be in (0, 1], got {v!r}")
+        if trans.get("strong", 0) <= trans.get("moderate", 0) or trans.get("moderate", 0) <= trans.get("weak", 0):
+            findings.append("mechanics/scoring: transmission must fall strong > moderate > weak")
+        bands = scoring.get("bands", {})
+        if not (bands.get("green", 0) > bands.get("yellow", 0) > bands.get("red", 0)):
+            findings.append("mechanics/scoring: bands must fall green > yellow > red")
+
+    # `breadth` is derived, so it must still agree with the graph it describes.
+    if scoring:
+        recomputed = _breadth(mech, scoring)
+        for sysid, want in sorted(recomputed.items()):
+            got = mech["systems"][sysid].get("breadth")
+            if got != want:
+                findings.append(f"mechanics/{sysid}: breadth is {got!r} but the graph now makes it "
+                                f"{want!r} — re-run tools/build_mechanics.py")
+
     seen_edges = set()
     for edge in mech.get("edges", []):
         pair = (edge.get("from"), edge.get("to"))
@@ -290,6 +347,9 @@ def mechanics_checks(registry, abilities):
         seen_edges.add(pair)
         if not edge.get("why"):
             findings.append(f"mechanics: edge {pair[0]} -> {pair[1]} has no reason given")
+        if edge.get("strength") not in ("strong", "moderate", "weak"):
+            findings.append(f"mechanics: edge {pair[0]} -> {pair[1]} has strength "
+                            f"{edge.get('strength')!r}, not strong/moderate/weak")
 
     for sysid in sorted(systems - referenced):
         findings.append(f"mechanics: system {sysid!r} is declared but never used")

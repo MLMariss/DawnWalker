@@ -168,6 +168,12 @@ What *is* checked, by `tools/verify_perks.py` on every run:
 - no node both provides and scales with the same system, which would make it
   its own synergy partner.
 
+Also checked: every edge carries a `strength` of strong/moderate/weak, the
+`scoring` block's transmission values fall strong > moderate > weak and its
+bands fall green > yellow > red, and each system's derived `breadth` still
+matches what the graph makes it — a stale hub declaration is an error, not a
+silent drift.
+
 What is **not** checked, because nothing published could check it: whether an
 edge is true. `crit_events -> cooldown_reduction` is as solid as this file gets
 — Aether Flow, Restless Blade and Endless Ferocity each say "on critical hit" in
@@ -180,6 +186,35 @@ attacks_landed` ("a fight you are still standing in is a fight you are still
 swinging in"). It is true, and it is useless — it links every defensive perk to
 every offensive one and takes the median node from 26 partners to 33, which is
 most of the board. Generality is the failure mode for this file, not error.
+
+### Grading
+
+Impact is a multiplier, not a distance. Each link passes on part of what went in
+(strong 0.9, moderate 0.75, weak 0.5) and a chain multiplies; meeting at a hub
+system multiplies by a further 0.6. 100% is green, 75% and up amber, 50% and up
+red, and anything under 50% is not drawn at all. Green is therefore reserved for
+a direct meeting on a non-hub system.
+
+Two decisions in that scheme are worth defending:
+
+**An edge that only one perk justifies is `moderate`, not `strong`.** Adrenaline
+Rush plainly says it raises attack damage after an ability, which makes
+`ability_uptime -> weapon_damage` real — but only for a build carrying Adrenaline
+Rush. Grading it strong put Sustained Focus and Artery Strike at 81% on a chain
+that most builds do not have. `strong` now means the mechanic itself, or a rule
+several separate perks attest to independently — as `crit_events ->
+cooldown_reduction` is, with Aether Flow, Restless Blade and Endless Ferocity
+each saying it in their own text.
+
+**Hub systems are measured, not chosen.** `meeting_pairs` counts how many node
+pairs can meet at each system, and 150 is the hub line. Ability uptime scores
+783 — 27 nodes can drive it and 29 read it, so "this feeds that through uptime"
+describes hundreds of pairs and recommends nothing. Activation charges (180) and
+attacks landed (216) are the others. The count is recomputed on every verify
+run, so adding perks re-decides it rather than leaving a stale label.
+
+The resulting spread over all 8,010 ordered pairs: 17% green, 37% amber, 46%
+red, and 71% of pairs below the 50% line and never shown.
 
 The graph is regenerated from `tools/build_mechanics.py`, so the data is
 reviewable as code and a change to it shows up as a diff in one place.

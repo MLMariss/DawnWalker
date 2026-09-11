@@ -309,10 +309,37 @@
   var MECH = null;
   var OUT = {};            // system -> [edge] following the arrow
   var IN = {};             // system -> [edge] against it
-  var MAX_HOPS = 2;        // past two steps everything connects to everything
+  var MAX_HOPS = 2;        // past two steps everything connects to everything; data may override
+
+  /* Impact is a multiplier, not a distance. Each link passes on only part of
+     what the first perk put in — strong 0.9, moderate 0.75, weak 0.5 — and a
+     chain multiplies, so two strong links carry 81%. Meeting at a hub system
+     multiplies by a further 0.6, because a claim true of hundreds of pairs is
+     a generic one. The model lives in data/mechanics.json; these are fallbacks. */
+  var SCORE = {
+    transmission: { strong: 0.9, moderate: 0.75, weak: 0.5 },
+    hub_factor: 0.6, hop_limit: 2,
+    bands: { green: 100, yellow: 75, red: 50 }
+  };
+
+  function carryOf(strength) {
+    return SCORE.transmission[strength] || SCORE.transmission.moderate;
+  }
+
+  /* Green is a direct meeting on a non-hub system and nothing less: this node
+     provides exactly what that node is paid by. Under 50% returns null and the
+     row is not drawn at all — a fifth of an effect is not a synergy. */
+  function bandOf(pct) {
+    if (pct >= SCORE.bands.green - 0.5) return 'green';
+    if (pct >= SCORE.bands.yellow) return 'yellow';
+    if (pct >= SCORE.bands.red) return 'red';
+    return null;
+  }
 
   function buildMechanics(m) {
     MECH = m;
+    if (m.scoring) SCORE = m.scoring;
+    MAX_HOPS = SCORE.hop_limit || MAX_HOPS;
     (m.edges || []).forEach(function (e) {
       (OUT[e.from] = OUT[e.from] || []).push(e);
       (IN[e.to] = IN[e.to] || []).push(e);
@@ -331,28 +358,36 @@
      cut cooldowns, cooldowns raise uptime, uptime raises damage, damage kills,
      kills cut cooldowns — so `seen` and MAX_HOPS are what terminate this. */
   function reach(starts, dir) {
-    var seen = {}, queue = [];
-    starts.forEach(function (s) {
-      if (seen[s]) return;
-      seen[s] = { dist: 0, path: [], from: s };
-      queue.push(s);
-    });
-    for (var q = 0; q < queue.length; q++) {
-      var cur = queue[q], rec = seen[cur];
-      if (rec.dist >= MAX_HOPS) continue;
-      var edges = (dir === 'out' ? OUT[cur] : IN[cur]) || [];
-      for (var k = 0; k < edges.length; k++) {
-        var e = edges[k], next = dir === 'out' ? e.to : e.from;
-        if (seen[next]) continue;
-        seen[next] = {
-          dist: rec.dist + 1,
-          path: dir === 'out' ? rec.path.concat([e]) : [e].concat(rec.path),
-          from: rec.from
-        };
-        queue.push(next);
+    var best = {};
+    starts.forEach(function (s) { best[s] = { carry: 1, dist: 0, path: [] }; });
+    // Expanded hop by hop, keeping the best-carrying route to each system rather
+    // than the shortest — two strong links carry more than one weak one, and
+    // should be ranked that way.
+    for (var hop = 0; hop < MAX_HOPS; hop++) {
+      var frontier = Object.keys(best);
+      for (var i = 0; i < frontier.length; i++) {
+        var cur = frontier[i], rec = best[cur];
+        if (rec.dist !== hop) continue;
+        var edges = (dir === 'out' ? OUT[cur] : IN[cur]) || [];
+        for (var k = 0; k < edges.length; k++) {
+          var e = edges[k], next = dir === 'out' ? e.to : e.from;
+          var carry = rec.carry * carryOf(e.strength);
+          if (best[next] && best[next].carry >= carry) continue;
+          best[next] = {
+            carry: carry, dist: rec.dist + 1,
+            path: dir === 'out' ? rec.path.concat([e]) : [e].concat(rec.path)
+          };
+        }
       }
     }
-    return seen;
+    return best;
+  }
+
+  /* A meeting on a hub system is discounted — see SCORE.hub_factor. */
+  function impactAt(hit, sysid) {
+    var sys = MECH.systems[sysid];
+    var hub = sys && sys.breadth === 'hub' ? SCORE.hub_factor : 1;
+    return hit.carry * hub * 100;
   }
 
   /* The systems named along a path, cause first. */
@@ -376,34 +411,47 @@
 
       (y.scales_with || []).forEach(function (s) {
         var hit = fwd[s];
-        if (hit && (!best || hit.dist < best.dist)) {
-          best = { dist: hit.dist, dir: 'feeds', chain: chainOf(hit, s, 'out'), path: hit.path };
+        if (!hit) return;
+        var pct = impactAt(hit, s);
+        if (!best || pct > best.pct) {
+          best = { pct: pct, dist: hit.dist, dir: 'feeds', chain: chainOf(hit, s, 'out'), path: hit.path, at: s };
         }
       });
       (y.provides || []).forEach(function (s) {
         var hit = rev[s];
-        if (hit && (!best || hit.dist < best.dist)) {
-          best = { dist: hit.dist, dir: 'fedBy', chain: chainOf(hit, s, 'in'), path: hit.path };
+        if (!hit) return;
+        var pct = impactAt(hit, s);
+        if (!best || pct > best.pct) {
+          best = { pct: pct, dist: hit.dist, dir: 'fedBy', chain: chainOf(hit, s, 'in'), path: hit.path, at: s };
         }
       });
       if (!best) return;
+      var band = bandOf(best.pct);
+      if (!band) return;              // under 50%: not a synergy worth drawing
       rows.push({
-        id: other, name: y.name, dist: best.dist, dir: best.dir,
-        chain: best.chain, why: best.path.map(function (e) { return e.why; }),
+        id: other, name: y.name, pct: Math.round(best.pct), band: band,
+        dist: best.dist, dir: best.dir, chain: best.chain, at: best.at,
+        hub: (MECH.systems[best.at] || {}).breadth === 'hub',
+        why: best.path.map(function (e) { return e.why; }),
         tree: TREE_OF[other] || ULT_TREE[other] || null,
         learned: lv(other) > 0 || ultTaken(other)
       });
     });
 
     rows.sort(function (a, b) {
-      if (a.dist !== b.dist) return a.dist - b.dist;
+      if (a.pct !== b.pct) return b.pct - a.pct;
       if (a.learned !== b.learned) return a.learned ? -1 : 1;
       return a.name.localeCompare(b.name);
     });
     return rows;
   }
 
-  var SYN_SHOWN = 12;
+  var SYN_SHOWN = 14;
+  var BAND_TEXT = {
+    green: 'Full effect: this node provides exactly what that one is paid by.',
+    yellow: 'Most of the effect, one or two firm links away.',
+    red: 'Part of the effect — generic, conditional, or a stretch.'
+  };
 
   function synergyHTML(id) {
     var me = mech(id);
@@ -423,25 +471,38 @@
         note + '</div>';
     }
 
+    var greens = rows.filter(function (r) { return r.band === 'green'; }).length;
     var shown = rows.slice(0, SYN_SHOWN);
     var list = shown.map(function (r) {
       var chain = r.chain.map(function (x) { return esc(sysName(x)); }).join(' <i>→</i> ');
       var where = r.tree && r.tree !== TREE_OF[id]
         ? '<span class="syn-tree">' + esc(r.tree.name) + '</span>' : '';
+      var tip = BAND_TEXT[r.band] +
+        (r.hub ? ' Meeting at ' + sysName(r.at) + ', which most of the board touches.' : '') +
+        (r.why.length ? ' — ' + r.why.join(' ') : '');
       return '<li class="syn-row ' + (r.dir === 'feeds' ? 'out' : 'in') +
-        (r.learned ? ' has' : '') + '" title="' + esc(r.why.join(' ')) + '">' +
+        ' tier-' + r.band + (r.learned ? ' has' : '') +
+        '" title="' + esc(tip) + '">' +
         '<span class="syn-arrow" aria-hidden="true"></span>' +
-        '<span class="syn-name">' + esc(r.name) + where + '</span>' +
+        '<span class="syn-name">' + esc(r.name) + where +
+          '<span class="syn-pct">' + r.pct + '%</span></span>' +
         '<span class="syn-chain">' + chain + '</span></li>';
     }).join('');
 
     var more = rows.length > shown.length
-      ? '<p class="syn-more">and ' + (rows.length - shown.length) + ' more, further away.</p>' : '';
+      ? '<p class="syn-more">and ' + (rows.length - shown.length) + ' more at ' +
+        rows[shown.length].pct + '% or less.</p>' : '';
 
     return '<div class="syn-box">' +
       (head.length ? '<p class="syn-sub">' + head.join(' · ') + '.</p>' : '') + note +
+      (greens ? '<p class="syn-count">' + greens + ' full-effect ' +
+        (greens === 1 ? 'partner' : 'partners') + '</p>' : '') +
       '<ul class="syn-list">' + list + '</ul>' + more +
-      '<p class="syn-key">Arrow out: this feeds it. Arrow in: it feeds this. ' +
+      '<p class="syn-key"><span class="tier-dot tier-green"></span>100% · ' +
+      '<span class="tier-dot tier-yellow"></span>75%+ · ' +
+      '<span class="tier-dot tier-red"></span>50%+ — how much of this perk\'s ' +
+      'effect reaches the other. Under 50% is not listed.<br>' +
+      'Arrow out: this feeds it. Arrow in: it feeds this. ' +
       'Hover a row for the mechanic behind the chain.</p></div>';
   }
 
@@ -450,9 +511,13 @@
      output *is* the other's input. Two-hop chains are real but there are enough
      of them to light up the whole board, so they stay in the panel list. */
   function related(id) {
-    return synergiesFor(id).filter(function (r) {
-      return r.dist === 0 && r.tree === TREE_OF[id];
-    }).map(function (r) { return r.id; });
+    var marks = {};
+    synergiesFor(id).forEach(function (r) {
+      // Every band that made the 50% cut is marked, in its own colour — the
+      // board is a heat map, and a red dot is itself the useful answer.
+      if (r.tree === TREE_OF[id]) marks[r.id] = r.band;
+    });
+    return marks;
   }
 
   /* -------------------------------------------------------------- layout */
@@ -590,7 +655,7 @@
     el.tree.style.height = L.height + 'px';
     el.links.setAttribute('viewBox', '0 0 ' + L.width + ' ' + L.height);
 
-    var syn = state.synergy && state.sel && TREE_OF[state.sel] === t ? related(state.sel) : [];
+    var syn = state.synergy && state.sel && TREE_OF[state.sel] === t ? related(state.sel) : {};
     var paths = [];
     t.perks.forEach(function (child) {
       child.prerequisites.forEach(function (pid) {
@@ -634,7 +699,7 @@
     else if (!open) cls.push('locked');
     else if (n < p.max_level) cls.push('gated');
     if (state.sel === p.node_id) cls.push('selected');
-    if (syn.indexOf(p.node_id) >= 0) cls.push('synergy');
+    if (syn[p.node_id]) cls.push('synergy', 'syn-' + syn[p.node_id]);
 
     var pips = pipsHTML(p, n, learnable);
 
@@ -669,12 +734,12 @@
     el.abilNote.textContent = learned + ' of ' + list.length + ' learned · ' + pts +
       ' points — these do not count toward the ultimate';
 
-    var syn = state.synergy && state.sel && TREE_OF[state.sel] === t ? related(state.sel) : [];
+    var syn = state.synergy && state.sel && TREE_OF[state.sel] === t ? related(state.sel) : {};
     el.abils.innerHTML = list.map(function (a) {
       var n = lv(a.node_id), can = canLearn(a).ok;
       var cls = 'abil' + (n ? ' taken' : '') + (n >= a.max_level ? ' maxed' : '') +
                 (can ? ' avail' : '') + (state.sel === a.node_id ? ' selected' : '') +
-                (syn.indexOf(a.node_id) >= 0 ? ' synergy' : '');
+                (syn[a.node_id] ? ' synergy syn-' + syn[a.node_id] : '');
       var pips = pipsHTML(a, n, can);
       var nl = a.levels[n];
       var use = a.use_cost && a.use_cost.text ? a.use_cost.text : '';

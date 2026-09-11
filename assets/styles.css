@@ -17,6 +17,11 @@
   --blood:#a4262c;
   --blood-2:#e05a5c;
   --green:#8fc06e;
+  /* synergy tiers — green carries impact, amber caution, red "do not read much
+     into this". Each is lifted off the dark ground rather than a pure hue. */
+  --tier-green:#6fc48a;
+  --tier-yellow:#e0b153;
+  --tier-red:#c4626a;
   --accent:var(--gold);
 
   --node:92px;
@@ -220,6 +225,12 @@ a:hover{color:var(--gold-2)}
   opacity:0;transform:scale(.4);transition:.2s;
 }
 .node.synergy .syn{opacity:1;transform:scale(1)}
+/* Same grading as the panel rows, so a glance at the board and a read of the
+   list agree with each other. Weak links are not marked here at all. */
+.node.syn-green .syn{background:var(--tier-green);
+  box-shadow:0 0 9px 2px color-mix(in srgb,var(--tier-green) 70%,transparent)}
+.node.syn-yellow .syn{background:var(--tier-yellow);
+  box-shadow:0 0 9px 2px color-mix(in srgb,var(--tier-yellow) 60%,transparent)}
 
 .node.avail .frame{background:linear-gradient(160deg,#cdb389,#4b3d2e)}
 .node.avail svg.glyph{stroke:var(--text)}
@@ -311,6 +322,8 @@ a:hover{color:var(--gold-2)}
 .abil.taken .abil-mark svg{stroke:#1a1309}
 .abil.maxed{border-color:var(--gold-dim)}
 .abil.selected{border-color:var(--gold);background:linear-gradient(180deg,rgba(231,179,86,.14),rgba(17,13,9,.85))}
+.abil.syn-green{border-left:3px solid var(--tier-green)}
+.abil.syn-yellow{border-left:3px solid var(--tier-yellow)}
 
 .hint{flex:none;margin:8px 0 0;font-size:12px;color:var(--text-faint);text-align:center}
 
@@ -364,16 +377,47 @@ a:hover{color:var(--gold-2)}
 }
 .syn-row.out .syn-arrow::after{transform:translateX(-1px) rotate(45deg)}
 .syn-row.in .syn-arrow::after{transform:translateX(1px) rotate(-135deg)}
-.syn-row.out .syn-arrow{border-color:color-mix(in srgb,var(--accent) 50%,transparent)}
-.syn-row.out .syn-arrow::after{border-color:var(--accent)}
+
+/* Tier is the loudest thing in the row: it decides whether the link is worth
+   building around. It colours the marker and a rule down the left, so the list
+   can be skimmed for green without reading a word of it. */
+.syn-row{border-left:2px solid transparent;padding-left:8px}
+.syn-row.tier-green{border-left-color:var(--tier-green)}
+.syn-row.tier-yellow{border-left-color:var(--tier-yellow)}
+.syn-row.tier-red{border-left-color:color-mix(in srgb,var(--tier-red) 55%,transparent)}
+.syn-row.tier-green .syn-arrow{border-color:color-mix(in srgb,var(--tier-green) 60%,transparent)}
+.syn-row.tier-green .syn-arrow::after{border-color:var(--tier-green)}
+.syn-row.tier-yellow .syn-arrow{border-color:color-mix(in srgb,var(--tier-yellow) 60%,transparent)}
+.syn-row.tier-yellow .syn-arrow::after{border-color:var(--tier-yellow)}
+.syn-row.tier-red .syn-arrow{border-color:color-mix(in srgb,var(--tier-red) 45%,transparent)}
+.syn-row.tier-red .syn-arrow::after{border-color:color-mix(in srgb,var(--tier-red) 80%,transparent)}
+.syn-row.tier-red .syn-name{color:var(--text-dim);font-weight:500}
+.syn-row.tier-red .syn-chain{opacity:.75}
+.node.syn-red .syn{background:var(--tier-red);
+  box-shadow:0 0 8px 1px color-mix(in srgb,var(--tier-red) 45%,transparent);opacity:.75}
+.abil.syn-red{border-left:3px solid color-mix(in srgb,var(--tier-red) 70%,transparent)}
+
+.syn-pct{margin-left:7px;font-size:11.5px;font-weight:700;letter-spacing:.02em;
+  color:var(--text-faint);font-variant-numeric:tabular-nums}
+.syn-row.tier-green .syn-pct{color:var(--tier-green)}
+.syn-row.tier-yellow .syn-pct{color:var(--tier-yellow)}
+.syn-row.tier-red .syn-pct{color:color-mix(in srgb,var(--tier-red) 85%,transparent)}
+.syn-count{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--tier-green)}
 .syn-row.has .syn-name{color:var(--gold-2)}
+
+.tier-dot{display:inline-block;width:8px;height:8px;margin-right:5px;
+  transform:rotate(45deg);vertical-align:middle}
+.tier-dot.tier-green{background:var(--tier-green)}
+.tier-dot.tier-yellow{background:var(--tier-yellow)}
+.tier-dot.tier-red{background:var(--tier-red)}
 .syn-name{font-size:14px;color:var(--text);font-weight:600}
 .syn-tree{margin-left:7px;font-size:11px;font-weight:600;letter-spacing:.1em;
   text-transform:uppercase;color:var(--text-faint)}
 .syn-chain{grid-column:2;font-size:12px;line-height:1.5;color:var(--text-faint)}
 .syn-chain i{font-style:normal;color:var(--gold-dim);padding:0 2px}
 .syn-more{margin:8px 0 0;font-size:12px;color:var(--text-faint)}
-.syn-key{margin:10px 0 0;font-size:11.5px;line-height:1.5;color:var(--text-faint);opacity:.8}
+.syn-key{margin:10px 0 0;font-size:11.5px;line-height:1.7;color:var(--text-faint);opacity:.85}
 
 .levels{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .levels li{display:flex;gap:11px;align-items:flex-start;flex-wrap:wrap;padding:11px 0;

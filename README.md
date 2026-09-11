@@ -32,12 +32,14 @@ Pages and it works as the site index.
   perk a later level replaces the earlier one for the same stat (Endless Effort's
   +100% is not also +25% and +50%); across different perks the same stat adds up.
   Conditional effects and the manuals you still need are listed separately.
-- **Synergy, read from the mechanics.** Selecting a node marks the perks in the
-  tree its output actually feeds, and the panel lists the rest — cross-tree
-  included — with the causal chain spelled out. More attack speed lands more
-  attacks; more attacks roll more criticals; Restless Blade turns criticals into
-  cooldown. So Swiftness feeds Restless Blade, two steps away, and the planner
-  says which two. Hovering a row gives the mechanic behind each link. Toggleable.
+- **Synergy, graded.** Selecting a node scores every other perk, ability and
+  ultimate by how much of this one's effect actually reaches it, and colours the
+  result: **green** at 100%, **amber** from 75%, **red** from 50%. Below 50% it
+  is not shown at all. The causal chain is printed on every row — more attack
+  speed lands more attacks, more attacks roll more criticals, and Restless Blade
+  turns criticals into cooldown, so Swiftness reaches it at 81%. Hovering gives
+  the mechanic behind each link. The board marks the same grades as coloured
+  dots. Toggleable.
 - **Shareable builds.** The URL hash carries the whole build; "Copy build link" puts
   it on the clipboard. Lowering Corruption or switching Manuals off peels back any
   level that is no longer legal rather than leaving an impossible build on screen.
@@ -198,16 +200,42 @@ with. It has three parts:
 - **`systems`** are the things a build can act on — attack speed, criticals
   landed, ability uptime, corruption, and so on.
 - **`edges`** are directed: `from` A `to` B means more A produces more B. Every
-  edge carries a `why` naming the perk or mechanic that makes it true, so a
-  reader can disagree with one link rather than the whole file.
+  edge carries a `why` naming the perk or mechanic that makes it true and a
+  `strength` of `strong`, `moderate` or `weak`, so a reader can disagree with one
+  link rather than the whole file.
 - **`nodes`** map all 90 perks, abilities and ultimates onto those systems.
   `provides` is what the node raises; `scales_with` is what makes it worth more.
 
-Synergy is `provides` meeting `scales_with`, directly or along a chain. The
-planner walks at most two edges: past that, the graph is connected enough that
-everything is a synergy and the marks stop meaning anything. Board marks are
-stricter still — direct hits only, where this node's output *is* the other's
-input — with the two-hop chains listed in the panel.
+Synergy is `provides` meeting `scales_with`, directly or along a chain, and it
+is scored as a **multiplier** rather than a distance. Each link passes on part of
+what went in — strong 0.9, moderate 0.75, weak 0.5 — and a chain multiplies, so
+two strong links carry 81%. Meeting at a **hub** system multiplies by a further
+0.6, because a claim true of hundreds of pairs is a generic one. The result is a
+percentage:
+
+| Score | Colour | Meaning |
+| --- | --- | --- |
+| 100% | green | Direct meeting on a non-hub system — this node provides exactly what the other is paid by |
+| 75–99% | amber | One or two firm links away |
+| 50–74% | red | Generic, conditional, or a stretch |
+| under 50% | — | Not shown. A fifth of an effect is not a synergy |
+
+The whole model lives in the file's `scoring` block, so changing it is a data
+edit. The planner walks at most two edges: past that the graph is connected
+enough that everything is a synergy.
+
+`breadth` on each system is **derived, not hand-picked** — `meeting_pairs`
+counts how many node pairs can actually meet there, and anything at or above 150
+is a hub. Today that is ability uptime (783 pairs), attacks landed (216) and
+activation charges (180). `tools/verify_perks.py` recomputes both and fails if
+the committed values have gone stale.
+
+Edge `strength` follows one rule worth knowing: an edge that exists only because
+*one named perk* provides it is `moderate`, however plainly that perk states it.
+"Ability uptime raises weapon damage" is true of anyone carrying Adrenaline Rush
+and of nobody else, so a chain through it is conditional on a build choice.
+`strong` is reserved for the mechanic itself, or a rule several separate perks
+attest to independently.
 
 Ultimates have no `node_id` in the perk registry, so they are keyed here as
 `U<tree key><index from 1>` — `Usm2` is Sword Sage.
