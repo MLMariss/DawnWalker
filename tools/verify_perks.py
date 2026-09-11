@@ -198,6 +198,14 @@ def ability_checks(abilities, perk_ids):
                 findings.append(f"{where}: node_id {ability['node_id']} collides with a perk")
             if not ability.get("use_cost", {}).get("text"):
                 findings.append(f"{where}: no activation cost recorded")
+            # `kind` splits the drawer, so it has to agree with what the ability
+            # actually costs to fire rather than drift on its own.
+            cost = ability.get("use_cost", {})
+            kind = ("passive" if cost.get("charges", 0) == 0 and cost.get("health_percent", 0) == 0
+                    else "active")
+            if ability.get("kind") != kind:
+                findings.append(f"{where}: kind is {ability.get('kind')!r} but "
+                                f"use_cost makes it {kind!r}")
             for level in ability["levels"]:
                 gate = level["gate"]
                 if gate not in ABILITY_GATES and not re.match(r"corruption \d+$", gate):
@@ -205,7 +213,6 @@ def ability_checks(abilities, perk_ids):
                 if level["skill_points"] < 1:
                     findings.append(f"{where} Lv{level['level']}: costs no skill points")
     return findings
-
 
 def internal_checks(registry):
     """Checks that need no external source: the graph and level bookkeeping."""

@@ -267,6 +267,15 @@ a:hover{color:var(--gold-2)}
   border-bottom:2px solid var(--gold);transform:rotate(-45deg);transition:.18s;margin-right:2px;
 }
 .drawer[open]>summary::before{transform:rotate(45deg)}
+
+/* A section that is always open carries no disclosure triangle and no pointer —
+   there is nothing to click. Ultimates are permanent, so they read as a fixed
+   part of the tree rather than something you opened. */
+.drawer-fixed>.drawer-head{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;
+  border-bottom:1px solid var(--line);
+}
+.drawer-fixed{border-color:var(--line-2);background:rgba(24,18,13,.8)}
 .drawer-title{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-2)}
 .drawer-note{font-size:12px;color:var(--text-faint);flex:1}
 .ult-gate{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--blood-2)}
@@ -294,7 +303,15 @@ a:hover{color:var(--gold-2)}
 .ult.on b{color:var(--gold-2)}
 
 /* ---------------------------------------------------------- abilities */
-.abils{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;padding:0 14px 14px}
+.abils{padding:0 14px 14px}
+.abils-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.abil-group + .abil-group{margin-top:16px}
+.abil-head{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin:0 0 8px;
+  font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.abil-count{padding:1px 7px;border:1px solid var(--line-2);border-radius:10px;
+  font-size:11px;letter-spacing:.04em;color:var(--text-dim)}
+.abil-sub{flex:1;font-size:11.5px;font-weight:500;letter-spacing:.02em;
+  text-transform:none;color:var(--text-faint)}
 .abil{
   display:flex;gap:12px;align-items:flex-start;text-align:left;padding:11px 12px;
   border:1px solid var(--line);border-radius:3px;cursor:pointer;
@@ -326,6 +343,12 @@ a:hover{color:var(--gold-2)}
 .abil.syn-yellow{border-left:3px solid var(--tier-yellow)}
 
 .hint{flex:none;margin:8px 0 0;font-size:12px;color:var(--text-faint);text-align:center}
+/* The synergy key lives down here rather than in the side panel: it is read
+   once and then never again, and the panel's space belongs to the perk. */
+.hint-key{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;
+  margin-left:10px;padding-left:10px;border-left:1px solid var(--line)}
+.hint-key b{font-weight:600;color:var(--text-dim)}
+.hint-key .tier-dot{margin-right:2px}
 
 /* --------------------------------------------------------- side panel */
 .side{display:flex;flex-direction:column;min-height:0;gap:0}
@@ -358,10 +381,7 @@ a:hover{color:var(--gold-2)}
 /* --------------------------------------------------------- synergy block
    A read of the mechanics graph, not a tag cloud: what this node raises, what
    pays it, and the chain that connects it to everything else. */
-.syn-box{margin:0 0 14px;border-top:1px solid var(--line);padding-top:12px}
-.syn-sub{margin:0 0 8px;font-size:13px;color:var(--text-faint)}
-.syn-sub em{font-style:normal;color:var(--accent)}
-.syn-note{margin:0 0 10px;font-size:13px;line-height:1.45;color:var(--text-dim)}
+.syn-box{margin:0 0 6px;border-top:1px solid var(--line);padding-top:10px}
 .syn-list{list-style:none;margin:0;padding:0}
 .syn-row{
   display:grid;grid-template-columns:14px 1fr;gap:2px 8px;align-items:baseline;
@@ -402,8 +422,6 @@ a:hover{color:var(--gold-2)}
 .syn-row.tier-green .syn-pct{color:var(--tier-green)}
 .syn-row.tier-yellow .syn-pct{color:var(--tier-yellow)}
 .syn-row.tier-red .syn-pct{color:color-mix(in srgb,var(--tier-red) 85%,transparent)}
-.syn-count{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--tier-green)}
 .syn-row.has .syn-name{color:var(--gold-2)}
 
 .tier-dot{display:inline-block;width:8px;height:8px;margin-right:5px;
@@ -417,7 +435,6 @@ a:hover{color:var(--gold-2)}
 .syn-chain{grid-column:2;font-size:12px;line-height:1.5;color:var(--text-faint)}
 .syn-chain i{font-style:normal;color:var(--gold-dim);padding:0 2px}
 .syn-more{margin:8px 0 0;font-size:12px;color:var(--text-faint)}
-.syn-key{margin:10px 0 0;font-size:11.5px;line-height:1.7;color:var(--text-faint);opacity:.85}
 
 .levels{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .levels li{display:flex;gap:11px;align-items:flex-start;flex-wrap:wrap;padding:11px 0;

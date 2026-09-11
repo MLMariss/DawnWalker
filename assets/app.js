@@ -21,7 +21,7 @@
   var el = {};
   ['tabs', 'tree', 'links', 'nodes', 'ults', 'ult-gate', 'panel', 'toast', 'corruption',
    'corruption-out', 'manuals', 'synergy', 'm-sp', 'm-ts', 'm-bk', 'boardscroll',
-   'ov-body', 'ov-note', 'ovdrawer', 'ultdrawer', 'abils', 'abil-note', 'abildrawer'].forEach(function (id) {
+   'ov-body', 'ov-note', 'ovdrawer', 'abils', 'abil-note', 'abildrawer', 'hint-key'].forEach(function (id) {
     el[id.replace(/-(\w)/g, function (_, c) { return c.toUpperCase(); })] = document.getElementById(id);
   });
 
@@ -76,6 +76,7 @@
         p.prerequisites.forEach(function (q) { (CHILDREN[q] = CHILDREN[q] || []).push(p); });
       });
     });
+    renderHintKey();
     state.tab = TREES[0].name;
     readHash();
     bindChrome();
@@ -447,6 +448,16 @@
   }
 
   var SYN_SHOWN = 14;
+
+  /* Written once, under the board. The colours need explaining exactly once,
+     and the side panel is not where a legend earns its space. */
+  function renderHintKey() {
+    if (!el.hintKey) return;
+    el.hintKey.innerHTML = '<b>Synergy:</b> ' +
+      '<span class="tier-dot tier-green"></span>100% · ' +
+      '<span class="tier-dot tier-yellow"></span>75%+ · ' +
+      '<span class="tier-dot tier-red"></span>50%+ of this perk\'s effect reaches it';
+  }
   var BAND_TEXT = {
     green: 'Full effect: this node provides exactly what that one is paid by.',
     yellow: 'Most of the effect, one or two firm links away.',
@@ -458,20 +469,19 @@
     if (!me) return '';
     var rows = synergiesFor(id);
 
+    // What this node raises and is paid by used to be spelled out here. It is
+    // the same information the rows already carry in their chains, and it was
+    // taking the top of the panel to say it — so it moved to the title attribute
+    // and the space went back to the perk.
     var head = [];
     if ((me.provides || []).length) {
-      head.push('Raises <em>' + me.provides.map(function (x) { return esc(sysName(x)); }).join(', ') + '</em>');
+      head.push('Raises ' + me.provides.map(sysName).join(', '));
     }
     if ((me.scales_with || []).length) {
-      head.push('paid by <em>' + me.scales_with.map(function (x) { return esc(sysName(x)); }).join(', ') + '</em>');
+      head.push('paid by ' + me.scales_with.map(sysName).join(', '));
     }
-    var note = me.note ? '<p class="syn-note">' + esc(me.note) + '</p>' : '';
-    if (!rows.length) {
-      return '<div class="syn-box">' + (head.length ? '<p class="syn-sub">' + head.join(' · ') + '.</p>' : '') +
-        note + '</div>';
-    }
+    if (!rows.length) return '';
 
-    var greens = rows.filter(function (r) { return r.band === 'green'; }).length;
     var shown = rows.slice(0, SYN_SHOWN);
     var list = shown.map(function (r) {
       var chain = r.chain.map(function (x) { return esc(sysName(x)); }).join(' <i>→</i> ');
@@ -493,17 +503,8 @@
       ? '<p class="syn-more">and ' + (rows.length - shown.length) + ' more at ' +
         rows[shown.length].pct + '% or less.</p>' : '';
 
-    return '<div class="syn-box">' +
-      (head.length ? '<p class="syn-sub">' + head.join(' · ') + '.</p>' : '') + note +
-      (greens ? '<p class="syn-count">' + greens + ' full-effect ' +
-        (greens === 1 ? 'partner' : 'partners') + '</p>' : '') +
-      '<ul class="syn-list">' + list + '</ul>' + more +
-      '<p class="syn-key"><span class="tier-dot tier-green"></span>100% · ' +
-      '<span class="tier-dot tier-yellow"></span>75%+ · ' +
-      '<span class="tier-dot tier-red"></span>50%+ — how much of this perk\'s ' +
-      'effect reaches the other. Under 50% is not listed.<br>' +
-      'Arrow out: this feeds it. Arrow in: it feeds this. ' +
-      'Hover a row for the mechanic behind the chain.</p></div>';
+    return '<div class="syn-box" title="' + esc(head.join(' · ')) + '">' +
+      '<ul class="syn-list">' + list + '</ul>' + more + '</div>';
   }
 
   /* Board marking stays inside the tree on screen — those are the nodes you can
@@ -731,11 +732,14 @@
       for (var i = 0; i < n; i++) s += a.levels[i].skill_points;
       return sum + s;
     }, 0);
-    el.abilNote.textContent = learned + ' of ' + list.length + ' learned · ' + pts +
-      ' points — these do not count toward the ultimate';
+    var act = list.filter(function (a) { return a.kind === 'active'; }).length;
+    el.abilNote.textContent = learned + ' of ' + list.length + ' learned · ' + act +
+      ' active, ' + (list.length - act) + ' passive · ' + pts +
+      ' points, which do not count toward the ultimate';
 
     var syn = state.synergy && state.sel && TREE_OF[state.sel] === t ? related(state.sel) : {};
-    el.abils.innerHTML = list.map(function (a) {
+
+    function card(a) {
       var n = lv(a.node_id), can = canLearn(a).ok;
       var cls = 'abil' + (n ? ' taken' : '') + (n >= a.max_level ? ' maxed' : '') +
                 (can ? ' avail' : '') + (state.sel === a.node_id ? ' selected' : '') +
@@ -755,7 +759,28 @@
                 ? '<span class="gate-tag">' + esc(gateLabel(nl.gate)) + '</span>' : '') + '</span>'
             : '<span class="abil-next done">Maxed</span>') +
         '</span></span></button>';
-    }).join('') || '<p class="ov-empty">No abilities listed for this tree.</p>';
+    }
+
+    /* Active and passive are different things to shop for: one costs charges or
+       health every time you fire it, the other just runs once equipped. They
+       compete for the same slots, so both are shown, but not in one undivided
+       pile. */
+    var groups = [
+      { kind: 'active', title: 'Active',
+        note: 'cost charges or health to use' },
+      { kind: 'passive', title: 'Passive',
+        note: 'no activation cost — they work once equipped, and still take a slot' }
+    ];
+    var html = groups.map(function (g) {
+      var items = list.filter(function (a) { return a.kind === g.kind; });
+      if (!items.length) return '';
+      return '<div class="abil-group">' +
+        '<h4 class="abil-head">' + g.title +
+          '<span class="abil-count">' + items.length + '</span>' +
+          '<span class="abil-sub">' + g.note + '</span></h4>' +
+        '<div class="abils-grid">' + items.map(card).join('') + '</div></div>';
+    }).join('');
+    el.abils.innerHTML = html || '<p class="ov-empty">No abilities listed for this tree.</p>';
   }
 
   function renderUltimates() {
@@ -1033,16 +1058,9 @@
       if (writingHash) return;
       readHash(); renderAll();
     });
-    [el.ovdrawer, el.ultdrawer, el.abildrawer].forEach(function (d) {
-      d.addEventListener('toggle', function () {
-        // Abilities and Ultimates sit under the board and would squeeze it flat
-        // together, so opening one closes the other.
-        if (d.open && (d === el.ultdrawer || d === el.abildrawer)) {
-          var other = d === el.ultdrawer ? el.abildrawer : el.ultdrawer;
-          if (other.open) other.open = false;
-        }
-        renderTree();
-      });
+    // Ultimates are a fixed section now, not a drawer, so only these two toggle.
+    [el.ovdrawer, el.abildrawer].forEach(function (d) {
+      d.addEventListener('toggle', function () { renderTree(); });
     });
 
     el.corruption.value = state.corruption;

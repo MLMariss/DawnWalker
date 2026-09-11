@@ -69,6 +69,18 @@
       </div>
     </div>
 
+    <!-- Ultimates sit directly under the tree they belong to, and are always
+         open: the choice is permanent and one per tree, so it is not something
+         to go looking for behind a disclosure triangle. -->
+    <section class="drawer drawer-fixed" id="ultdrawer" aria-labelledby="ult-head">
+      <div class="drawer-head" id="ult-head">
+        <span class="drawer-title">Ultimate Perks</span>
+        <span class="drawer-note">only one per skill tree, permanently</span>
+        <span class="ult-gate" id="ult-gate"></span>
+      </div>
+      <div class="ults" id="ults"></div>
+    </section>
+
     <details class="drawer" id="abildrawer">
       <summary>
         <span class="drawer-title">Abilities</span>
@@ -77,16 +89,10 @@
       <div class="abils" id="abils"></div>
     </details>
 
-    <details class="drawer" id="ultdrawer">
-      <summary>
-        <span class="drawer-title">Ultimate Perks</span>
-        <span class="drawer-note">only one per skill tree, permanently</span>
-        <span class="ult-gate" id="ult-gate"></span>
-      </summary>
-      <div class="ults" id="ults"></div>
-    </details>
-
-    <p class="hint">Click a node to learn its next level · Right-click to refund · Padlocked nodes are story unlocks</p>
+    <p class="hint">
+      Click a node to learn its next level · Right-click to refund · Padlocked nodes are story unlocks
+      <span class="hint-key" id="hint-key"></span>
+    </p>
   </section>
 
   <aside class="side">

@@ -12,10 +12,12 @@ Pages and it works as the site index.
 
 - **All 54 perks and 9 ultimates**, laid out at their in-game grid positions with
   connector lines drawn from the prerequisite graph.
-- **All 27 active abilities**, in a collapsible drawer per tree, with what each
-  costs to *use* (activation charges and health) as well as to learn. They are
-  learned independently of the perk graph and count toward what a tree costs you
-  — but not toward the 35 points an ultimate needs.
+- **All 27 abilities**, split into **active** (14 — they cost activation charges
+  or health every time you fire them) and **passive** (13 — no activation cost;
+  they simply run once equipped, and still occupy an ability slot). Each shows
+  what it costs to use as well as to learn. They are learned independently of the
+  perk graph and count toward what a tree costs you — but not toward the 35
+  points an ultimate needs.
 - **Point spending with real rules** — a perk level only becomes learnable when every
   prerequisite has at least one level, and refunding is blocked while a downstream
   perk still depends on it.
@@ -25,6 +27,8 @@ Pages and it works as the site index.
   *Mandrake Ward* — are click-to-toggle and cost nothing.
 - **Ultimates.** Three per tree, one selectable, unlocked at 35 points spent on
   *perks* in that tree (Witchcraft, Swordmastery) or Corruption 15 (Vampirism).
+  They sit directly under the tree and are always on screen — the choice is
+  permanent, so it is not hidden behind a disclosure triangle.
 - **Running totals** for skill points, time segments and manuals across all trees,
   plus a per-treepoint count and manual count on each tab — so you can see what a
   given tree actually costs you to find in the world.
@@ -35,7 +39,9 @@ Pages and it works as the site index.
 - **Synergy, graded.** Selecting a node scores every other perk, ability and
   ultimate by how much of this one's effect actually reaches it, and colours the
   result: **green** at 100%, **amber** from 75%, **red** from 50%. Below 50% it
-  is not shown at all. The causal chain is printed on every row — more attack
+  is not shown at all. The colour key sits under the board, not in the side panel
+  — it is read once, and the panel's space belongs to the perk. The causal chain
+  is printed on every row — more attack
   speed lands more attacks, more attacks roll more criticals, and Restless Blade
   turns criticals into cooldown, so Swiftness reaches it at 81%. Hovering gives
   the mechanic behind each link. The board marks the same grades as coloured
@@ -108,6 +114,7 @@ rebuild it from saved copies of the two ability pages. Each tree holds an
   "node_id": "AV10",
   "name": "Voracious Bite",
   "effect": "Restores Health by drinking target's blood.",
+  "kind": "active",
   "max_level": 4,
   "use_cost": { "text": "1 Activation Charge", "charges": 1, "health_percent": 0 },
   "levels": [
@@ -119,6 +126,11 @@ rebuild it from saved copies of the two ability pages. Each tree holds an
 
 - `use_cost` is what the ability costs to *fire*, not to learn; only the
   Fextralife table publishes it.
+- `kind` is `active` or `passive`, decided by `use_cost`: anything that pays an
+  activation charge or health is active. The drawer groups by it. Passives still
+  take an ability slot — they work "once equipped in the Active Ability panel" —
+  so both kinds compete for the same slots. The verifier re-derives it, so the
+  field cannot drift from the cost it is read from.
 - Ability gates add one value to the perk set: `vrakhir blood`, a Phial of
   Vrakhir Blood consumed to learn that level. It is counted in the build
   overview rather than treated as a lock, because it is an item, not a
