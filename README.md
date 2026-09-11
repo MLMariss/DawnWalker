@@ -25,6 +25,11 @@ Pages and it works as the site index.
   the header, 0–15). Levels that need a Manual found in the world are gated behind the
   "Manuals found" toggle. The two padlocked story nodes — *Font of Life* and
   *Mandrake Ward* — are click-to-toggle and cost nothing.
+- **Story grants are free and marked.** Five abilities are handed to you by the
+  story rather than bought — *Astral Communion*, *Burning Blood*, *Compel Soul*,
+  *Dirty Trick* and *Voracious Bite*. Their first level costs no skill points and
+  no time segments, carries a green **Story** badge, and never appears in any
+  total. Upgrades past level 1 are paid for normally.
 - **Ultimates.** Three per tree, one selectable, unlocked at 35 points spent on
   *perks* in that tree (Witchcraft, Swordmastery) or Corruption 15 (Vampirism).
   They sit directly under the tree and are always on screen — the choice is
@@ -36,16 +41,12 @@ Pages and it works as the site index.
   perk a later level replaces the earlier one for the same stat (Endless Effort's
   +100% is not also +25% and +50%); across different perks the same stat adds up.
   Conditional effects and the manuals you still need are listed separately.
-- **Synergy, graded.** Selecting a node scores every other perk, ability and
-  ultimate by how much of this one's effect actually reaches it, and colours the
-  result: **green** at 100%, **amber** from 75%, **red** from 50%. Below 50% it
-  is not shown at all. The colour key sits under the board, not in the side panel
-  — it is read once, and the panel's space belongs to the perk. The causal chain
-  is printed on every row — more attack
-  speed lands more attacks, more attacks roll more criticals, and Restless Blade
-  turns criticals into cooldown, so Swiftness reaches it at 81%. Hovering gives
-  the mechanic behind each link. The board marks the same grades as coloured
-  dots. Toggleable.
+- **Synergy, graded, on the board.** Selecting a node scores every other perk,
+  ability and ultimate by how much of this one's effect actually reaches it, and
+  marks the partners in the tree with a coloured dot: **green** at 100%, **amber**
+  from 75%, **red** from 50%. Below 50% is not marked at all. The key is one line
+  under the board. Nothing about synergy goes in the side panel — that space
+  belongs to the perk you selected. Toggleable.
 - **Shareable builds.** The URL hash carries the whole build; "Copy build link" puts
   it on the clipboard. Lowering Corruption or switching Manuals off peels back any
   level that is no longer legal rather than leaving an impossible build on screen.
@@ -126,6 +127,11 @@ rebuild it from saved copies of the two ability pages. Each tree holds an
 
 - `use_cost` is what the ability costs to *fire*, not to learn; only the
   Fextralife table publishes it.
+- `story_granted: true` means the story hands you level 1: it costs no skill
+  points and no time segments, and the planner shows "Story — no points" in its
+  place. Upgrades are unaffected. This is observed in game and appears in neither
+  source table, so nothing can cross-check *which* abilities carry it — the
+  verifier only checks the flag is a real boolean on an ability that has levels.
 - `kind` is `active` or `passive`, decided by `use_cost`: anything that pays an
   activation charge or health is active. The drawer groups by it. Passives still
   take an ability slot — they work "once equipped in the Active Ability panel" —
@@ -234,7 +240,9 @@ percentage:
 
 The whole model lives in the file's `scoring` block, so changing it is a data
 edit. The planner walks at most two edges: past that the graph is connected
-enough that everything is a synergy.
+enough that everything is a synergy. The score is rendered only as a coloured
+dot on the board — the chain that produced it is in the data and in `why`, not on
+screen.
 
 `breadth` on each system is **derived, not hand-picked** — `meeting_pairs`
 counts how many node pairs can actually meet there, and anything at or above 150

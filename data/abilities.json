@@ -8,7 +8,8 @@
     "Abilities have no prerequisites in either source - they are learned independently of the perk graph.",
     "Gates: manual, corruption <n>, vrakhir blood (a Phial of Vrakhir Blood), or none.",
     "Two source typos are corrected on extraction; tools/extract_abilities.py names them.",
-    "`kind` is active or passive, decided by use_cost: anything that pays an activation charge or health is active. Passive abilities still take an ability slot - they work once equipped in the Active Ability panel."
+    "`kind` is active or passive, decided by use_cost: anything that pays an activation charge or health is active. Passive abilities still take an ability slot - they work once equipped in the Active Ability panel.",
+    "`story_granted` marks an ability whose first level the story hands you: it costs no skill points and no time segments to learn. Upgrades past level 1 are paid for normally. This is observed in game, not published in either source table, so verify_perks.py cannot cross-check it - it only checks that the flag is a boolean on a real ability."
   ],
   "trees": {
     "Witchcraft": {
@@ -19,6 +20,7 @@
           "name": "Astral Communion",
           "effect": "Activates dormant magic in places of power scattered throughout the Valley.",
           "kind": "passive",
+          "story_granted": true,
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -61,6 +63,7 @@
           "name": "Burning Blood",
           "effect": "Deal Damage over time to a target.",
           "kind": "active",
+          "story_granted": true,
           "max_level": 4,
           "use_cost": {
             "text": "1 Activation Charge 15% Health",
@@ -103,6 +106,7 @@
           "name": "Compel Soul",
           "effect": "Allows you to speak with the restless souls. Use together with objects associated with the dead to obtain additional information.",
           "kind": "passive",
+          "story_granted": true,
           "max_level": 4,
           "use_cost": {
             "text": "Passive — no activation cost",
@@ -612,6 +616,7 @@
           "name": "Dirty Trick",
           "effect": "Stuns and Damages a target and makes them vulnerable to Active Abilities.",
           "kind": "active",
+          "story_granted": true,
           "max_level": 4,
           "use_cost": {
             "text": "1 Activation Charge",
@@ -1114,6 +1119,7 @@
           "name": "Voracious Bite",
           "effect": "Restores Health by drinking target's blood.",
           "kind": "active",
+          "story_granted": true,
           "max_level": 4,
           "use_cost": {
             "text": "1 Activation Charge",

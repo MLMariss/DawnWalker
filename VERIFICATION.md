@@ -141,6 +141,31 @@ Worth knowing: passive does not mean free of slots. The same text says they work
 "once equipped in the Active Ability panel", so passives compete with actives for
 the slots that Forbidden Sigils, Master Fencer and Vrakhiri Might hand out.
 
+### Story grants
+
+Five abilities are given by the story rather than bought, and the planner charges
+nothing for their first level: **Astral Communion**, **Burning Blood** and
+**Compel Soul** (Witchcraft), **Dirty Trick** (Swordmastery) and **Voracious
+Bite** (Vampirism). Together with *Font of Life* and *Mandrake Ward* — the two
+padlocked perks — that is the whole set of things the planner treats as free.
+
+Three of those five were identified from a screenshot of the in-game Abilities
+panel rather than by reading names off it, because the icons are the game's and
+the registry's are not. The panel showed four abilities: two with a filled first
+pip and no Manual books, one with a filled first pip and books, and one with
+books and nothing filled. The registry makes that unambiguous — **Astral
+Communion and Compel Soul are the only two Witchcraft abilities with no Manual
+gate on any level**, and **Burning Blood is the only one whose level 1 is ungated
+while its upgrades are not**. The fourth, gated at level 1 and unlearned, is one
+of the remaining seven and is not marked.
+
+**Not verifiable.** Neither source table records which abilities the story hands
+out, so there is nothing to cross-check the list against and no way to tell from
+the data whether more exist. `verify_perks.py` checks only that `story_granted`
+is a real boolean on an ability that has levels; the list itself rests on play.
+If an ability turns out to be granted and is not flagged, it is one line in
+`data/abilities.json`.
+
 Abilities introduce one gate the perks do not have: `vrakhir blood`, a Phial of
 Vrakhir Blood spent to learn certain Vampirism ability levels. The planner
 treats it as a consumable to count rather than a lock to satisfy — it is an item

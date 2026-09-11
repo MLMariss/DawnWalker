@@ -304,7 +304,14 @@ a:hover{color:var(--gold-2)}
 
 /* ---------------------------------------------------------- abilities */
 .abils{padding:0 14px 14px}
-.abils-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+/* auto-FIT, not auto-fill. auto-fill keeps every track it can fit even when
+   nothing is in it, so five cards in a seven-track row sat at their minimum
+   width with two empty tracks of dead space beside them — and the text wrapped
+   itself tall to fit a column it never needed to be. auto-fit drops the empty
+   tracks and the cards take the width back, which costs rows rather than
+   buying them. */
+.abils-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;
+  align-items:start}
 .abil-group + .abil-group{margin-top:16px}
 .abil-head{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin:0 0 8px;
   font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
@@ -378,63 +385,13 @@ a:hover{color:var(--gold-2)}
 .panel .desc{margin:0 0 14px;font-size:16px;color:var(--text)}
 .panel .req{margin:0 0 14px;font-size:14px;color:var(--text-faint)}
 .panel .req b{color:var(--text-dim);font-weight:500}
-/* --------------------------------------------------------- synergy block
-   A read of the mechanics graph, not a tag cloud: what this node raises, what
-   pays it, and the chain that connects it to everything else. */
-.syn-box{margin:0 0 6px;border-top:1px solid var(--line);padding-top:10px}
-.syn-list{list-style:none;margin:0;padding:0}
-.syn-row{
-  display:grid;grid-template-columns:14px 1fr;gap:2px 8px;align-items:baseline;
-  padding:7px 0;border-bottom:1px solid rgba(58,48,42,.45);
-}
-.syn-arrow{
-  grid-row:span 2;align-self:center;width:14px;height:14px;position:relative;
-  border:1px solid var(--line-2);border-radius:50%;
-}
-.syn-arrow::after{
-  content:'';position:absolute;inset:0;margin:auto;width:5px;height:5px;
-  border-top:1.5px solid var(--text-faint);border-right:1.5px solid var(--text-faint);
-}
-.syn-row.out .syn-arrow::after{transform:translateX(-1px) rotate(45deg)}
-.syn-row.in .syn-arrow::after{transform:translateX(1px) rotate(-135deg)}
-
-/* Tier is the loudest thing in the row: it decides whether the link is worth
-   building around. It colours the marker and a rule down the left, so the list
-   can be skimmed for green without reading a word of it. */
-.syn-row{border-left:2px solid transparent;padding-left:8px}
-.syn-row.tier-green{border-left-color:var(--tier-green)}
-.syn-row.tier-yellow{border-left-color:var(--tier-yellow)}
-.syn-row.tier-red{border-left-color:color-mix(in srgb,var(--tier-red) 55%,transparent)}
-.syn-row.tier-green .syn-arrow{border-color:color-mix(in srgb,var(--tier-green) 60%,transparent)}
-.syn-row.tier-green .syn-arrow::after{border-color:var(--tier-green)}
-.syn-row.tier-yellow .syn-arrow{border-color:color-mix(in srgb,var(--tier-yellow) 60%,transparent)}
-.syn-row.tier-yellow .syn-arrow::after{border-color:var(--tier-yellow)}
-.syn-row.tier-red .syn-arrow{border-color:color-mix(in srgb,var(--tier-red) 45%,transparent)}
-.syn-row.tier-red .syn-arrow::after{border-color:color-mix(in srgb,var(--tier-red) 80%,transparent)}
-.syn-row.tier-red .syn-name{color:var(--text-dim);font-weight:500}
-.syn-row.tier-red .syn-chain{opacity:.75}
-.node.syn-red .syn{background:var(--tier-red);
-  box-shadow:0 0 8px 1px color-mix(in srgb,var(--tier-red) 45%,transparent);opacity:.75}
-.abil.syn-red{border-left:3px solid color-mix(in srgb,var(--tier-red) 70%,transparent)}
-
-.syn-pct{margin-left:7px;font-size:11.5px;font-weight:700;letter-spacing:.02em;
-  color:var(--text-faint);font-variant-numeric:tabular-nums}
-.syn-row.tier-green .syn-pct{color:var(--tier-green)}
-.syn-row.tier-yellow .syn-pct{color:var(--tier-yellow)}
-.syn-row.tier-red .syn-pct{color:color-mix(in srgb,var(--tier-red) 85%,transparent)}
-.syn-row.has .syn-name{color:var(--gold-2)}
-
+/* The synergy tiers. Only the board dots and the one-line key under the board
+   use these now; the side panel carries no synergy list at all. */
 .tier-dot{display:inline-block;width:8px;height:8px;margin-right:5px;
   transform:rotate(45deg);vertical-align:middle}
 .tier-dot.tier-green{background:var(--tier-green)}
 .tier-dot.tier-yellow{background:var(--tier-yellow)}
 .tier-dot.tier-red{background:var(--tier-red)}
-.syn-name{font-size:14px;color:var(--text);font-weight:600}
-.syn-tree{margin-left:7px;font-size:11px;font-weight:600;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--text-faint)}
-.syn-chain{grid-column:2;font-size:12px;line-height:1.5;color:var(--text-faint)}
-.syn-chain i{font-style:normal;color:var(--gold-dim);padding:0 2px}
-.syn-more{margin:8px 0 0;font-size:12px;color:var(--text-faint)}
 
 .levels{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .levels li{display:flex;gap:11px;align-items:flex-start;flex-wrap:wrap;padding:11px 0;
@@ -449,6 +406,15 @@ a:hover{color:var(--gold-2)}
 .levels .lv-meta{display:flex;gap:9px;align-items:center;flex:1 1 100%;font-size:13px;
   flex-wrap:wrap;justify-content:flex-end;margin-top:2px}
 .gate-tag{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--blood-2)}
+/* Given by the story, not bought. Marked in green because the useful fact is
+   that it costs nothing, and priced rows are read in red and gold. */
+.free-tag{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--green)}
+.story-tag{
+  margin-left:8px;padding:2px 7px;border:1px solid color-mix(in srgb,var(--green) 45%,transparent);
+  border-radius:10px;font-size:10.5px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--green);vertical-align:middle;
+}
+.panel h3 .story-tag{font-size:11px}
 .cost{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-weight:600}
 .cost i{width:13px;height:13px;background:currentColor;font-style:normal;
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain}

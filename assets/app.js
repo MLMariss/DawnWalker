@@ -151,7 +151,7 @@
       }
     }
     var t = TREE_OF[p.node_id];
-    var after = perkSpent(t) - (p.is_ability ? 0 : p.levels[n - 1].skill_points);
+    var after = perkSpent(t) - (p.is_ability ? 0 : levelCost(p, n - 1, 'skill_points'));
     if (state.ults[t.key] != null && !ultMet(t, after)) {
       return { ok: false, why: 'Deselect the ultimate perk first.' };
     }
@@ -176,12 +176,22 @@
   /* Totals. Levels learned are the first `n` entries of a perk's level list. */
   function entries(t) { return t.perks.concat(t.abilities || []); }
 
+  /* The story hands you the first level of a few abilities outright. They still
+     appear, still occupy an ability slot and still upgrade at the usual price —
+     but level 1 is free, so nothing may charge for it. Every cost in the planner
+     reads through here. */
+  function levelCost(p, i, field) {
+    if (p.story_granted && i === 0) return 0;
+    return p.levels[i][field];
+  }
+  function isFree(p, i) { return !!p.story_granted && i === 0; }
+
   function tallyOf(list, field) {
     return list.reduce(function (sum, p) {
       var n = lv(p.node_id), s = 0;
       for (var i = 0; i < n; i++) s += (field === 'manual' || field === 'vrakhir blood')
         ? (p.levels[i].gate === field ? 1 : 0)
-        : p.levels[i][field];
+        : levelCost(p, i, field);
       return sum + s;
     }, 0);
   }
@@ -391,14 +401,9 @@
     return hit.carry * hub * 100;
   }
 
-  /* The systems named along a path, cause first. */
-  function chainOf(hit, target, dir) {
-    if (!hit.path.length) return [target];
-    var out = [hit.path[0].from];
-    hit.path.forEach(function (e) { out.push(e.to); });
-    return out;
-  }
-
+  /* Scores every other node against this one. The result is a band per node,
+     which is what the board draws as a coloured dot — the chain that produced it
+     is not rendered anywhere, so it is not carried here either. */
   function synergiesFor(id) {
     var me = mech(id);
     if (!me) return [];
@@ -412,42 +417,22 @@
 
       (y.scales_with || []).forEach(function (s) {
         var hit = fwd[s];
-        if (!hit) return;
-        var pct = impactAt(hit, s);
-        if (!best || pct > best.pct) {
-          best = { pct: pct, dist: hit.dist, dir: 'feeds', chain: chainOf(hit, s, 'out'), path: hit.path, at: s };
-        }
+        if (hit) { var pct = impactAt(hit, s); if (best === null || pct > best) best = pct; }
       });
       (y.provides || []).forEach(function (s) {
         var hit = rev[s];
-        if (!hit) return;
-        var pct = impactAt(hit, s);
-        if (!best || pct > best.pct) {
-          best = { pct: pct, dist: hit.dist, dir: 'fedBy', chain: chainOf(hit, s, 'in'), path: hit.path, at: s };
-        }
+        if (hit) { var pct = impactAt(hit, s); if (best === null || pct > best) best = pct; }
       });
-      if (!best) return;
-      var band = bandOf(best.pct);
+      if (best === null) return;
+      var band = bandOf(best);
       if (!band) return;              // under 50%: not a synergy worth drawing
       rows.push({
-        id: other, name: y.name, pct: Math.round(best.pct), band: band,
-        dist: best.dist, dir: best.dir, chain: best.chain, at: best.at,
-        hub: (MECH.systems[best.at] || {}).breadth === 'hub',
-        why: best.path.map(function (e) { return e.why; }),
-        tree: TREE_OF[other] || ULT_TREE[other] || null,
-        learned: lv(other) > 0 || ultTaken(other)
+        id: other, name: y.name, pct: Math.round(best), band: band,
+        tree: TREE_OF[other] || ULT_TREE[other] || null
       });
-    });
-
-    rows.sort(function (a, b) {
-      if (a.pct !== b.pct) return b.pct - a.pct;
-      if (a.learned !== b.learned) return a.learned ? -1 : 1;
-      return a.name.localeCompare(b.name);
     });
     return rows;
   }
-
-  var SYN_SHOWN = 14;
 
   /* Written once, under the board. The colours need explaining exactly once,
      and the side panel is not where a legend earns its space. */
@@ -457,54 +442,6 @@
       '<span class="tier-dot tier-green"></span>100% · ' +
       '<span class="tier-dot tier-yellow"></span>75%+ · ' +
       '<span class="tier-dot tier-red"></span>50%+ of this perk\'s effect reaches it';
-  }
-  var BAND_TEXT = {
-    green: 'Full effect: this node provides exactly what that one is paid by.',
-    yellow: 'Most of the effect, one or two firm links away.',
-    red: 'Part of the effect — generic, conditional, or a stretch.'
-  };
-
-  function synergyHTML(id) {
-    var me = mech(id);
-    if (!me) return '';
-    var rows = synergiesFor(id);
-
-    // What this node raises and is paid by used to be spelled out here. It is
-    // the same information the rows already carry in their chains, and it was
-    // taking the top of the panel to say it — so it moved to the title attribute
-    // and the space went back to the perk.
-    var head = [];
-    if ((me.provides || []).length) {
-      head.push('Raises ' + me.provides.map(sysName).join(', '));
-    }
-    if ((me.scales_with || []).length) {
-      head.push('paid by ' + me.scales_with.map(sysName).join(', '));
-    }
-    if (!rows.length) return '';
-
-    var shown = rows.slice(0, SYN_SHOWN);
-    var list = shown.map(function (r) {
-      var chain = r.chain.map(function (x) { return esc(sysName(x)); }).join(' <i>→</i> ');
-      var where = r.tree && r.tree !== TREE_OF[id]
-        ? '<span class="syn-tree">' + esc(r.tree.name) + '</span>' : '';
-      var tip = BAND_TEXT[r.band] +
-        (r.hub ? ' Meeting at ' + sysName(r.at) + ', which most of the board touches.' : '') +
-        (r.why.length ? ' — ' + r.why.join(' ') : '');
-      return '<li class="syn-row ' + (r.dir === 'feeds' ? 'out' : 'in') +
-        ' tier-' + r.band + (r.learned ? ' has' : '') +
-        '" title="' + esc(tip) + '">' +
-        '<span class="syn-arrow" aria-hidden="true"></span>' +
-        '<span class="syn-name">' + esc(r.name) + where +
-          '<span class="syn-pct">' + r.pct + '%</span></span>' +
-        '<span class="syn-chain">' + chain + '</span></li>';
-    }).join('');
-
-    var more = rows.length > shown.length
-      ? '<p class="syn-more">and ' + (rows.length - shown.length) + ' more at ' +
-        rows[shown.length].pct + '% or less.</p>' : '';
-
-    return '<div class="syn-box" title="' + esc(head.join(' · ')) + '">' +
-      '<ul class="syn-list">' + list + '</ul>' + more + '</div>';
   }
 
   /* Board marking stays inside the tree on screen — those are the nodes you can
@@ -729,7 +666,7 @@
     var learned = list.filter(function (a) { return lv(a.node_id) > 0; }).length;
     var pts = list.reduce(function (sum, a) {
       var n = lv(a.node_id), s = 0;
-      for (var i = 0; i < n; i++) s += a.levels[i].skill_points;
+      for (var i = 0; i < n; i++) s += levelCost(a, i, 'skill_points');
       return sum + s;
     }, 0);
     var act = list.filter(function (a) { return a.kind === 'active'; }).length;
@@ -750,11 +687,16 @@
       return '<button class="' + cls + '" type="button" data-node="' + a.node_id + '"' +
         ' aria-label="' + esc(a.name) + ', level ' + n + ' of ' + a.max_level + '">' +
         '<span class="abil-mark">' + Icons.svg(Icons.forAbility(a.name)) + '</span>' +
-        '<span class="abil-txt"><b>' + esc(a.name) + '</b>' +
+        '<span class="abil-txt"><b>' + esc(a.name) +
+          (a.story_granted ? '<span class="story-tag" title="The story grants level 1 — ' +
+            'it costs no skill points and no time segments. Upgrades are paid for normally.">' +
+            'Story</span>' : '') + '</b>' +
         '<span class="abil-use">' + esc(use) + '</span>' +
         '<span class="abil-eff">' + esc(a.effect) + '</span>' +
         '<span class="abil-foot"><span class="pips">' + pips + '</span>' +
-        (nl ? '<span class="abil-next">' + costHTML(nl.skill_points, nl.time_segments, nl.gate) +
+        (nl ? '<span class="abil-next">' +
+              (isFree(a, n) ? '<span class="free-tag">Story — free</span>'
+                            : costHTML(nl.skill_points, nl.time_segments, nl.gate)) +
               (gateLabel(nl.gate) && nl.gate !== 'manual'
                 ? '<span class="gate-tag">' + esc(gateLabel(nl.gate)) + '</span>' : '') + '</span>'
             : '<span class="abil-next done">Maxed</span>') +
@@ -834,7 +776,6 @@
       }).join('</b> and <b>') + '</b></p>';
     }
 
-    var synLine = state.synergy ? synergyHTML(id) : '';
 
     var levels = p.levels.map(function (l, i) {
       var owned = i < n, isNext = i === n;
@@ -843,7 +784,9 @@
         ? '<span class="gate-tag">' + esc(gateLabel(l.gate)) + '</span>' : '';
       return '<li class="' + (owned ? 'on ' : '') + (isNext ? 'next ' : '') + (blocked ? 'blocked' : '') + '">' +
         '<span class="lp"></span><span class="lv-text">' + esc(l.effect) + '</span>' +
-        '<span class="lv-meta">' + tag + costHTML(l.skill_points, l.time_segments, l.gate) + '</span></li>';
+        '<span class="lv-meta">' + tag +
+          (isFree(p, i) ? '<span class="free-tag">Story — no points</span>'
+                        : costHTML(l.skill_points, l.time_segments, l.gate)) + '</span></li>';
     }).join('');
 
     var btn = nl ? 'Learn level ' + nl.level : 'Fully learned';
@@ -857,8 +800,9 @@
         (when ? '<p class="panel-when">' + esc(when) + '</p>' : '') +
         (nl && gateLabel(nl.gate) ? '<p class="panel-gate' + (gateOk(nl.gate) ? ' ok' : '') + '">' +
           esc(gateLabel(nl.gate)) + '</p>' : '') +
-        '<h3>' + esc(p.name) + '</h3>' +
-        '<p class="desc">' + esc(p.effect) + '</p>' + reqLine + synLine +
+        '<h3>' + esc(p.name) +
+          (p.story_granted ? '<span class="story-tag">Story</span>' : '') + '</h3>' +
+        '<p class="desc">' + esc(p.effect) + '</p>' + reqLine +
         '<ul class="levels">' + levels + '</ul>' +
       '</div>' +
       '<div class="panel-foot">' +
