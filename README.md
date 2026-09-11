@@ -36,16 +36,12 @@ Pages and it works as the site index.
   perk a later level replaces the earlier one for the same stat (Endless Effort's
   +100% is not also +25% and +50%); across different perks the same stat adds up.
   Conditional effects and the manuals you still need are listed separately.
-- **Synergy, graded.** Selecting a node scores every other perk, ability and
-  ultimate by how much of this one's effect actually reaches it, and colours the
-  result: **green** at 100%, **amber** from 75%, **red** from 50%. Below 50% it
-  is not shown at all. The colour key sits under the board, not in the side panel
-  — it is read once, and the panel's space belongs to the perk. The causal chain
-  is printed on every row — more attack
-  speed lands more attacks, more attacks roll more criticals, and Restless Blade
-  turns criticals into cooldown, so Swiftness reaches it at 81%. Hovering gives
-  the mechanic behind each link. The board marks the same grades as coloured
-  dots. Toggleable.
+- **Synergy, graded, on the board.** Selecting a node scores every other perk,
+  ability and ultimate by how much of this one's effect actually reaches it, and
+  marks the partners in the tree with a coloured dot: **green** at 100%, **amber**
+  from 75%, **red** from 50%. Below 50% is not marked at all. The key is one line
+  under the board. Nothing about synergy goes in the side panel — that space
+  belongs to the perk you selected. Toggleable.
 - **Shareable builds.** The URL hash carries the whole build; "Copy build link" puts
   it on the clipboard. Lowering Corruption or switching Manuals off peels back any
   level that is no longer legal rather than leaving an impossible build on screen.
@@ -234,7 +230,9 @@ percentage:
 
 The whole model lives in the file's `scoring` block, so changing it is a data
 edit. The planner walks at most two edges: past that the graph is connected
-enough that everything is a synergy.
+enough that everything is a synergy. The score is rendered only as a coloured
+dot on the board — the chain that produced it is in the data and in `why`, not on
+screen.
 
 `breadth` on each system is **derived, not hand-picked** — `meeting_pairs`
 counts how many node pairs can actually meet there, and anything at or above 150

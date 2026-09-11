@@ -391,14 +391,9 @@
     return hit.carry * hub * 100;
   }
 
-  /* The systems named along a path, cause first. */
-  function chainOf(hit, target, dir) {
-    if (!hit.path.length) return [target];
-    var out = [hit.path[0].from];
-    hit.path.forEach(function (e) { out.push(e.to); });
-    return out;
-  }
-
+  /* Scores every other node against this one. The result is a band per node,
+     which is what the board draws as a coloured dot — the chain that produced it
+     is not rendered anywhere, so it is not carried here either. */
   function synergiesFor(id) {
     var me = mech(id);
     if (!me) return [];
@@ -412,42 +407,22 @@
 
       (y.scales_with || []).forEach(function (s) {
         var hit = fwd[s];
-        if (!hit) return;
-        var pct = impactAt(hit, s);
-        if (!best || pct > best.pct) {
-          best = { pct: pct, dist: hit.dist, dir: 'feeds', chain: chainOf(hit, s, 'out'), path: hit.path, at: s };
-        }
+        if (hit) { var pct = impactAt(hit, s); if (best === null || pct > best) best = pct; }
       });
       (y.provides || []).forEach(function (s) {
         var hit = rev[s];
-        if (!hit) return;
-        var pct = impactAt(hit, s);
-        if (!best || pct > best.pct) {
-          best = { pct: pct, dist: hit.dist, dir: 'fedBy', chain: chainOf(hit, s, 'in'), path: hit.path, at: s };
-        }
+        if (hit) { var pct = impactAt(hit, s); if (best === null || pct > best) best = pct; }
       });
-      if (!best) return;
-      var band = bandOf(best.pct);
+      if (best === null) return;
+      var band = bandOf(best);
       if (!band) return;              // under 50%: not a synergy worth drawing
       rows.push({
-        id: other, name: y.name, pct: Math.round(best.pct), band: band,
-        dist: best.dist, dir: best.dir, chain: best.chain, at: best.at,
-        hub: (MECH.systems[best.at] || {}).breadth === 'hub',
-        why: best.path.map(function (e) { return e.why; }),
-        tree: TREE_OF[other] || ULT_TREE[other] || null,
-        learned: lv(other) > 0 || ultTaken(other)
+        id: other, name: y.name, pct: Math.round(best), band: band,
+        tree: TREE_OF[other] || ULT_TREE[other] || null
       });
-    });
-
-    rows.sort(function (a, b) {
-      if (a.pct !== b.pct) return b.pct - a.pct;
-      if (a.learned !== b.learned) return a.learned ? -1 : 1;
-      return a.name.localeCompare(b.name);
     });
     return rows;
   }
-
-  var SYN_SHOWN = 14;
 
   /* Written once, under the board. The colours need explaining exactly once,
      and the side panel is not where a legend earns its space. */
@@ -457,54 +432,6 @@
       '<span class="tier-dot tier-green"></span>100% · ' +
       '<span class="tier-dot tier-yellow"></span>75%+ · ' +
       '<span class="tier-dot tier-red"></span>50%+ of this perk\'s effect reaches it';
-  }
-  var BAND_TEXT = {
-    green: 'Full effect: this node provides exactly what that one is paid by.',
-    yellow: 'Most of the effect, one or two firm links away.',
-    red: 'Part of the effect — generic, conditional, or a stretch.'
-  };
-
-  function synergyHTML(id) {
-    var me = mech(id);
-    if (!me) return '';
-    var rows = synergiesFor(id);
-
-    // What this node raises and is paid by used to be spelled out here. It is
-    // the same information the rows already carry in their chains, and it was
-    // taking the top of the panel to say it — so it moved to the title attribute
-    // and the space went back to the perk.
-    var head = [];
-    if ((me.provides || []).length) {
-      head.push('Raises ' + me.provides.map(sysName).join(', '));
-    }
-    if ((me.scales_with || []).length) {
-      head.push('paid by ' + me.scales_with.map(sysName).join(', '));
-    }
-    if (!rows.length) return '';
-
-    var shown = rows.slice(0, SYN_SHOWN);
-    var list = shown.map(function (r) {
-      var chain = r.chain.map(function (x) { return esc(sysName(x)); }).join(' <i>→</i> ');
-      var where = r.tree && r.tree !== TREE_OF[id]
-        ? '<span class="syn-tree">' + esc(r.tree.name) + '</span>' : '';
-      var tip = BAND_TEXT[r.band] +
-        (r.hub ? ' Meeting at ' + sysName(r.at) + ', which most of the board touches.' : '') +
-        (r.why.length ? ' — ' + r.why.join(' ') : '');
-      return '<li class="syn-row ' + (r.dir === 'feeds' ? 'out' : 'in') +
-        ' tier-' + r.band + (r.learned ? ' has' : '') +
-        '" title="' + esc(tip) + '">' +
-        '<span class="syn-arrow" aria-hidden="true"></span>' +
-        '<span class="syn-name">' + esc(r.name) + where +
-          '<span class="syn-pct">' + r.pct + '%</span></span>' +
-        '<span class="syn-chain">' + chain + '</span></li>';
-    }).join('');
-
-    var more = rows.length > shown.length
-      ? '<p class="syn-more">and ' + (rows.length - shown.length) + ' more at ' +
-        rows[shown.length].pct + '% or less.</p>' : '';
-
-    return '<div class="syn-box" title="' + esc(head.join(' · ')) + '">' +
-      '<ul class="syn-list">' + list + '</ul>' + more + '</div>';
   }
 
   /* Board marking stays inside the tree on screen — those are the nodes you can
@@ -834,7 +761,6 @@
       }).join('</b> and <b>') + '</b></p>';
     }
 
-    var synLine = state.synergy ? synergyHTML(id) : '';
 
     var levels = p.levels.map(function (l, i) {
       var owned = i < n, isNext = i === n;
@@ -858,7 +784,7 @@
         (nl && gateLabel(nl.gate) ? '<p class="panel-gate' + (gateOk(nl.gate) ? ' ok' : '') + '">' +
           esc(gateLabel(nl.gate)) + '</p>' : '') +
         '<h3>' + esc(p.name) + '</h3>' +
-        '<p class="desc">' + esc(p.effect) + '</p>' + reqLine + synLine +
+        '<p class="desc">' + esc(p.effect) + '</p>' + reqLine +
         '<ul class="levels">' + levels + '</ul>' +
       '</div>' +
       '<div class="panel-foot">' +
