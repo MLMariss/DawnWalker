@@ -32,8 +32,16 @@
 
   --shadow:0 16px 40px rgba(0,0,0,.6);
 
-  --m-sp:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2l3.2 6.2L22 9.6l-5 4.6 1.4 6.8L12 17.7 5.6 21l1.4-6.8-5-4.6 6.8-1.4z'/></svg>");
-  --m-ts:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 2h12v2c0 3.5-2.2 5.2-4 8 1.8 2.8 4 4.5 4 8v2H6v-2c0-3.5 2.2-5.2 4-8-1.8-2.8-4-4.5-4-8V2z'/></svg>");
+  --m-sp:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M15.6 2.4a9.6 9.6 0 1 0 6 18 7.8 7.8 0 0 1-6-18z'/></svg>");
+  --m-ts:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M4.5 2h15v2.4h-1.8c0 3.3-2 5-3.7 7.6 1.7 2.6 3.7 4.3 3.7 7.6h1.8V22h-15v-2.4h1.8c0-3.3 2-5 3.7-7.6C8.3 9.4 6.3 7.7 6.3 4.4H4.5z'/></svg>");
+  --m-cor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2c4 0 7.5 1.2 8.5 2.6-.6 6.4-3 12.4-8.5 17.4C6.5 17 4.1 11 3.5 4.6 4.5 3.2 8 2 12 2zM8 8l1.6 3.4L11.2 8zm4.8 0l1.6 3.4L16 8z'/></svg>");
+  --m-shr:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2L4.5 8h15zM7 8v13M17 8v13M4 21.5h16M10 12h4v9h-4z'/></svg>");
+  --m-sun:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 6.8a5.2 5.2 0 1 0 0 10.4 5.2 5.2 0 0 0 0-10.4zM12 1v3.2M12 19.8V23M1 12h3.2M19.8 12H23M4.2 4.2l2.3 2.3M17.5 17.5l2.3 2.3M19.8 4.2l-2.3 2.3M6.5 17.5l-2.3 2.3'/></svg>");
+  --m-moon:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M15.6 2.4a9.6 9.6 0 1 0 6 18 7.8 7.8 0 0 1-6-18z'/></svg>");
+  --m-any:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M8 5.2a6.8 6.8 0 1 0 0 13.6A6.8 6.8 0 0 0 8 5.2zM8 1.2v2.4M8 20.4v2.4M1.2 12h2.4M18.4 6.4a6.4 6.4 0 0 1 3.8 11.7A7.6 7.6 0 0 0 18.4 6.4z'/></svg>");
+  --m-cd:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2.8a9.2 9.2 0 1 0 0 18.4 9.2 9.2 0 0 0 0-18.4zM12 6.6V12l3.8 2.6'/></svg>");
+  --m-chg:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2l5.4 5.2L12 22 6.6 7.2zM6.6 7.2h10.8M12 2v20'/></svg>");
+  --m-hp:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 21S3.2 15.2 3.2 9.4A4.8 4.8 0 0 1 12 6.7a4.8 4.8 0 0 1 8.8 2.7C20.8 15.2 12 21 12 21z'/></svg>");
   --m-bk:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M3 3h8.2v18H3zM12.8 3H21v18h-8.2zM11.2 3h1.6v18h-1.6z' fill='black'/><path d='M3 3h8.2v18H3z' fill='black'/></svg>");
   --m-lock:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 10h12v11H6zM9 10V7a3 3 0 0 1 6 0v3' fill='none' stroke='black' stroke-width='2.2'/></svg>");
 }
@@ -383,6 +391,9 @@ a:hover{color:var(--gold-2)}
 .panel-gate.ok{color:var(--text-faint)}
 .panel h3{margin:0 0 8px;font-size:22px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gold-2)}
 .panel .desc{margin:0 0 14px;font-size:16px;color:var(--text)}
+/* The game prints this under the effect in italics — a passive note, or that
+   the ability does not take up a common slot. */
+.panel .desc-note{margin:-8px 0 14px;font-size:14px;font-style:italic;color:var(--text-faint)}
 .panel .req{margin:0 0 14px;font-size:14px;color:var(--text-faint)}
 .panel .req b{color:var(--text-dim);font-weight:500}
 /* The synergy tiers. Only the board dots and the one-line key under the board
@@ -424,6 +435,21 @@ a:hover{color:var(--gold-2)}
 .cost.ts i{-webkit-mask-image:var(--m-ts);mask-image:var(--m-ts)}
 .cost.bk{color:var(--text-dim)}
 .cost.bk i{-webkit-mask-image:var(--m-bk);mask-image:var(--m-bk)}
+.cost.cor{color:var(--blood-2)}
+.cost.cor i{-webkit-mask-image:var(--m-cor);mask-image:var(--m-cor)}
+.cost.shr{color:var(--text-dim)}
+.cost.shr i{-webkit-mask-image:var(--m-shr);mask-image:var(--m-shr)}
+
+/* The banner over a perk name, and the cooldown line on an ability. Both are
+   read straight off the in-game panel, so both carry the game's own marks. */
+.when-mark,.cd-mark{width:13px;height:13px;display:inline-block;vertical-align:-2px;
+  margin-right:6px;background:currentColor;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain}
+.when-mark.day{-webkit-mask-image:var(--m-sun);mask-image:var(--m-sun)}
+.when-mark.night{-webkit-mask-image:var(--m-moon);mask-image:var(--m-moon)}
+.when-mark.any{-webkit-mask-image:var(--m-any);mask-image:var(--m-any)}
+.cd-mark{-webkit-mask-image:var(--m-cd);mask-image:var(--m-cd)}
+.panel-cd{font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--text-dim);margin:0 0 10px}
 
 .panel-foot{
   position:sticky;bottom:0;z-index:2;padding:18px 18px 16px;display:flex;gap:10px;

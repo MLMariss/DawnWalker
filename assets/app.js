@@ -245,6 +245,15 @@
 
   function activeTime(p) { return p.active_time || TREE_OF[p.node_id].active_time || ''; }
 
+  /* The banner above a perk name is one of three, each with its own mark in
+     game: a sun for DAY ONLY, a crescent for NIGHT ONLY, both for ANYTIME. */
+  function whenMark(when) {
+    var w = String(when || '').toUpperCase();
+    if (w.indexOf('DAY') === 0) return 'day';
+    if (w.indexOf('NIGHT') === 0) return 'night';
+    return w ? 'any' : '';
+  }
+
   /* ------------------------------------------------- effect interpretation */
 
   /* Effects are written as prose. Two shapes carry a number we can total:
@@ -753,6 +762,9 @@
     if (sp) out.push('<span class="cost sp"><i></i>' + sp + '</span>');
     if (ts) out.push('<span class="cost ts"><i></i>' + ts + '</span>');
     if (gate === 'manual') out.push('<span class="cost bk"><i></i></span>');
+    if (gate === 'road shrine') out.push('<span class="cost shr"><i></i></span>');
+    var c = corruptionOf(gate);
+    if (c !== null) out.push('<span class="cost cor"><i></i>' + c + '</span>');
     return out.join(' ');
   }
 
@@ -800,12 +812,16 @@
         '<span class="hero-tree">' + esc(t.name) + '</span>' +
         '<span class="hero-lv">Level ' + n + ' / ' + p.max_level + '</span></div>' +
       '<div class="panel-body">' +
-        (when ? '<p class="panel-when">' + esc(when) + '</p>' : '') +
+        (when ? '<p class="panel-when"><i class="when-mark ' + whenMark(when) + '"></i>' +
+          esc(when) + '</p>' : '') +
+        (p.cooldown ? '<p class="panel-cd"><i class="cd-mark"></i>Cooldown: ' +
+          esc(p.cooldown) + '</p>' : '') +
         (nl && gateLabel(nl.gate) ? '<p class="panel-gate' + (gateOk(nl.gate) ? ' ok' : '') + '">' +
           esc(gateLabel(nl.gate)) + '</p>' : '') +
         '<h3>' + esc(p.name) +
           (p.story_granted ? '<span class="story-tag">Story</span>' : '') + '</h3>' +
-        '<p class="desc">' + esc(p.effect) + '</p>' + reqLine +
+        '<p class="desc">' + esc(p.effect) + '</p>' +
+        (p.note ? '<p class="desc-note">' + esc(p.note) + '</p>' : '') + reqLine +
         '<ul class="levels">' + levels + '</ul>' +
       '</div>' +
       '<div class="panel-foot">' +

@@ -36,7 +36,7 @@
               "effect": "Double Harvest : 50% chance.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
