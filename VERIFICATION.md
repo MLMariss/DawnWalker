@@ -42,9 +42,13 @@ Internal checks also pass: every prerequisite resolves to a real node in the sam
 tree, `unlocks` is the exact inverse of `prerequisites` everywhere, and each
 perk's `max_level` matches its number of level entries.
 
-**Not verifiable from these sources:** node positions and the prerequisite graph.
-Neither published list records tree topology, so those fields still rest on the
-in-game skill screens alone.
+**Not cross-checkable — which is not the same as unverified.** Node positions and
+the prerequisite graph come from the in-game skill screens, and no published list
+records tree topology at all. So `verify_perks.py` has nothing to compare them
+against; that is a limit on the script's reach, not a doubt about the data. The
+screens are the game itself, read directly, and each node's identity was pinned
+by matching its in-game icon against the named perk icon set. Where a published
+list and a screen disagree, the screen wins — see Endless Effort below.
 
 ## Where the sources disagreed
 
@@ -131,6 +135,51 @@ treats it as a consumable to count rather than a lock to satisfy — it is an it
 you can go and get, not a threshold you have to reach — and totals it beside the
 manuals in the build overview.
 
-**Not verifiable:** whether ability points count toward the 35-point ultimate
-threshold. The planner assumes they do, and the README says so. Nothing found
-states it either way.
+## Ability points and the ultimate threshold
+
+**Resolved: they do not count.** An earlier pass assumed ability points fed the
+same "35 skill points in a tree" counter as perks, on the grounds that abilities
+sit on the same tree screen. They do not. The counter reads perk spend alone, so
+a tree full of learned abilities and no perks never unlocks its ultimate.
+
+The planner keeps the two totals apart: `spent()` is what a tree actually costs
+you, perks and abilities together, and is what the tab badges and the build
+overview show; `perkSpent()` is what the ultimate gate reads. Refunding an
+ability can therefore never cost you a selected ultimate, and the ability drawer
+says so on its header rather than leaving it to be discovered.
+
+## The mechanics graph
+
+`data/mechanics.json` is a different kind of file from the other two, and it is
+worth being blunt about that. The perk and ability registries are transcriptions
+— every number in them was read off a screen or a published table and can be
+checked against one. The mechanics graph is an **interpretation**: a reading of
+what the effect text in those registries implies about how the systems drive
+each other.
+
+What *is* checked, by `tools/verify_perks.py` on every run:
+
+- every node it maps is a real perk, ability or ultimate, and carries that
+  node's registry name (so a rename in the registry cannot silently orphan it),
+- every one of the 90 nodes has an entry — no perk is quietly left out,
+- every system named in a `provides`, a `scales_with` or an edge is declared,
+- no edge is a self-loop, a duplicate, or missing its `why`,
+- no system is declared and then never used,
+- no node both provides and scales with the same system, which would make it
+  its own synergy partner.
+
+What is **not** checked, because nothing published could check it: whether an
+edge is true. `crit_events -> cooldown_reduction` is as solid as this file gets
+— Aether Flow, Restless Blade and Endless Ferocity each say "on critical hit" in
+their own level text. `consumables -> damage_output` is a judgement call. Each
+edge carries a `why` naming the perk or mechanic behind it, so a reader can
+disagree with a specific link rather than the whole idea.
+
+One edge was written and then deliberately removed: `survivability ->
+attacks_landed` ("a fight you are still standing in is a fight you are still
+swinging in"). It is true, and it is useless — it links every defensive perk to
+every offensive one and takes the median node from 26 partners to 33, which is
+most of the board. Generality is the failure mode for this file, not error.
+
+The graph is regenerated from `tools/build_mechanics.py`, so the data is
+reviewable as code and a change to it shows up as a diff in one place.

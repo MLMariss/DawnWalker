@@ -57,6 +57,24 @@ button,input,select{font:inherit;color:inherit}
 a{color:var(--gold);text-decoration:none}
 a:hover{color:var(--gold-2)}
 
+/* ------------------------------------------------------- scrollbars
+   The default bars are a bright system chrome that cuts straight through the
+   dark skin, and they are most visible exactly where they are needed most —
+   a short window, where every pane scrolls. Style them to match: a track that
+   disappears into the panel it sits on, a thumb the colour of the borders,
+   picking up the tree accent on hover. Firefox gets the two-keyword form,
+   WebKit the full pseudo-elements. */
+*{scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-track{background:rgba(0,0,0,.26);border-radius:6px}
+*::-webkit-scrollbar-thumb{
+  background:var(--line-2);border-radius:6px;
+  border:2px solid transparent;background-clip:padding-box;
+}
+*::-webkit-scrollbar-thumb:hover{background:var(--gold-dim);background-clip:padding-box}
+*::-webkit-scrollbar-thumb:active{background:var(--gold);background-clip:padding-box}
+*::-webkit-scrollbar-corner{background:transparent}
+
 /* ------------------------------------------------------------ top bar */
 .topbar{
   flex:none;display:flex;align-items:center;gap:22px;flex-wrap:wrap;
@@ -134,8 +152,11 @@ a:hover{color:var(--gold-2)}
   display:grid;grid-template-columns:minmax(0,1fr) var(--side);gap:16px;
   padding:6px 18px 14px;
 }
-.board{display:flex;flex-direction:column;min-width:0;min-height:0;overflow-y:auto;scrollbar-width:thin}
-.boardscroll{flex:none;min-height:0;overflow-x:auto;overflow-y:visible;scrollbar-width:thin}
+.board{display:flex;flex-direction:column;min-width:0;min-height:0;overflow-y:auto}
+/* Horizontal only. `overflow-y:visible` next to `overflow-x:auto` is not honoured —
+   the spec makes the browser compute it as `auto` — so it has to be said outright,
+   or the board grows a second vertical scrollbar it never wanted. */
+.boardscroll{flex:none;min-height:0;overflow-x:auto;overflow-y:hidden}
 .tree{position:relative;margin:0 auto}
 .links{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .link{fill:none;stroke:#40352c;stroke-width:2}
@@ -167,8 +188,14 @@ a:hover{color:var(--gold-2)}
   transition:.18s;
 }
 .node .pips{position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);display:flex;gap:5px}
-.node .pip{width:8px;height:8px;transform:rotate(45deg);background:#2b241e;box-shadow:inset 0 0 0 1px #5d4d3e}
-.node .pip.on{background:var(--gold);box-shadow:0 0 8px rgba(231,179,86,.7)}
+
+/* Level markers. The game draws a diamond per level: filled for what you have,
+   a hollow bright one on the level you can buy next, dark for the rest. Perk
+   nodes and ability rows share the rule so the two read the same. */
+.pip{width:8px;height:8px;flex:none;transform:rotate(45deg);
+  background:#2b241e;box-shadow:inset 0 0 0 1px #5d4d3e}
+.pip.on{background:var(--gold);box-shadow:0 0 8px rgba(231,179,86,.7)}
+.pip.next{background:transparent;box-shadow:inset 0 0 0 1.5px var(--gold-2)}
 .node .badge{position:absolute;right:4px;bottom:16px;width:17px;height:17px;
   background:var(--text-faint);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
   -webkit-mask-size:contain;mask-size:contain;-webkit-mask-image:var(--m-bk);mask-image:var(--m-bk)}
@@ -274,7 +301,7 @@ a:hover{color:var(--gold-2)}
 .abil .abil-use{display:block;font-size:12px;font-weight:600;color:var(--blood-2);margin-top:2px}
 .abil .abil-eff{display:block;font-size:13px;color:var(--text-dim);margin-top:4px}
 .abil .abil-foot{display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap}
-.abil .pips{display:flex;gap:5px}
+.abil .pips{display:flex;gap:5px;align-items:center}
 .abil .abil-next{display:flex;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap}
 .abil .abil-next.done{color:var(--text-faint);font-size:12px}
 .abil.avail{border-color:#6a5540}
@@ -315,8 +342,38 @@ a:hover{color:var(--gold-2)}
 .panel .desc{margin:0 0 14px;font-size:16px;color:var(--text)}
 .panel .req{margin:0 0 14px;font-size:14px;color:var(--text-faint)}
 .panel .req b{color:var(--text-dim);font-weight:500}
-.panel .syn-line{margin:0 0 14px;font-size:13px;color:var(--text-faint)}
-.panel .syn-line em{font-style:normal;color:var(--accent)}
+/* --------------------------------------------------------- synergy block
+   A read of the mechanics graph, not a tag cloud: what this node raises, what
+   pays it, and the chain that connects it to everything else. */
+.syn-box{margin:0 0 14px;border-top:1px solid var(--line);padding-top:12px}
+.syn-sub{margin:0 0 8px;font-size:13px;color:var(--text-faint)}
+.syn-sub em{font-style:normal;color:var(--accent)}
+.syn-note{margin:0 0 10px;font-size:13px;line-height:1.45;color:var(--text-dim)}
+.syn-list{list-style:none;margin:0;padding:0}
+.syn-row{
+  display:grid;grid-template-columns:14px 1fr;gap:2px 8px;align-items:baseline;
+  padding:7px 0;border-bottom:1px solid rgba(58,48,42,.45);
+}
+.syn-arrow{
+  grid-row:span 2;align-self:center;width:14px;height:14px;position:relative;
+  border:1px solid var(--line-2);border-radius:50%;
+}
+.syn-arrow::after{
+  content:'';position:absolute;inset:0;margin:auto;width:5px;height:5px;
+  border-top:1.5px solid var(--text-faint);border-right:1.5px solid var(--text-faint);
+}
+.syn-row.out .syn-arrow::after{transform:translateX(-1px) rotate(45deg)}
+.syn-row.in .syn-arrow::after{transform:translateX(1px) rotate(-135deg)}
+.syn-row.out .syn-arrow{border-color:color-mix(in srgb,var(--accent) 50%,transparent)}
+.syn-row.out .syn-arrow::after{border-color:var(--accent)}
+.syn-row.has .syn-name{color:var(--gold-2)}
+.syn-name{font-size:14px;color:var(--text);font-weight:600}
+.syn-tree{margin-left:7px;font-size:11px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text-faint)}
+.syn-chain{grid-column:2;font-size:12px;line-height:1.5;color:var(--text-faint)}
+.syn-chain i{font-style:normal;color:var(--gold-dim);padding:0 2px}
+.syn-more{margin:8px 0 0;font-size:12px;color:var(--text-faint)}
+.syn-key{margin:10px 0 0;font-size:11.5px;line-height:1.5;color:var(--text-faint);opacity:.8}
 
 .levels{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .levels li{display:flex;gap:11px;align-items:flex-start;flex-wrap:wrap;padding:11px 0;
@@ -342,8 +399,8 @@ a:hover{color:var(--gold-2)}
 .cost.bk i{-webkit-mask-image:var(--m-bk);mask-image:var(--m-bk)}
 
 .panel-foot{
-  position:sticky;bottom:0;padding:14px 18px 16px;display:flex;gap:10px;
-  background:linear-gradient(180deg,rgba(20,15,11,0),rgba(17,13,9,.97) 28%);
+  position:sticky;bottom:0;z-index:2;padding:18px 18px 16px;display:flex;gap:10px;
+  background:linear-gradient(180deg,rgba(20,15,11,0),rgba(17,13,9,.99) 60%,rgba(17,13,9,1));
 }
 .panel-foot .btn{flex:1;padding:12px 10px;text-align:center;font-size:13px}
 .btn-learn{background:linear-gradient(180deg,#cf9c44,#8a6528);border-color:#e0bb74;color:#1a1209;font-weight:700}
@@ -391,15 +448,22 @@ a:hover{color:var(--gold-2)}
 
 @media (max-width:1000px){
   body{overflow:auto}
-  /* the page scrolls here, so the board must not be a scroller of its own */
-  .board{overflow:visible}
-  .stage{grid-template-columns:minmax(0,1fr);padding:6px 14px 20px}
-  .side{min-height:0}
+  /* The page scrolls here, so nothing inside it may be a scroller of its own or
+     claim a slice of viewport height — each box sizes to its content and the
+     column simply gets longer. Without this the stage keeps the height it had
+     as a two-column layout, and the tree spills straight over the panel. */
+  .stage{grid-template-columns:minmax(0,1fr);padding:6px 14px 20px;flex:none;min-height:auto}
+  .board{overflow:visible;flex:none;min-height:auto}
+  .boardscroll{overflow-x:auto;overflow-y:hidden}
+  .side{min-height:auto}
   .panel{max-height:none;overflow:visible}
 }
 
 @media (max-width:640px){
-  :root{--node:70px;--icon:36px;--colmin:84px;--row:150px}
+  /* A wider column floor than the screen can hold, on purpose: the board scrolls
+     sideways and the labels stay legible, rather than every name being squeezed
+     into its neighbour to make the whole tree fit a phone. */
+  :root{--node:70px;--icon:36px;--colmin:118px;--row:150px}
   .topbar{padding:10px 12px;gap:14px}
   .meter-lbl{display:none}
   .tabs{padding:8px 10px 2px}

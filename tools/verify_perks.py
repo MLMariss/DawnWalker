@@ -10,11 +10,16 @@ complete") and point this script at the .html file:
 
 It reports every difference in level count, skill point cost, time segment cost,
 manual gate, corruption gate and the numbers inside each level's effect text,
-and exits non-zero if anything differs. What it cannot check: node positions and
-the prerequisite graph, which come from in-game skill screens and appear in no
-published table.
+and exits non-zero if anything differs. It also checks data/mechanics.json —
+that every node it maps exists, every system it names is declared, and no edge
+dangles.
 
-Requires: beautifulsoup4, lxml.
+Node positions and the prerequisite graph come from in-game skill screens and
+appear in no published table, so there is nothing here to check them against.
+They are read directly off the screens rather than inferred.
+
+Requires: beautifulsoup4 and lxml, but only to read a source page. The internal
+checks run without them.
 """
 import json
 import pathlib
@@ -22,10 +27,15 @@ import re
 import sys
 import unicodedata
 
-try:
-    from bs4 import BeautifulSoup
-except ImportError:
-    sys.exit("beautifulsoup4 is required: pip install beautifulsoup4 lxml")
+def _soup():
+    """Imported only when a source page is actually being parsed — the internal
+    checks need no HTML parser, and should run in a bare checkout."""
+    try:
+        from bs4 import BeautifulSoup
+    except ImportError:
+        sys.exit("beautifulsoup4 is required to read a source page: "
+                 "pip install beautifulsoup4 lxml")
+    return BeautifulSoup
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TREES = ("Witchcraft", "Swordmastery", "Vampirism")
@@ -66,7 +76,7 @@ def parse_cell(td):
 
 
 def parse_page(path):
-    soup = BeautifulSoup(pathlib.Path(path).read_text(encoding="utf-8", errors="replace"), "lxml")
+    soup = _soup()(pathlib.Path(path).read_text(encoding="utf-8", errors="replace"), "lxml")
     out = {}
     for table in soup.find_all("table"):
         heading = table.find_previous(["h2", "h3"])
@@ -221,13 +231,79 @@ def internal_checks(registry):
     return findings
 
 
+
+def mechanics_checks(registry, abilities):
+    """data/mechanics.json is an interpretation, but it still has to refer to
+    nodes and systems that exist, or the planner silently drops synergies."""
+    path = ROOT / "data" / "mechanics.json"
+    if not path.exists():
+        return ["data/mechanics.json is missing — the planner needs it to draw synergies"]
+    mech = json.loads(path.read_text(encoding="utf-8"))
+    findings = []
+
+    real = {}
+    for tree in registry["trees"].values():
+        for perk in tree["perks"]:
+            real[perk["node_id"]] = perk["name"]
+        for i, ult in enumerate(tree["ultimates"], 1):
+            real[f"U{tree['key']}{i}"] = ult["name"]
+    if abilities:
+        for tree in abilities["trees"].values():
+            for ab in tree["abilities"]:
+                real[ab["node_id"]] = ab["name"]
+
+    systems = set(mech.get("systems", {}))
+    referenced = set()
+
+    for nid, rec in mech.get("nodes", {}).items():
+        if nid not in real:
+            findings.append(f"mechanics: {nid} is not a perk, ability or ultimate")
+            continue
+        if rec.get("name") != real[nid]:
+            findings.append(f"mechanics/{nid}: name {rec.get('name')!r} "
+                            f"does not match the registry's {real[nid]!r}")
+        for field in ("provides", "scales_with"):
+            for sysid in rec.get(field, []):
+                referenced.add(sysid)
+                if sysid not in systems:
+                    findings.append(f"mechanics/{nid}: {field} names unknown system {sysid!r}")
+        both = set(rec.get("provides", [])) & set(rec.get("scales_with", []))
+        if both:
+            findings.append(f"mechanics/{nid}: {sorted(both)} is both provided and scaled with, "
+                            "which makes the node its own synergy")
+
+    for nid, name in sorted(real.items()):
+        if nid not in mech.get("nodes", {}):
+            findings.append(f"mechanics: no entry for {nid} ({name})")
+
+    seen_edges = set()
+    for edge in mech.get("edges", []):
+        pair = (edge.get("from"), edge.get("to"))
+        for end in pair:
+            referenced.add(end)
+            if end not in systems:
+                findings.append(f"mechanics: edge names unknown system {end!r}")
+        if pair[0] == pair[1]:
+            findings.append(f"mechanics: {pair[0]} is an edge to itself")
+        if pair in seen_edges:
+            findings.append(f"mechanics: duplicate edge {pair[0]} -> {pair[1]}")
+        seen_edges.add(pair)
+        if not edge.get("why"):
+            findings.append(f"mechanics: edge {pair[0]} -> {pair[1]} has no reason given")
+
+    for sysid in sorted(systems - referenced):
+        findings.append(f"mechanics: system {sysid!r} is declared but never used")
+    return findings
+
+
 def main():
     registry = json.loads((ROOT / "data" / "perks.json").read_text(encoding="utf-8"))
     ability_path = ROOT / "data" / "abilities.json"
     abilities = json.loads(ability_path.read_text(encoding="utf-8")) if ability_path.exists() else None
 
     perk_ids = {p["node_id"] for t in registry["trees"].values() for p in t["perks"]}
-    findings = internal_checks(registry) + ability_checks(abilities, perk_ids)
+    findings = (internal_checks(registry) + ability_checks(abilities, perk_ids)
+                + mechanics_checks(registry, abilities))
     label = "internal consistency"
 
     expected = []
@@ -253,8 +329,16 @@ def main():
         for f in findings:
             print(" -", f)
         return 1
-    print(f"{perks} perks, {ults} ultimates and {abils} abilities "
-          f"check out against {label}.")
+    mech_path = ROOT / "data" / "mechanics.json"
+    if mech_path.exists():
+        mech = json.loads(mech_path.read_text(encoding="utf-8"))
+        print(f"{perks} perks, {ults} ultimates and {abils} abilities "
+              f"check out against {label}.")
+        print(f"Mechanics graph: {len(mech['systems'])} systems, {len(mech['edges'])} edges, "
+              f"{len(mech['nodes'])} nodes mapped.")
+    else:
+        print(f"{perks} perks, {ults} ultimates and {abils} abilities "
+              f"check out against {label}.")
     return 0
 
 

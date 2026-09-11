@@ -9,7 +9,8 @@
   var BY_ID = {};
   var TREE_OF = {};
   var CHILDREN = {};
-  var TAGS = {};           // node_id -> [tag]
+  var ULT_TREE = {};       // synthetic ultimate id -> tree
+  var ULT_IDX = {};        // synthetic ultimate id -> index within its tree
 
   var state = {
     tab: null, sel: null,
@@ -33,8 +34,8 @@
     });
   }
 
-  Promise.all([load('data/perks.json'), load('data/abilities.json')])
-    .then(function (both) { boot(both[0], both[1]); })
+  Promise.all([load('data/perks.json'), load('data/abilities.json'), load('data/mechanics.json')])
+    .then(function (all) { boot(all[0], all[1], all[2]); })
     .catch(function (err) {
       el.panel.innerHTML = '<div class="panel-empty"><b>Could not load the registry</b>' +
         'Browsers block fetch on <code>file://</code> URLs. Serve the folder instead:' +
@@ -42,8 +43,9 @@
         '<br><br>' + esc(String(err)) + '</div>';
     });
 
-  function boot(json, abilities) {
+  function boot(json, abilities, mechanics) {
     DATA = json;
+    buildMechanics(mechanics);
     Object.keys(DATA.trees).forEach(function (name) {
       var t = DATA.trees[name];
       var a = (abilities.trees[name] || {}).abilities || [];
@@ -59,12 +61,16 @@
         ab.prerequisites = []; ab.unlocks = []; ab.quest_unlock = false;
         BY_ID[ab.node_id] = ab; TREE_OF[ab.node_id] = tree;
         CHILDREN[ab.node_id] = [];
-        TAGS[ab.node_id] = tagsFor(ab);
+      });
+      // Ultimates carry no node_id of their own; the mechanics graph keys them
+      // U<tree key><index from 1>, so mirror that here.
+      t.ultimates.forEach(function (u, i) {
+        var uid = 'U' + t.key + (i + 1);
+        ULT_TREE[uid] = tree; ULT_IDX[uid] = i;
       });
       t.perks.forEach(function (p) {
         BY_ID[p.node_id] = p; TREE_OF[p.node_id] = tree;
         CHILDREN[p.node_id] = CHILDREN[p.node_id] || [];
-        TAGS[p.node_id] = tagsFor(p);
       });
       t.perks.forEach(function (p) {
         p.prerequisites.forEach(function (q) { (CHILDREN[q] = CHILDREN[q] || []).push(p); });
@@ -144,7 +150,8 @@
       }
     }
     var t = TREE_OF[p.node_id];
-    if (state.ults[t.key] != null && !ultMet(t, spent(t) - p.levels[n - 1].skill_points)) {
+    var after = perkSpent(t) - (p.is_ability ? 0 : p.levels[n - 1].skill_points);
+    if (state.ults[t.key] != null && !ultMet(t, after)) {
       return { ok: false, why: 'Deselect the ultimate perk first.' };
     }
     return { ok: true };
@@ -168,8 +175,8 @@
   /* Totals. Levels learned are the first `n` entries of a perk's level list. */
   function entries(t) { return t.perks.concat(t.abilities || []); }
 
-  function tally(t, field) {
-    return entries(t).reduce(function (sum, p) {
+  function tallyOf(list, field) {
+    return list.reduce(function (sum, p) {
       var n = lv(p.node_id), s = 0;
       for (var i = 0; i < n; i++) s += (field === 'manual' || field === 'vrakhir blood')
         ? (p.levels[i].gate === field ? 1 : 0)
@@ -177,7 +184,14 @@
       return sum + s;
     }, 0);
   }
+  function tally(t, field) { return tallyOf(entries(t), field); }
+
+  /* Two different point counts, and the difference matters. `spent` is what the
+     build actually costs you — perks and abilities alike. `perkSpent` is what
+     the ultimate's "N/35" counter reads: ability points do NOT count toward it,
+     so an all-ability tree never unlocks an ultimate. */
   function spent(t) { return tally(t, 'skill_points'); }
+  function perkSpent(t) { return tallyOf(t.perks, 'skill_points'); }
   function timeSpent(t) {
     var u = state.ults[t.key];
     return tally(t, 'time_segments') + (u != null ? (t.ultimates[u].cost.time_segments || 0) : 0);
@@ -200,13 +214,19 @@
   function ultProgress(t, spentOverride) {
     return ultReq(t).map(function (c) {
       var have = c.type === 'corruption' ? state.corruption
-        : (spentOverride == null ? spent(t) : spentOverride);
+        : (spentOverride == null ? perkSpent(t) : spentOverride);
       return {
         met: have >= c.n, have: have, n: c.n,
-        text: c.type === 'corruption' ? 'Corruption ' + c.n : 'Spend ' + c.n + ' in this tree'
+        text: c.type === 'corruption' ? 'Corruption ' + c.n
+          : 'Spend ' + c.n + ' on perks in this tree'
       };
     });
   }
+  function ultTaken(id) {
+    var t = ULT_TREE[id];
+    return !!t && state.ults[t.key] === ULT_IDX[id];
+  }
+
   function ultMet(t, o) { return ultProgress(t, o).every(function (x) { return x.met; }); }
 
   function activeTime(p) { return p.active_time || TREE_OF[p.node_id].active_time || ''; }
@@ -276,29 +296,163 @@
     return { stats: stats, other: other, manuals: manuals, phials: phials };
   }
 
-  /* Experimental: which systems a perk touches, so the board can mark the other
-     perks that act on the same thing. */
-  var TAG_RULES = [
-    ['Stamina', /stamina/i], ['Activation charge', /activation charge|charges/i],
-    ['Critical hits', /critical|crit /i], ['Claws', /claw/i],
-    ['Weapon damage', /weapon/i], ['Witchcraft', /witchcraft/i],
-    ['Health', /health/i], ['Armour', /armour/i], ['Cooldowns', /cooldown/i],
-    ['Corruption', /corruption/i], ['Blood', /blood|drink|feed/i],
-    ['Consumables', /consumable|quickslot|craft|recipe|harvest|plant/i],
-    ['Blocking', /block|riposte|parry/i], ['Dodging', /dodge/i],
-    ['Ability slots', /\bslots?\b/i], ['Duration', /duration|time segment/i],
-    ['Carry weight', /carry weight|encumber/i], ['Trading', /\b(prices?|stores?|shops?|offers?)\b/i]
-  ];
-  function tagsFor(p) {
-    var hay = p.effect + ' ' + p.levels.map(function (l) { return l.effect; }).join(' ');
-    return TAG_RULES.filter(function (r) { return r[1].test(hay); }).map(function (r) { return r[0]; });
+  /* ------------------------------------------------------------- synergy
+
+     Two perks are not synergistic because their text shares a word. They are
+     synergistic when one raises something the other is paid by — directly, or
+     down a chain of real mechanics. data/mechanics.json holds that chain: each
+     node declares what it `provides` and what it `scales_with`, and the edges
+     say which systems drive which. Attack speed lands more attacks, more
+     attacks roll more criticals, and criticals are what Restless Blade turns
+     into cooldown — so Swiftness feeds Restless Blade three steps away, and
+     the planner can say why. */
+  var MECH = null;
+  var OUT = {};            // system -> [edge] following the arrow
+  var IN = {};             // system -> [edge] against it
+  var MAX_HOPS = 2;        // past two steps everything connects to everything
+
+  function buildMechanics(m) {
+    MECH = m;
+    (m.edges || []).forEach(function (e) {
+      (OUT[e.from] = OUT[e.from] || []).push(e);
+      (IN[e.to] = IN[e.to] || []).push(e);
+    });
   }
+
+  function sysName(id) {
+    return (MECH && MECH.systems[id] && MECH.systems[id].name) || id;
+  }
+  function mech(id) { return (MECH && MECH.nodes[id]) || null; }
+
+  /* Breadth-first over the mechanics graph. `dir` is 'out' to follow the arrows
+     (what my outputs end up affecting) or 'in' to walk against them (what could
+     end up feeding my inputs). Either way the stored path reads forward, cause
+     first, so it can be printed as-is. The graph has cycles by design — crits
+     cut cooldowns, cooldowns raise uptime, uptime raises damage, damage kills,
+     kills cut cooldowns — so `seen` and MAX_HOPS are what terminate this. */
+  function reach(starts, dir) {
+    var seen = {}, queue = [];
+    starts.forEach(function (s) {
+      if (seen[s]) return;
+      seen[s] = { dist: 0, path: [], from: s };
+      queue.push(s);
+    });
+    for (var q = 0; q < queue.length; q++) {
+      var cur = queue[q], rec = seen[cur];
+      if (rec.dist >= MAX_HOPS) continue;
+      var edges = (dir === 'out' ? OUT[cur] : IN[cur]) || [];
+      for (var k = 0; k < edges.length; k++) {
+        var e = edges[k], next = dir === 'out' ? e.to : e.from;
+        if (seen[next]) continue;
+        seen[next] = {
+          dist: rec.dist + 1,
+          path: dir === 'out' ? rec.path.concat([e]) : [e].concat(rec.path),
+          from: rec.from
+        };
+        queue.push(next);
+      }
+    }
+    return seen;
+  }
+
+  /* The systems named along a path, cause first. */
+  function chainOf(hit, target, dir) {
+    if (!hit.path.length) return [target];
+    var out = [hit.path[0].from];
+    hit.path.forEach(function (e) { out.push(e.to); });
+    return out;
+  }
+
+  function synergiesFor(id) {
+    var me = mech(id);
+    if (!me) return [];
+    var fwd = reach(me.provides || [], 'out');
+    var rev = reach(me.scales_with || [], 'in');
+    var rows = [];
+
+    Object.keys(MECH.nodes).forEach(function (other) {
+      if (other === id) return;
+      var y = MECH.nodes[other], best = null;
+
+      (y.scales_with || []).forEach(function (s) {
+        var hit = fwd[s];
+        if (hit && (!best || hit.dist < best.dist)) {
+          best = { dist: hit.dist, dir: 'feeds', chain: chainOf(hit, s, 'out'), path: hit.path };
+        }
+      });
+      (y.provides || []).forEach(function (s) {
+        var hit = rev[s];
+        if (hit && (!best || hit.dist < best.dist)) {
+          best = { dist: hit.dist, dir: 'fedBy', chain: chainOf(hit, s, 'in'), path: hit.path };
+        }
+      });
+      if (!best) return;
+      rows.push({
+        id: other, name: y.name, dist: best.dist, dir: best.dir,
+        chain: best.chain, why: best.path.map(function (e) { return e.why; }),
+        tree: TREE_OF[other] || ULT_TREE[other] || null,
+        learned: lv(other) > 0 || ultTaken(other)
+      });
+    });
+
+    rows.sort(function (a, b) {
+      if (a.dist !== b.dist) return a.dist - b.dist;
+      if (a.learned !== b.learned) return a.learned ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+    return rows;
+  }
+
+  var SYN_SHOWN = 12;
+
+  function synergyHTML(id) {
+    var me = mech(id);
+    if (!me) return '';
+    var rows = synergiesFor(id);
+
+    var head = [];
+    if ((me.provides || []).length) {
+      head.push('Raises <em>' + me.provides.map(function (x) { return esc(sysName(x)); }).join(', ') + '</em>');
+    }
+    if ((me.scales_with || []).length) {
+      head.push('paid by <em>' + me.scales_with.map(function (x) { return esc(sysName(x)); }).join(', ') + '</em>');
+    }
+    var note = me.note ? '<p class="syn-note">' + esc(me.note) + '</p>' : '';
+    if (!rows.length) {
+      return '<div class="syn-box">' + (head.length ? '<p class="syn-sub">' + head.join(' · ') + '.</p>' : '') +
+        note + '</div>';
+    }
+
+    var shown = rows.slice(0, SYN_SHOWN);
+    var list = shown.map(function (r) {
+      var chain = r.chain.map(function (x) { return esc(sysName(x)); }).join(' <i>→</i> ');
+      var where = r.tree && r.tree !== TREE_OF[id]
+        ? '<span class="syn-tree">' + esc(r.tree.name) + '</span>' : '';
+      return '<li class="syn-row ' + (r.dir === 'feeds' ? 'out' : 'in') +
+        (r.learned ? ' has' : '') + '" title="' + esc(r.why.join(' ')) + '">' +
+        '<span class="syn-arrow" aria-hidden="true"></span>' +
+        '<span class="syn-name">' + esc(r.name) + where + '</span>' +
+        '<span class="syn-chain">' + chain + '</span></li>';
+    }).join('');
+
+    var more = rows.length > shown.length
+      ? '<p class="syn-more">and ' + (rows.length - shown.length) + ' more, further away.</p>' : '';
+
+    return '<div class="syn-box">' +
+      (head.length ? '<p class="syn-sub">' + head.join(' · ') + '.</p>' : '') + note +
+      '<ul class="syn-list">' + list + '</ul>' + more +
+      '<p class="syn-key">Arrow out: this feeds it. Arrow in: it feeds this. ' +
+      'Hover a row for the mechanic behind the chain.</p></div>';
+  }
+
+  /* Board marking stays inside the tree on screen — those are the nodes you can
+     actually click from here — and only shows a direct hit, where this node's
+     output *is* the other's input. Two-hop chains are real but there are enough
+     of them to light up the whole board, so they stay in the panel list. */
   function related(id) {
-    var mine = TAGS[id] || [];
-    if (!mine.length) return [];
-    return (TREE_OF[id] ? TREE_OF[id].perks : []).filter(function (p) {
-      return p.node_id !== id && (TAGS[p.node_id] || []).some(function (t) { return mine.indexOf(t) >= 0; });
-    }).map(function (p) { return p.node_id; });
+    return synergiesFor(id).filter(function (r) {
+      return r.dist === 0 && r.tree === TREE_OF[id];
+    }).map(function (r) { return r.id; });
   }
 
   /* -------------------------------------------------------------- layout */
@@ -313,10 +467,13 @@
      Clamping a narrow gap up has to come out of the wide ones, or the board
      would overflow — so the surplus is taken back from whatever is still above
      the floor, and the floor itself gives way if there is simply no room. */
-  function distribute(gaps, total, target, floor) {
+  function distribute(gaps, total, target, floor, mayOverflow) {
     var n = gaps.length;
     if (!n) return [];
-    if (floor * n > target) floor = target / n;
+    // Normally the board is made to fit the window, so a floor that cannot fit
+    // gives way. Where the board is allowed to scroll sideways it does not:
+    // squeezing past the floor is what drives names into each other.
+    if (!mayOverflow && floor * n > target) floor = target / n;
     var w = gaps.map(function (g) { return total ? g / total * target : target / n; });
     for (var pass = 0; pass < 6; pass++) {
       w = w.map(function (x) { return Math.max(floor, x); });
@@ -349,9 +506,12 @@
 
     var rows = Math.max.apply(null, t.perks.map(function (p) { return p.row; }));
     var labelRoom = 48, rowFloorGap = 58;
+    // Below the stacking breakpoint the page scrolls and the board may scroll
+    // sideways, which changes what the layout is allowed to do to fit.
+    var stacked = window.matchMedia('(max-width:1000px)').matches;
     // Rows may not go below what a two-line label needs, so when the column is
     // short it is the node that gives way, not the spacing.
-    if (!window.matchMedia('(max-width:1000px)').matches && rows > 1) {
+    if (!stacked && rows > 1) {
       var fits = (availH - 56 - rowFloorGap * (rows - 1)) / rows;
       node = Math.max(52, Math.min(node, fits));
     }
@@ -366,7 +526,7 @@
     var gaps = [], total = 0, i;
     for (i = 1; i < xs.length; i++) { gaps.push(xs[i] - xs[i - 1]); total += xs[i] - xs[i - 1]; }
     var target = Math.max(availW - 2 * pad, 0);
-    var widths = distribute(gaps, total, target, colmin);
+    var widths = distribute(gaps, total, target, colmin, stacked);
 
     var at = {}, cursor = pad;
     at[xs[0]] = cursor;
@@ -380,12 +540,11 @@
     var pitch = widths.length ? Math.min.apply(null, widths) : colmin;
     // A label is centred on its node, so it may overhang neither its neighbour
     // nor the edge of the board — hence the padding cap as well as the pitch.
-    var labelW = Math.max(64, Math.min(152, pitch - 8, 2 * pad - 8));
+    var labelW = Math.min(152, Math.max(56, Math.min(pitch - 8, 2 * pad - 8)));
 
     var top = node / 2 + 8;
     // Below the stacking breakpoint the page scrolls anyway, so let the board
     // keep its full row height instead of nesting a second scroller inside it.
-    var stacked = window.matchMedia('(max-width:1000px)').matches;
     var rowH = cssPx('--row', 180);
     if (!stacked && rows > 1) {
       rowH = Math.max(node + rowFloorGap, Math.min(rowH, (availH - top - node / 2 - labelRoom) / (rows - 1)));
@@ -453,6 +612,19 @@
     el.nodes.innerHTML = t.perks.map(function (p) { return nodeHTML(p, L, syn); }).join('');
   }
 
+  /* Level markers, drawn the way the game draws them: a filled diamond for every
+     level learned, a hollow bright one on the level you could buy next, and a
+     dark one for the rest. Perk nodes and ability rows share this so the two
+     read the same at a glance. */
+  function pipsHTML(p, n, learnable) {
+    var out = '';
+    for (var i = 0; i < p.max_level; i++) {
+      var cls = i < n ? ' on' : (i === n && learnable ? ' next' : '');
+      out += '<span class="pip' + cls + '"></span>';
+    }
+    return out;
+  }
+
   function nodeHTML(p, L, syn) {
     var n = lv(p.node_id), open = unlocked(p), learnable = canLearn(p).ok;
     var cls = ['node'];
@@ -464,8 +636,7 @@
     if (state.sel === p.node_id) cls.push('selected');
     if (syn.indexOf(p.node_id) >= 0) cls.push('synergy');
 
-    var pips = '';
-    for (var i = 0; i < p.max_level; i++) pips += '<span class="pip' + (i < n ? ' on' : '') + '"></span>';
+    var pips = pipsHTML(p, n, learnable);
 
     var badge = '';
     if (p.quest_unlock && !state.quests[p.node_id]) badge = '<span class="badge lock"></span>';
@@ -495,14 +666,16 @@
       for (var i = 0; i < n; i++) s += a.levels[i].skill_points;
       return sum + s;
     }, 0);
-    el.abilNote.textContent = learned + ' of ' + list.length + ' learned · ' + pts + ' points';
+    el.abilNote.textContent = learned + ' of ' + list.length + ' learned · ' + pts +
+      ' points — these do not count toward the ultimate';
 
+    var syn = state.synergy && state.sel && TREE_OF[state.sel] === t ? related(state.sel) : [];
     el.abils.innerHTML = list.map(function (a) {
       var n = lv(a.node_id), can = canLearn(a).ok;
       var cls = 'abil' + (n ? ' taken' : '') + (n >= a.max_level ? ' maxed' : '') +
-                (can ? ' avail' : '') + (state.sel === a.node_id ? ' selected' : '');
-      var pips = '';
-      for (var i = 0; i < a.max_level; i++) pips += '<span class="pip' + (i < n ? ' on' : '') + '"></span>';
+                (can ? ' avail' : '') + (state.sel === a.node_id ? ' selected' : '') +
+                (syn.indexOf(a.node_id) >= 0 ? ' synergy' : '');
+      var pips = pipsHTML(a, n, can);
       var nl = a.levels[n];
       var use = a.use_cost && a.use_cost.text ? a.use_cost.text : '';
       return '<button class="' + cls + '" type="button" data-node="' + a.node_id + '"' +
@@ -571,10 +744,7 @@
       }).join('</b> and <b>') + '</b></p>';
     }
 
-    var tags = TAGS[id] || [];
-    var synLine = (state.synergy && tags.length)
-      ? '<p class="syn-line">Acts on <em>' + tags.map(esc).join(', ') + '</em> — ' +
-        related(id).length + ' other perks in this tree touch the same systems.</p>' : '';
+    var synLine = state.synergy ? synergyHTML(id) : '';
 
     var levels = p.levels.map(function (l, i) {
       var owned = i < n, isNext = i === n;
