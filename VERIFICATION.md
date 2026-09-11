@@ -24,10 +24,9 @@ script exits non-zero on any undocumented difference.
 
 ### The screenshot sweep
 
-A capture of every skill screen — 92 shots across the three trees, one per
-node — is what the registry is transcribed from. It covers all 27 abilities,
-53 of the 54 perks and all 9 ultimates. **Unholy Fervour (Witchcraft) is the
-one perk not captured**, and its entry still rests on the Game8 tables alone.
+A capture of every skill screen is what the registry is transcribed from, and
+it is complete: all 54 perks, all 27 abilities and all 9 ultimates are read
+from the game.
 
 Three things the screenshots settled that no published source carries:
 

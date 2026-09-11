@@ -629,18 +629,18 @@
           ],
           "unlocks": [],
           "quest_unlock": false,
-          "effect": "Chance to refund an activation charge after casting.",
+          "effect": "Chance for a refund of an Activation Charge after Witchcraft Ability use.",
           "levels": [
             {
               "level": 1,
-              "effect": "20% refund chance",
+              "effect": "Activation Charge refund : 20% chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "40% refund chance",
+              "effect": "Activation Charge refund : 40% chance.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
