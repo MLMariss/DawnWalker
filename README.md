@@ -21,7 +21,16 @@ Pages and it works as the site index.
   *Mandrake Ward* — are click-to-toggle and cost nothing.
 - **Ultimates.** Three per tree, one selectable, unlocked at 35 points spent in that
   tree (Witchcraft, Swordmastery) or Corruption 15 (Vampirism).
-- **Running totals** for skill points, time segments and manuals across all trees.
+- **Running totals** for skill points, time segments and manuals across all trees,
+  plus a per-treepoint count and manual count on each tab — so you can see what a
+  given tree actually costs you to find in the world.
+- **Build overview.** Every bonus you have taken, added up and grouped. Within one
+  perk a later level replaces the earlier one for the same stat (Endless Effort's
+  +100% is not also +25% and +50%); across different perks the same stat adds up.
+  Conditional effects and the manuals you still need are listed separately.
+- **Synergy marks (experimental).** Selecting a perk puts a small bright point on
+  every other perk in the tree that acts on the same system — stamina, critical
+  hits, claws, cooldowns and so on — derived from the effect text. Toggleable.
 - **Shareable builds.** The URL hash carries the whole build; "Copy build link" puts
   it on the clipboard. Lowering Corruption or switching Manuals off peels back any
   level that is no longer legal rather than leaving an impossible build on screen.
@@ -29,6 +38,15 @@ Pages and it works as the site index.
 Controls: **click** a node to learn its next level, **right-click** to refund,
 **Backspace** refunds the focused node, and the side panel has explicit Learn/Refund
 buttons for touch.
+
+## Layout
+
+The board fits the window rather than scrolling. Columns are remapped into the
+space available — keeping the game's relative spacing, with a floor on the gap
+between neighbours — instead of zooming the whole board, which would drag the
+labels below a readable size. Nothing on the page is set under 12px. The
+Ultimate Perks and Build overview sections are collapsible, so a short screen can
+give the tree its height back.
 
 ## Layout
 
@@ -86,10 +104,13 @@ string. A perk looks like this:
 - `gate` is one of `none`, `manual`, `quest`, or `corruption <n>`.
 - `unlocks` is the exact inverse of `prerequisites` across all three trees; the app
   builds its graph from `prerequisites` and treats `unlocks` as documentation.
+- `active_time` (`ANYTIME`, `DAY ONLY`, `NIGHT ONLY`) may sit on a tree or on a
+  single perk; a perk's own value wins.
 - An ultimate may carry an `alias` when published lists disagree on its name; the
   planner shows it on the card.
-- `requirement` on an ultimate may name more than one condition — Vampirism reads
-  `"35 points in tree, Corruption 15"` — and all of them must hold.
+- `requirement` on an ultimate may name more than one condition and all of them
+  must hold. Witchcraft and Swordmastery read `"35 points in tree"`; Vampirism
+  reads `"Corruption 15"` and has no point requirement.
 - Top-level `source_overrides` records any field where the registry knowingly
   departs from the external source, with the reason.
 

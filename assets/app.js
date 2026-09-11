@@ -1,57 +1,39 @@
 /* The Blood of Dawnwalker — skill tree planner.
-   Reads data/perks.json and renders every tree from it; nothing about the
-   perks is hard-coded here beyond the icon mapping in icons.js. */
+   Everything about the perks is read from data/perks.json; this file holds the
+   rules, the layout maths and the build analysis. */
 (function () {
   'use strict';
 
-  var DATA = null;          // parsed registry
-  var TREES = [];           // [{name, key, perks, ultimates, ultimate_rule}]
-  var BY_ID = {};           // node_id -> perk
-  var TREE_OF = {};         // node_id -> tree
-  var CHILDREN = {};        // node_id -> [perk] (from prerequisites)
+  var DATA = null;
+  var TREES = [];
+  var BY_ID = {};
+  var TREE_OF = {};
+  var CHILDREN = {};
+  var TAGS = {};           // node_id -> [tag]
 
   var state = {
-    tab: null,
-    sel: null,
-    levels: {},             // node_id -> levels learned
-    ults: {},               // tree key -> ultimate index
-    quests: {},             // node_id -> true for story-unlocked nodes
-    corruption: 15,
-    manuals: true
+    tab: null, sel: null,
+    levels: {}, ults: {}, quests: {},
+    corruption: 15, manuals: true, synergy: true
   };
 
-  var el = {
-    tabs: document.getElementById('tabs'),
-    tree: document.getElementById('tree'),
-    links: document.getElementById('links'),
-    nodes: document.getElementById('nodes'),
-    ults: document.getElementById('ults'),
-    ultGate: document.getElementById('ult-gate'),
-    ultRule: document.getElementById('ult-rule'),
-    panel: document.getElementById('panel'),
-    toast: document.getElementById('toast'),
-    corruption: document.getElementById('corruption'),
-    corruptionOut: document.getElementById('corruption-out'),
-    manuals: document.getElementById('manuals'),
-    mSp: document.getElementById('m-sp'),
-    mTs: document.getElementById('m-ts'),
-    mBk: document.getElementById('m-bk')
-  };
+  var el = {};
+  ['tabs', 'tree', 'links', 'nodes', 'ults', 'ult-gate', 'panel', 'toast', 'corruption',
+   'corruption-out', 'manuals', 'synergy', 'm-sp', 'm-ts', 'm-bk', 'boardscroll',
+   'ov-body', 'ov-note', 'ovdrawer', 'ultdrawer'].forEach(function (id) {
+    el[id.replace(/-(\w)/g, function (_, c) { return c.toUpperCase(); })] = document.getElementById(id);
+  });
 
   /* ---------------------------------------------------------------- data */
 
   fetch('data/perks.json', { cache: 'no-cache' })
-    .then(function (r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(boot)
     .catch(function (err) {
-      el.panel.innerHTML =
-        '<div class="panel-empty"><b>Could not load data/perks.json</b>' +
+      el.panel.innerHTML = '<div class="panel-empty"><b>Could not load data/perks.json</b>' +
         'Browsers block fetch on <code>file://</code> URLs. Serve the folder instead:' +
-        '<br><br><code>python3 -m http.server</code><br>then open ' +
-        '<code>http://localhost:8000</code>.<br><br><small>' + esc(String(err)) + '</small></div>';
+        '<br><br><code>python3 -m http.server</code><br>then open <code>http://localhost:8000</code>.' +
+        '<br><br>' + esc(String(err)) + '</div>';
     });
 
   function boot(json) {
@@ -59,34 +41,31 @@
     Object.keys(DATA.trees).forEach(function (name) {
       var t = DATA.trees[name];
       var tree = {
-        name: name, key: t.key, perks: t.perks,
-        ultimates: t.ultimates, ultimate_rule: t.ultimate_rule
+        name: name, key: t.key, perks: t.perks, ultimates: t.ultimates,
+        ultimate_rule: t.ultimate_rule, active_time: t.active_time
       };
       TREES.push(tree);
       t.perks.forEach(function (p) {
-        BY_ID[p.node_id] = p;
-        TREE_OF[p.node_id] = tree;
+        BY_ID[p.node_id] = p; TREE_OF[p.node_id] = tree;
         CHILDREN[p.node_id] = CHILDREN[p.node_id] || [];
+        TAGS[p.node_id] = tagsFor(p);
       });
       t.perks.forEach(function (p) {
-        p.prerequisites.forEach(function (q) {
-          (CHILDREN[q] = CHILDREN[q] || []).push(p);
-        });
+        p.prerequisites.forEach(function (q) { (CHILDREN[q] = CHILDREN[q] || []).push(p); });
       });
     });
-
     state.tab = TREES[0].name;
     readHash();
     bindChrome();
-    renderTabs();
     renderAll();
-    window.addEventListener('resize', debounce(renderTree, 120));
+    window.addEventListener('resize', debounce(function () { renderTree(); }, 120));
   }
 
   /* --------------------------------------------------------------- rules */
 
   function lv(id) { return state.levels[id] || 0; }
   function tree() { return TREES.filter(function (t) { return t.name === state.tab; })[0]; }
+  function nameOf(id) { return BY_ID[id] ? BY_ID[id].name : id; }
 
   function unlocked(p) {
     if (p.quest_unlock) return !!state.quests[p.node_id];
@@ -120,7 +99,7 @@
       return { ok: false, why: 'Story unlock — click the node to mark it found.' };
     }
     if (!unlocked(p)) {
-      return { ok: false, why: 'Requires ' + p.prerequisites.map(nameOf).join(' and ') + '.' };
+      return { ok: false, why: 'Learn ' + p.prerequisites.map(nameOf).join(' and ') + ' to make this one available.' };
     }
     var nl = nextLevel(p);
     if (!nl) return { ok: false, why: 'Fully learned.' };
@@ -145,9 +124,8 @@
       }
     }
     var t = TREE_OF[p.node_id];
-    if (state.ults[t.key] != null) {
-      var after = spent(t) - p.levels[n - 1].skill_points;
-      if (!ultMet(t, after)) return { ok: false, why: 'Deselect the ultimate perk first.' };
+    if (state.ults[t.key] != null && !ultMet(t, spent(t) - p.levels[n - 1].skill_points)) {
+      return { ok: false, why: 'Deselect the ultimate perk first.' };
     }
     return { ok: true };
   }
@@ -167,37 +145,24 @@
     return true;
   }
 
-  /* Skill points spent on perks in a tree (ultimate cost excluded — the
-     in-game unlock counter reads "Spend N to unlock" off perk points). */
-  function spent(t) {
+  /* Totals. Levels learned are the first `n` entries of a perk's level list. */
+  function tally(t, field) {
     return t.perks.reduce(function (sum, p) {
       var n = lv(p.node_id), s = 0;
-      for (var i = 0; i < n; i++) s += p.levels[i].skill_points;
+      for (var i = 0; i < n; i++) s += field === 'manual'
+        ? (p.levels[i].gate === 'manual' ? 1 : 0)
+        : p.levels[i][field];
       return sum + s;
     }, 0);
   }
-
+  function spent(t) { return tally(t, 'skill_points'); }
   function timeSpent(t) {
-    var total = t.perks.reduce(function (sum, p) {
-      var n = lv(p.node_id), s = 0;
-      for (var i = 0; i < n; i++) s += p.levels[i].time_segments;
-      return sum + s;
-    }, 0);
     var u = state.ults[t.key];
-    if (u != null) total += (t.ultimates[u].cost.time_segments || 0);
-    return total;
+    return tally(t, 'time_segments') + (u != null ? (t.ultimates[u].cost.time_segments || 0) : 0);
   }
+  function manualsNeeded(t) { return tally(t, 'manual'); }
 
-  function manualsUsed(t) {
-    return t.perks.reduce(function (sum, p) {
-      var n = lv(p.node_id), s = 0;
-      for (var i = 0; i < n; i++) if (p.levels[i].gate === 'manual') s++;
-      return sum + s;
-    }, 0);
-  }
-
-  /* A requirement string can name more than one condition, e.g.
-     "35 points in tree, Corruption 15" — all of them must hold. */
+  /* A requirement string may name several conditions; all of them must hold. */
   function ultReq(t) {
     var r = (t.ultimates[0] && t.ultimates[0].requirement) || '35 points in tree';
     var conds = [];
@@ -211,8 +176,7 @@
 
   function ultProgress(t, spentOverride) {
     return ultReq(t).map(function (c) {
-      var have = c.type === 'corruption'
-        ? state.corruption
+      var have = c.type === 'corruption' ? state.corruption
         : (spentOverride == null ? spent(t) : spentOverride);
       return {
         met: have >= c.n, have: have, n: c.n,
@@ -220,90 +184,224 @@
       };
     });
   }
+  function ultMet(t, o) { return ultProgress(t, o).every(function (x) { return x.met; }); }
 
-  function ultMet(t, spentOverride) {
-    return ultProgress(t, spentOverride).every(function (x) { return x.met; });
+  function activeTime(p) { return p.active_time || TREE_OF[p.node_id].active_time || ''; }
+
+  /* ------------------------------------------------- effect interpretation */
+
+  /* Effects are written as prose. Two shapes carry a number we can total:
+     a signed delta ("+25% max stamina", "-10% cooldowns") and a flat setting
+     ("10% critical chance", "2 slots"). Anything with more than one number in
+     it — "+4% per attack, up to +20%" — is conditional, and is listed as text
+     rather than folded into a total. */
+  function readEffect(text) {
+    var body = String(text).replace(/\.$/, '').trim();
+    var signed = /^([+-])(\d+)(%?)\s+(.+)$/.exec(body);
+    if (signed && !/\d/.test(signed[4])) {
+      return { kind: 'delta', value: (signed[1] === '-' ? -1 : 1) * +signed[2],
+               unit: signed[3], label: signed[4] };
+    }
+    var flat = /^(\d+)(%?)\s+(.+)$/.exec(body);
+    if (flat && !/\d/.test(flat[3])) {
+      return { kind: 'set', value: +flat[1], unit: flat[2], label: flat[3] };
+    }
+    return null;
   }
 
-  function nameOf(id) { return BY_ID[id] ? BY_ID[id].name : id; }
+  var GROUPS = [
+    ['Offence', /damage|crit|bleed|weaken/i],
+    ['Defence', /armour|health|penalt|regener|block|immortal/i],
+    ['Resources', /stamina|charge|cooldown|corruption|refund|restor/i]
+  ];
+  function groupFor(label) {
+    for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i][1].test(label)) return GROUPS[i][0];
+    return 'Utility';
+  }
 
-  /* ------------------------------------------------------------- render */
+  /* Within one perk, a later level replaces the earlier one for the same stat
+     (Endless Effort's +100% is not +25% and +50% and +75% as well), so take the
+     highest. Across different perks the stats add up. */
+  function summarise() {
+    var stats = {}, other = [], manuals = [];
+    TREES.forEach(function (t) {
+      t.perks.forEach(function (p) {
+        var n = lv(p.node_id);
+        if (!n) return;
+        var best = {};
+        for (var i = 0; i < n; i++) {
+          var l = p.levels[i];
+          if (l.gate === 'manual') manuals.push(p.name + ' — level ' + l.level);
+          var r = readEffect(l.effect);
+          if (!r) { other.push({ perk: p.name, text: l.effect }); continue; }
+          var key = (r.label + '|' + r.unit).toLowerCase();
+          if (!best[key] || Math.abs(r.value) > Math.abs(best[key].value)) {
+            best[key] = { value: r.value, unit: r.unit, label: r.label, kind: r.kind };
+          }
+        }
+        Object.keys(best).forEach(function (key) {
+          var b = best[key];
+          if (!stats[key]) stats[key] = { value: 0, unit: b.unit, label: b.label, kind: b.kind, perks: [] };
+          stats[key].value += b.value;
+          stats[key].perks.push(p.name);
+        });
+      });
+      var u = state.ults[t.key];
+      if (u != null) other.push({ perk: t.ultimates[u].name + ' (ultimate)', text: t.ultimates[u].effect });
+    });
+    return { stats: stats, other: other, manuals: manuals };
+  }
+
+  /* Experimental: which systems a perk touches, so the board can mark the other
+     perks that act on the same thing. */
+  var TAG_RULES = [
+    ['Stamina', /stamina/i], ['Activation charge', /activation charge|charges/i],
+    ['Critical hits', /critical|crit /i], ['Claws', /claw/i],
+    ['Weapon damage', /weapon/i], ['Witchcraft', /witchcraft/i],
+    ['Health', /health/i], ['Armour', /armour/i], ['Cooldowns', /cooldown/i],
+    ['Corruption', /corruption/i], ['Blood', /blood|drink|feed/i],
+    ['Consumables', /consumable|quickslot|craft|recipe|harvest|plant/i],
+    ['Blocking', /block|riposte|parry/i], ['Dodging', /dodge/i],
+    ['Ability slots', /\bslots?\b/i], ['Duration', /duration|time segment/i],
+    ['Carry weight', /carry weight|encumber/i], ['Trading', /\b(prices?|stores?|shops?|offers?)\b/i]
+  ];
+  function tagsFor(p) {
+    var hay = p.effect + ' ' + p.levels.map(function (l) { return l.effect; }).join(' ');
+    return TAG_RULES.filter(function (r) { return r[1].test(hay); }).map(function (r) { return r[0]; });
+  }
+  function related(id) {
+    var mine = TAGS[id] || [];
+    if (!mine.length) return [];
+    return (TREE_OF[id] ? TREE_OF[id].perks : []).filter(function (p) {
+      return p.node_id !== id && (TAGS[p.node_id] || []).some(function (t) { return mine.indexOf(t) >= 0; });
+    }).map(function (p) { return p.node_id; });
+  }
+
+  /* -------------------------------------------------------------- layout */
+
+  function cssPx(name, fallback) {
+    var v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name));
+    return isNaN(v) ? fallback : v;
+  }
+
+  /* Share `target` pixels out among the gaps between columns, in proportion to
+     the spacing the game uses, but never letting a gap fall below `floor`.
+     Clamping a narrow gap up has to come out of the wide ones, or the board
+     would overflow — so the surplus is taken back from whatever is still above
+     the floor, and the floor itself gives way if there is simply no room. */
+  function distribute(gaps, total, target, floor) {
+    var n = gaps.length;
+    if (!n) return [];
+    if (floor * n > target) floor = target / n;
+    var w = gaps.map(function (g) { return total ? g / total * target : target / n; });
+    for (var pass = 0; pass < 6; pass++) {
+      w = w.map(function (x) { return Math.max(floor, x); });
+      var sum = w.reduce(function (a, b) { return a + b; }, 0);
+      if (sum - target <= 0.5) break;
+      var free = [], freeTotal = 0;
+      w.forEach(function (x, i) { if (x > floor + 0.5) { free.push(i); freeTotal += x; } });
+      if (!free.length) break;
+      var give = Math.min(sum - target, freeTotal - floor * free.length);
+      if (give <= 0) break;
+      var k = (freeTotal - give) / freeTotal;
+      free.forEach(function (i) { w[i] *= k; });
+    }
+    return w;
+  }
+
+  /* Columns are remapped into the space available rather than the board being
+     zoomed — scaling the board would drag the labels below 12px. Relative
+     spacing is kept, with a floor on the gap between adjacent columns. */
+  function layout(t) {
+    var node = cssPx('--node', 92), colmin = cssPx('--colmin', 132);
+    var pad = node / 2 + 38;
+    var availW = (el.boardscroll.clientWidth || 1000) - 4;
+    var availH = (el.boardscroll.clientHeight || 700) - 6;
+
+    var xs = [];
+    t.perks.forEach(function (p) { if (xs.indexOf(p.x) < 0) xs.push(p.x); });
+    xs.sort(function (a, b) { return a - b; });
+
+    var gaps = [], total = 0, i;
+    for (i = 1; i < xs.length; i++) { gaps.push(xs[i] - xs[i - 1]); total += xs[i] - xs[i - 1]; }
+    var target = Math.max(availW - 2 * pad, 0);
+    var widths = distribute(gaps, total, target, colmin);
+
+    var at = {}, cursor = pad;
+    at[xs[0]] = cursor;
+    for (i = 0; i < widths.length; i++) { cursor += widths[i]; at[xs[i + 1]] = cursor; }
+    var used = cursor + pad;
+    var width = Math.max(availW, used);
+    var shift = used < availW ? (availW - used) / 2 : 0;   // centre any spare room
+
+    // Labels sit under their node, so they may be no wider than the tightest
+    // column pitch or neighbouring names would collide.
+    var pitch = widths.length ? Math.min.apply(null, widths) : colmin;
+    // A label is centred on its node, so it may overhang neither its neighbour
+    // nor the edge of the board — hence the padding cap as well as the pitch.
+    var labelW = Math.max(64, Math.min(152, pitch - 8, 2 * pad - 8));
+
+    var rows = Math.max.apply(null, t.perks.map(function (p) { return p.row; }));
+    var labelRoom = 48, top = node / 2 + 8;
+    // Below the stacking breakpoint the page scrolls anyway, so let the board
+    // keep its full row height instead of nesting a second scroller inside it.
+    var stacked = window.matchMedia('(max-width:1000px)').matches;
+    var rowH = cssPx('--row', 180);
+    if (!stacked && rows > 1) {
+      rowH = Math.max(node + 58, Math.min(rowH, (availH - top - node / 2 - labelRoom) / (rows - 1)));
+    }
+    var height = top + (rows - 1) * rowH + node / 2 + labelRoom;
+
+    return {
+      node: node, width: width, height: height, labelW: labelW,
+      pos: function (p) { return { x: at[p.x] + shift, y: top + (p.row - 1) * rowH }; }
+    };
+  }
+
+  /* -------------------------------------------------------------- render */
 
   function renderAll() {
+    document.body.className = 't-' + (tree() ? tree().key : 'wc');
     renderTabs();
     renderTree();
     renderUltimates();
     renderPanel();
     renderMeters();
+    renderOverview();
     writeHash();
   }
 
   function renderTabs() {
     el.tabs.innerHTML = TREES.map(function (t) {
-      var on = t.name === state.tab;
+      var mn = manualsNeeded(t);
       return '<button class="tab" role="tab" type="button" data-tree="' + t.name + '"' +
-        ' aria-selected="' + on + '">' +
-        '<span class="tab-mark">' + Icons.svg(Icons.forTree(t.name)) + '</span>' +
-        t.name +
-        '<span class="tab-count">' + spent(t) + '</span></button>';
+        ' aria-selected="' + (t.name === state.tab) + '">' +
+        '<span class="tab-mark">' + Icons.svg(Icons.forTree(t.name)) + '</span>' + t.name +
+        '<span class="tab-stat"><i class="s-sp"></i>' + spent(t) +
+        (mn ? '<i class="s-bk"></i>' + mn : '') + '</span></button>';
     }).join('');
   }
-
-  function metrics() {
-    var css = getComputedStyle(document.documentElement);
-    var node = parseFloat(css.getPropertyValue('--node')) || 74;
-    var row = parseFloat(css.getPropertyValue('--row')) || 170;
-    return { node: node, row: row, pad: 70, top: node / 2 + 24 };
-  }
-
-  function pos(p, m) {
-    return { x: p.x * scaleX(m) + m.pad, y: m.top + (p.row - 1) * m.row };
-  }
-
-  /* Columns were captured at in-game pixel positions; squeeze them a little
-     on narrow node sizes so labels keep their gutter. */
-  function scaleX(m) { return m.node < 70 ? 0.82 : 1; }
 
   function renderTree() {
     var t = tree();
     if (!t) return;
-    var m = metrics();
-    var maxX = Math.max.apply(null, t.perks.map(function (p) { return p.x; }));
-    var maxRow = Math.max.apply(null, t.perks.map(function (p) { return p.row; }));
-    var w = maxX * scaleX(m) + m.pad * 2;
-    var h = m.top + (maxRow - 1) * m.row + m.node / 2 + 46;
+    var L = layout(t);
+    el.tree.style.width = L.width + 'px';
+    el.tree.style.height = L.height + 'px';
+    el.links.setAttribute('viewBox', '0 0 ' + L.width + ' ' + L.height);
 
-    el.tree.style.width = w + 'px';
-    el.tree.style.height = h + 'px';
-
-    // Scale the board down to the available width, but never so far that the
-    // labels stop being readable — past that point the wrapper scrolls.
-    var avail = document.getElementById('treescroll').clientWidth || w;
-    var s = Math.max(0.6, Math.min(1, (avail - 6) / w));
-    el.tree.style.transformOrigin = 'top left';
-    el.tree.style.transform = s < 1 ? 'scale(' + s + ')' : 'none';
-    el.tree.style.marginLeft = (s === 1 && avail > w) ? ((avail - w) / 2) + 'px' : '0';
-    document.getElementById('treescroll').style.height = Math.ceil(h * s) + 'px';
-    el.links.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
-    el.links.setAttribute('width', w);
-    el.links.setAttribute('height', h);
-
-    // links
+    var syn = state.synergy && state.sel && TREE_OF[state.sel] === t ? related(state.sel) : [];
     var paths = [];
     t.perks.forEach(function (child) {
       child.prerequisites.forEach(function (pid) {
         var parent = BY_ID[pid];
         if (!parent) return;
-        var a = pos(parent, m), b = pos(child, m);
-        var r = m.node / 2;
-        var y1 = a.y + r, y2 = b.y - r;
-        var d;
-        if (Math.abs(a.x - b.x) < 2) {
-          d = 'M' + a.x + ' ' + y1 + ' L' + b.x + ' ' + y2;
-        } else {
+        var a = L.pos(parent), b = L.pos(child), r = L.node / 2;
+        var y1 = a.y + r, y2 = b.y - r, d;
+        if (Math.abs(a.x - b.x) < 2) d = 'M' + a.x + ' ' + y1 + ' L' + b.x + ' ' + y2;
+        else {
           var my = y1 + (y2 - y1) * 0.45;
-          d = 'M' + a.x + ' ' + y1 + ' L' + a.x + ' ' + my +
-              ' L' + b.x + ' ' + my + ' L' + b.x + ' ' + y2;
+          d = 'M' + a.x + ' ' + y1 + ' L' + a.x + ' ' + my + ' L' + b.x + ' ' + my + ' L' + b.x + ' ' + y2;
         }
         var cls = 'link';
         if (lv(parent.node_id) >= 1) cls += lv(child.node_id) >= 1 ? ' done' : ' lit';
@@ -311,51 +409,45 @@
       });
     });
     el.links.innerHTML = paths.join('');
-
-    // nodes
-    el.nodes.innerHTML = t.perks.map(function (p) { return nodeHTML(p, m); }).join('');
+    el.nodes.innerHTML = t.perks.map(function (p) { return nodeHTML(p, L, syn); }).join('');
   }
 
-  function nodeHTML(p, m) {
-    var n = lv(p.node_id);
-    var open = unlocked(p);
+  function nodeHTML(p, L, syn) {
+    var n = lv(p.node_id), open = unlocked(p), learnable = canLearn(p).ok;
     var cls = ['node'];
-    if (p.quest_unlock) cls.push('quest');
     if (n > 0) cls.push('taken');
     if (n >= p.max_level) cls.push('maxed');
-    if (canLearn(p).ok) cls.push('avail');            // next level is affordable now
-    else if (!open) cls.push('locked');               // prerequisites unmet
-    else if (n < p.max_level) cls.push('gated');      // unlocked, but the level is gated
+    if (learnable) cls.push('avail');
+    else if (!open) cls.push('locked');
+    else if (n < p.max_level) cls.push('gated');
     if (state.sel === p.node_id) cls.push('selected');
+    if (syn.indexOf(p.node_id) >= 0) cls.push('synergy');
 
     var pips = '';
-    for (var i = 0; i < p.max_level; i++) {
-      pips += '<span class="pip' + (i < n ? ' on' : '') + '"></span>';
-    }
+    for (var i = 0; i < p.max_level; i++) pips += '<span class="pip' + (i < n ? ' on' : '') + '"></span>';
 
     var badge = '';
-    if (p.quest_unlock && !state.quests[p.node_id]) {
-      badge = '<svg class="badge lock" viewBox="0 0 24 24"><path d="' + Icons.glyphs.lock + '"/></svg>';
-    } else if (p.levels.some(function (l, i) { return l.gate === 'manual' && i >= n; })) {
-      badge = '<svg class="badge" viewBox="0 0 24 24"><path d="' + Icons.glyphs.book + '"/></svg>';
+    if (p.quest_unlock && !state.quests[p.node_id]) badge = '<span class="badge lock"></span>';
+    else {
+      var need = p.levels.some(function (l, i) { return l.gate === 'manual' && i >= n; });
+      var used = p.levels.some(function (l, i) { return l.gate === 'manual' && i < n; });
+      if (need) badge = '<span class="badge"></span>';
+      else if (used) badge = '<span class="badge got"></span>';
     }
+    var bang = (learnable && n === 0 && !p.quest_unlock) ? '<span class="bang">!</span>' : '';
 
-    var pt = pos(p, m);
+    var pt = L.pos(p);
     return '<button class="' + cls.join(' ') + '" type="button" data-node="' + p.node_id + '"' +
       ' style="left:' + pt.x + 'px;top:' + pt.y + 'px"' +
       ' aria-label="' + esc(p.name) + ', level ' + n + ' of ' + p.max_level + '">' +
-      '<span class="frame"></span><span class="disc"></span>' +
-      Icons.svg(Icons.forNode(p.node_id)) + badge +
+      '<span class="frame"></span>' + Icons.svg(Icons.forNode(p.node_id), 'glyph') +
+      badge + bang + '<span class="syn"></span>' +
       '<span class="pips">' + pips + '</span>' +
-      '<span class="name">' + esc(p.name) + '</span></button>';
+      '<span class="name" style="width:' + L.labelW + 'px">' + esc(p.name) + '</span></button>';
   }
 
   function renderUltimates() {
-    var t = tree();
-    var prog = ultProgress(t);
-    var met = prog.every(function (x) { return x.met; });
-
-    el.ultRule.textContent = t.ultimate_rule || '';
+    var t = tree(), prog = ultProgress(t), met = prog.every(function (x) { return x.met; });
     el.ultGate.className = 'ult-gate' + (met ? ' met' : '');
     el.ultGate.textContent = met
       ? 'Unlocked — ' + prog.map(function (x) { return x.text; }).join(' · ')
@@ -366,12 +458,11 @@
       var on = state.ults[t.key] === i;
       return '<button class="ult' + (on ? ' on' : '') + (met ? '' : ' locked') + '" type="button"' +
         ' data-ult="' + i + '" aria-pressed="' + on + '">' +
-        '<span class="ult-mark">' + Icons.svg(Icons.forUltimate(u.name)) + '</span>' +
-        '<span><b>' + esc(u.name) +
-          (u.alias ? '<em class="alias">also listed as ' + esc(u.alias) + '</em>' : '') +
-        '</b><span>' + esc(u.effect) + '</span>' +
-        '<span class="ult-cost">' + costHTML(u.cost.skill_points, u.cost.time_segments, null) +
-        '</span></span></button>';
+        '<span class="ult-mark">' + Icons.svg(Icons.forUltimate(u.name)) + '</span><span>' +
+        '<b>' + esc(u.name) + (u.alias ? '<span class="alias">also listed as ' + esc(u.alias) + '</span>' : '') + '</b>' +
+        '<span class="ult-eff">' + esc(u.effect) + '</span>' +
+        '<span class="ult-cost">' + costHTML(u.cost.skill_points, u.cost.time_segments, null) + '</span>' +
+        '</span></button>';
     }).join('');
   }
 
@@ -391,12 +482,8 @@
       return;
     }
     var p = BY_ID[id], t = TREE_OF[id], n = lv(id);
-    var nl = nextLevel(p);
-    var learnable = canLearn(p);
-    var refundable = canRefund(p);
-
-    var gate = nl ? gateLabel(nl.gate) : '';
-    var gateOkNow = nl ? gateOk(nl.gate) : true;
+    var nl = nextLevel(p), learnable = canLearn(p), refundable = canRefund(p);
+    var when = activeTime(p);
 
     var reqLine = '';
     if (p.quest_unlock) {
@@ -408,34 +495,39 @@
       }).join('</b> and <b>') + '</b></p>';
     }
 
+    var tags = TAGS[id] || [];
+    var synLine = (state.synergy && tags.length)
+      ? '<p class="syn-line">Acts on <em>' + tags.map(esc).join(', ') + '</em> — ' +
+        related(id).length + ' other perks in this tree touch the same systems.</p>' : '';
+
     var levels = p.levels.map(function (l, i) {
-      var owned = i < n;
-      var isNext = i === n;
+      var owned = i < n, isNext = i === n;
       var blocked = !owned && (!gateOk(l.gate) || (isNext ? !learnable.ok : true));
-      var tag = l.gate && l.gate !== 'none' && !owned
+      var tag = (l.gate && l.gate !== 'none' && !owned)
         ? '<span class="gate-tag">' + esc(gateLabel(l.gate)) + '</span>' : '';
       return '<li class="' + (owned ? 'on ' : '') + (isNext ? 'next ' : '') + (blocked ? 'blocked' : '') + '">' +
-        '<span class="lp"></span>' +
-        '<span class="lv-text">' + esc(l.effect) + '</span>' +
+        '<span class="lp"></span><span class="lv-text">' + esc(l.effect) + '</span>' +
         '<span class="lv-meta">' + tag + costHTML(l.skill_points, l.time_segments, l.gate) + '</span></li>';
     }).join('');
 
-    var btnLabel = nl ? 'Learn level ' + nl.level : 'Fully learned';
-    if (p.quest_unlock) btnLabel = state.quests[id] ? 'Found' : 'Mark as found';
+    var btn = nl ? 'Learn level ' + nl.level : 'Fully learned';
+    if (p.quest_unlock) btn = state.quests[id] ? 'Found' : 'Mark as found';
 
     el.panel.innerHTML =
       '<div class="panel-hero">' + Icons.svg(Icons.forNode(id)) +
         '<span class="hero-tree">' + esc(t.name) + '</span>' +
         '<span class="hero-lv">Level ' + n + ' / ' + p.max_level + '</span></div>' +
       '<div class="panel-body">' +
-        (gate ? '<p class="panel-gate' + (gateOkNow ? ' ok' : '') + '">' + esc(gate) + '</p>' : '') +
+        (when ? '<p class="panel-when">' + esc(when) + '</p>' : '') +
+        (nl && gateLabel(nl.gate) ? '<p class="panel-gate' + (gateOk(nl.gate) ? ' ok' : '') + '">' +
+          esc(gateLabel(nl.gate)) + '</p>' : '') +
         '<h3>' + esc(p.name) + '</h3>' +
-        '<p class="desc">' + esc(p.effect) + '</p>' + reqLine +
+        '<p class="desc">' + esc(p.effect) + '</p>' + reqLine + synLine +
         '<ul class="levels">' + levels + '</ul>' +
       '</div>' +
       '<div class="panel-foot">' +
         '<button class="btn btn-learn" type="button" data-act="learn"' +
-          (p.quest_unlock ? '' : (learnable.ok ? '' : ' disabled')) + '>' + btnLabel + '</button>' +
+          (p.quest_unlock ? '' : (learnable.ok ? '' : ' disabled')) + '>' + btn + '</button>' +
         '<button class="btn btn-ghost" type="button" data-act="refund"' +
           (refundable.ok ? '' : ' disabled') + '>Refund</button>' +
       '</div>' +
@@ -448,22 +540,61 @@
       sp += spent(t);
       var u = state.ults[t.key];
       if (u != null) sp += t.ultimates[u].cost.skill_points || 0;
-      ts += timeSpent(t);
-      bk += manualsUsed(t);
+      ts += timeSpent(t); bk += manualsNeeded(t);
     });
-    el.mSp.textContent = sp;
-    el.mTs.textContent = ts;
-    el.mBk.textContent = bk;
+    el.mSp.textContent = sp; el.mTs.textContent = ts; el.mBk.textContent = bk;
   }
 
-  /* ------------------------------------------------------------- events */
+  function renderOverview() {
+    var s = summarise();
+    var keys = Object.keys(s.stats);
+    var t = tree();
+    el.ovNote.textContent = t.name + ': ' + spent(t) + ' points · ' + manualsNeeded(t) + ' manuals needed';
+
+    if (!keys.length && !s.other.length) {
+      el.ovBody.innerHTML = '<p class="ov-empty">Nothing learned yet. Totals appear here as you spend points.</p>';
+      return;
+    }
+
+    var groups = {};
+    keys.forEach(function (k) {
+      var st = s.stats[k], g = groupFor(st.label);
+      (groups[g] = groups[g] || []).push(st);
+    });
+
+    var html = ['Offence', 'Defence', 'Resources', 'Utility'].filter(function (g) { return groups[g]; })
+      .map(function (g) {
+        var rows = groups[g].sort(function (a, b) { return Math.abs(b.value) - Math.abs(a.value); })
+          .map(function (st) {
+            var v = (st.kind === 'delta' && st.value > 0 ? '+' : '') + st.value + st.unit;
+            return '<div class="ov-row"><span>' + esc(cap(st.label)) + '</span><b>' + esc(v) + '</b></div>';
+          }).join('');
+        return '<div class="ov-group"><h4>' + g + '</h4>' + rows + '</div>';
+      }).join('');
+
+    if (s.other.length) {
+      html += '<details class="ov-sub"><summary>Conditional &amp; unique effects (' + s.other.length + ')</summary>' +
+        '<ul class="ov-list">' + s.other.map(function (o) {
+          return '<li><b>' + esc(o.perk) + '</b>' + esc(o.text) + '</li>';
+        }).join('') + '</ul></details>';
+    }
+    if (s.manuals.length) {
+      html += '<details class="ov-sub"><summary>Manuals to find (' + s.manuals.length + ')</summary>' +
+        '<ul class="ov-list">' + s.manuals.map(function (m) { return '<li>' + esc(m) + '</li>'; }).join('') +
+        '</ul></details>';
+    }
+    el.ovBody.innerHTML = html;
+  }
+
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  /* -------------------------------------------------------------- events */
 
   function bindChrome() {
     el.tabs.addEventListener('click', function (e) {
       var b = e.target.closest('[data-tree]');
       if (!b) return;
-      state.tab = b.dataset.tree;
-      state.sel = null;
+      state.tab = b.dataset.tree; state.sel = null;
       renderAll();
     });
 
@@ -474,12 +605,9 @@
       state.sel = p.node_id;
       if (p.quest_unlock) {
         state.quests[p.node_id] = !state.quests[p.node_id];
-        if (!state.quests[p.node_id]) delete state.levels[p.node_id];
-        else state.levels[p.node_id] = 1;
-      } else {
-        learn(p);
-      }
-      var byKeyboard = e.detail === 0;   // Enter/Space rather than a pointer
+        if (state.quests[p.node_id]) state.levels[p.node_id] = 1; else delete state.levels[p.node_id];
+      } else learn(p);
+      var byKeyboard = e.detail === 0;
       renderAll();
       if (byKeyboard) focusNode(p.node_id); else revealPanel();
     });
@@ -490,12 +618,8 @@
       e.preventDefault();
       var p = BY_ID[b.dataset.node];
       state.sel = p.node_id;
-      if (p.quest_unlock) {
-        state.quests[p.node_id] = false;
-        delete state.levels[p.node_id];
-      } else {
-        refund(p);
-      }
+      if (p.quest_unlock) { state.quests[p.node_id] = false; delete state.levels[p.node_id]; }
+      else refund(p);
       renderAll();
     });
 
@@ -503,19 +627,15 @@
       var b = e.target.closest('[data-node]');
       if (!b || state.sel === b.dataset.node) return;
       state.sel = b.dataset.node;
-      renderPanel();
-      markSelected();
+      renderPanel(); renderTree();
     });
 
     el.nodes.addEventListener('keydown', function (e) {
       var b = e.target.closest('[data-node]');
-      if (!b) return;
-      if (e.key === 'Backspace' || e.key === 'Delete') {
-        e.preventDefault();
-        refund(BY_ID[b.dataset.node]);
-        renderAll();
-        focusNode(b.dataset.node);
-      }
+      if (!b || (e.key !== 'Backspace' && e.key !== 'Delete')) return;
+      e.preventDefault();
+      refund(BY_ID[b.dataset.node]);
+      renderAll(); focusNode(b.dataset.node);
     });
 
     el.ults.addEventListener('click', function (e) {
@@ -523,13 +643,11 @@
       if (!b) return;
       var t = tree(), i = +b.dataset.ult;
       if (!ultMet(t)) {
-        var need = ultProgress(t).filter(function (x) { return !x.met; })
-          .map(function (x) { return x.text.toLowerCase(); }).join(' and ');
-        toast('You need to ' + need + ' before choosing an ultimate.', true);
+        toast('You need to ' + ultProgress(t).filter(function (x) { return !x.met; })
+          .map(function (x) { return x.text.toLowerCase(); }).join(' and ') + ' before choosing an ultimate.', true);
         return;
       }
-      state.ults[t.key] = state.ults[t.key] === i ? undefined : i;
-      if (state.ults[t.key] === undefined) delete state.ults[t.key];
+      if (state.ults[t.key] === i) delete state.ults[t.key]; else state.ults[t.key] = i;
       renderAll();
     });
 
@@ -540,76 +658,62 @@
       if (b.dataset.act === 'learn') {
         if (p.quest_unlock) { state.quests[p.node_id] = true; state.levels[p.node_id] = 1; }
         else learn(p);
-      } else {
-        if (p.quest_unlock) { state.quests[p.node_id] = false; delete state.levels[p.node_id]; }
-        else refund(p);
-      }
+      } else if (p.quest_unlock) { state.quests[p.node_id] = false; delete state.levels[p.node_id]; }
+      else refund(p);
       renderAll();
     });
 
     el.corruption.addEventListener('input', function () {
       state.corruption = +el.corruption.value;
       el.corruptionOut.textContent = state.corruption;
-      dropInvalid();
-      renderAll();
+      dropInvalid(); renderAll();
     });
-
     el.manuals.addEventListener('change', function () {
-      state.manuals = el.manuals.checked;
-      dropInvalid();
-      renderAll();
+      state.manuals = el.manuals.checked; dropInvalid(); renderAll();
+    });
+    el.synergy.addEventListener('change', function () {
+      state.synergy = el.synergy.checked; renderTree(); renderPanel();
     });
 
     document.getElementById('reset').addEventListener('click', function () {
       state.levels = {}; state.ults = {}; state.quests = {}; state.sel = null;
-      renderAll();
-      toast('Build cleared.');
+      renderAll(); toast('Build cleared.');
     });
 
     document.getElementById('share').addEventListener('click', function () {
       writeHash();
-      var url = location.href;
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(
+        navigator.clipboard.writeText(location.href).then(
           function () { toast('Build link copied.'); },
-          function () { toast('Copy failed — the link is in the address bar.', true); }
-        );
-      } else {
-        toast('The build link is in the address bar.');
-      }
+          function () { toast('Copy failed — the link is in the address bar.', true); });
+      } else toast('The build link is in the address bar.');
     });
 
     window.addEventListener('hashchange', function () {
       if (writingHash) return;
-      readHash();
-      renderAll();
+      readHash(); renderAll();
+    });
+    [el.ovdrawer, el.ultdrawer].forEach(function (d) {
+      d.addEventListener('toggle', debounce(function () { renderTree(); }, 60));
     });
 
     el.corruption.value = state.corruption;
     el.corruptionOut.textContent = state.corruption;
     el.manuals.checked = state.manuals;
-  }
-
-  /* On narrow layouts the detail panel sits below the board, so a tap on a
-     node would otherwise update something off-screen. */
-  function revealPanel() {
-    if (window.matchMedia('(min-width:1101px)').matches) return;
-    el.panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  function markSelected() {
-    Array.prototype.forEach.call(el.nodes.children, function (b) {
-      b.classList.toggle('selected', b.dataset.node === state.sel);
-    });
+    el.synergy.checked = state.synergy;
   }
 
   function focusNode(id) {
     var b = el.nodes.querySelector('[data-node="' + id + '"]');
     if (b) b.focus();
   }
+  function revealPanel() {
+    if (window.matchMedia('(min-width:1001px)').matches) return;
+    el.panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 
-  /* Levels can become illegal when corruption drops or manuals switch off —
-     peel them back from the top so the build stays legal. */
+  /* Corruption dropping or manuals switching off can make learned levels
+     illegal; peel them back from the top so the build stays possible. */
   function dropInvalid() {
     var changed = true;
     while (changed) {
@@ -618,7 +722,7 @@
         var p = BY_ID[id];
         if (!p) { delete state.levels[id]; changed = true; return; }
         var n = state.levels[id];
-        while (n > 0 && !gateOk(p.levels[n - 1].gate) && !p.quest_unlock) { n--; changed = true; }
+        while (n > 0 && !p.quest_unlock && !gateOk(p.levels[n - 1].gate)) { n--; changed = true; }
         if (n > 0 && !unlocked(p)) { n = 0; changed = true; }
         if (n) state.levels[id] = n; else delete state.levels[id];
       });
@@ -628,15 +732,15 @@
     }
   }
 
-  /* --------------------------------------------------------- build links */
+  /* ----------------------------------------------------------- build links */
 
   var writingHash = false;
 
   function writeHash() {
     var parts = ['1', 'c' + state.corruption, 'm' + (state.manuals ? 1 : 0)];
-    var picks = Object.keys(state.levels).filter(function (id) {
-      return !(BY_ID[id] && BY_ID[id].quest_unlock);
-    }).sort().map(function (id) { return id + '.' + state.levels[id]; });
+    var picks = Object.keys(state.levels)
+      .filter(function (id) { return !(BY_ID[id] && BY_ID[id].quest_unlock); })
+      .sort().map(function (id) { return id + '.' + state.levels[id]; });
     if (picks.length) parts.push('p=' + picks.join(','));
     var q = Object.keys(state.quests).filter(function (id) { return state.quests[id]; }).sort();
     if (q.length) parts.push('q=' + q.join(','));
@@ -659,20 +763,19 @@
       var k = chunk[0], v = chunk.slice(1).replace(/^=/, '');
       if (k === 'c') state.corruption = clamp(+v, 0, 15);
       else if (k === 'm') state.manuals = v === '1';
-      else if (k === 'p') {
-        v.split(',').forEach(function (pair) {
-          var a = pair.split('.'), p = BY_ID[a[0]];
-          if (p) state.levels[a[0]] = clamp(+a[1] || 0, 0, p.max_level);
-        });
-      } else if (k === 'q') {
-        v.split(',').forEach(function (id) { if (BY_ID[id]) { state.quests[id] = true; state.levels[id] = 1; } });
-      } else if (k === 'u') {
-        v.split(',').forEach(function (pair) {
-          var a = pair.split('.');
-          var t = TREES.filter(function (x) { return x.key === a[0]; })[0];
-          if (t) state.ults[a[0]] = clamp(+a[1] || 0, 0, t.ultimates.length - 1);
-        });
-      } else if (k === 't') {
+      else if (k === 'p') v.split(',').forEach(function (pair) {
+        var a = pair.split('.'), p = BY_ID[a[0]];
+        if (p) state.levels[a[0]] = clamp(+a[1] || 0, 0, p.max_level);
+      });
+      else if (k === 'q') v.split(',').forEach(function (id) {
+        if (BY_ID[id]) { state.quests[id] = true; state.levels[id] = 1; }
+      });
+      else if (k === 'u') v.split(',').forEach(function (pair) {
+        var a = pair.split('.');
+        var t = TREES.filter(function (x) { return x.key === a[0]; })[0];
+        if (t) state.ults[a[0]] = clamp(+a[1] || 0, 0, t.ultimates.length - 1);
+      });
+      else if (k === 't') {
         var tt = TREES.filter(function (x) { return x.key === v; })[0];
         if (tt) state.tab = tt.name;
       }
@@ -682,24 +785,21 @@
     dropInvalid();
   }
 
-  /* --------------------------------------------------------------- util */
+  /* ----------------------------------------------------------------- util */
 
   function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, isNaN(n) ? lo : n)); }
-
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
-
   var toastTimer;
   function toast(msg, warn) {
     el.toast.textContent = msg;
     el.toast.className = 'toast show' + (warn ? ' warn' : '');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { el.toast.className = 'toast'; }, 2600);
+    toastTimer = setTimeout(function () { el.toast.className = 'toast'; }, 2800);
   }
-
   function debounce(fn, ms) {
     var t;
     return function () { clearTimeout(t); t = setTimeout(fn, ms); };
