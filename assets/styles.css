@@ -134,8 +134,8 @@ a:hover{color:var(--gold-2)}
   display:grid;grid-template-columns:minmax(0,1fr) var(--side);gap:16px;
   padding:6px 18px 14px;
 }
-.board{display:flex;flex-direction:column;min-width:0;min-height:0}
-.boardscroll{flex:1;min-height:0;overflow:auto;scrollbar-width:thin}
+.board{display:flex;flex-direction:column;min-width:0;min-height:0;overflow-y:auto;scrollbar-width:thin}
+.boardscroll{flex:none;min-height:0;overflow-x:auto;overflow-y:visible;scrollbar-width:thin}
 .tree{position:relative;margin:0 auto}
 .links{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .link{fill:none;stroke:#40352c;stroke-width:2}
@@ -255,6 +255,36 @@ a:hover{color:var(--gold-2)}
 .ult.on .ult-mark svg{stroke:#150f09}
 .ult.on b{color:var(--gold-2)}
 
+/* ---------------------------------------------------------- abilities */
+.abils{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;padding:0 14px 14px}
+.abil{
+  display:flex;gap:12px;align-items:flex-start;text-align:left;padding:11px 12px;
+  border:1px solid var(--line);border-radius:3px;cursor:pointer;
+  background:linear-gradient(180deg,rgba(33,26,19,.8),rgba(15,12,9,.8));transition:.15s;
+}
+.abil:hover{border-color:var(--gold-dim)}
+.abil .abil-mark{
+  width:42px;height:42px;flex:none;display:grid;place-items:center;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  background:linear-gradient(160deg,#4a3d31,#201914);
+}
+.abil .abil-mark svg{width:22px;height:22px;stroke:#8d7f70;fill:none;stroke-width:1.5}
+.abil .abil-txt{flex:1;min-width:0}
+.abil b{display:block;font-size:14px;font-weight:700;letter-spacing:.04em;color:var(--text)}
+.abil .abil-use{display:block;font-size:12px;font-weight:600;color:var(--blood-2);margin-top:2px}
+.abil .abil-eff{display:block;font-size:13px;color:var(--text-dim);margin-top:4px}
+.abil .abil-foot{display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap}
+.abil .pips{display:flex;gap:5px}
+.abil .abil-next{display:flex;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap}
+.abil .abil-next.done{color:var(--text-faint);font-size:12px}
+.abil.avail{border-color:#6a5540}
+.abil.avail .abil-mark{background:linear-gradient(160deg,#cdb389,#4b3d2e)}
+.abil.avail .abil-mark svg{stroke:var(--text)}
+.abil.taken .abil-mark{background:linear-gradient(160deg,var(--gold),#6d5221)}
+.abil.taken .abil-mark svg{stroke:#1a1309}
+.abil.maxed{border-color:var(--gold-dim)}
+.abil.selected{border-color:var(--gold);background:linear-gradient(180deg,rgba(231,179,86,.14),rgba(17,13,9,.85))}
+
 .hint{flex:none;margin:8px 0 0;font-size:12px;color:var(--text-faint);text-align:center}
 
 /* --------------------------------------------------------- side panel */
@@ -289,16 +319,17 @@ a:hover{color:var(--gold-2)}
 .panel .syn-line em{font-style:normal;color:var(--accent)}
 
 .levels{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.levels li{display:flex;gap:11px;align-items:flex-start;padding:11px 0;
+.levels li{display:flex;gap:11px;align-items:flex-start;flex-wrap:wrap;padding:11px 0;
   border-bottom:1px solid rgba(58,48,42,.6);font-size:15px}
 .levels .lp{width:13px;height:13px;flex:none;margin-top:4px;transform:rotate(45deg);
   background:#2b241e;box-shadow:inset 0 0 0 1px #5d4d3e}
 .levels li.on .lp{background:var(--gold);box-shadow:0 0 8px rgba(231,179,86,.6)}
 .levels li.next .lp{box-shadow:inset 0 0 0 1px var(--gold)}
 .levels li.blocked{opacity:.55}
-.levels .lv-text{flex:1;color:var(--text)}
+.levels .lv-text{flex:1 1 160px;color:var(--text)}
 .levels li.on .lv-text{color:var(--text-dim)}
-.levels .lv-meta{display:flex;gap:9px;align-items:center;flex:none;font-size:13px;flex-wrap:wrap;justify-content:flex-end}
+.levels .lv-meta{display:flex;gap:9px;align-items:center;flex:1 1 100%;font-size:13px;
+  flex-wrap:wrap;justify-content:flex-end;margin-top:2px}
 .gate-tag{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--blood-2)}
 .cost{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-weight:600}
 .cost i{width:13px;height:13px;background:currentColor;font-style:normal;
@@ -351,14 +382,20 @@ a:hover{color:var(--gold-2)}
 @media (max-width:1360px){ :root{--side:332px;--node:80px;--icon:40px;--colmin:84px} }
 /* short viewports: give the board its height back */
 @media (max-height:860px){ :root{--node:80px;--icon:40px;--row:160px} }
-@media (max-height:720px){ :root{--node:70px;--icon:36px;--row:140px} .hint{display:none} }
+@media (max-height:720px){
+  :root{--node:70px;--icon:36px;--row:140px}
+  .hint{display:none}
+  .drawer>summary{padding:7px 14px}
+  .drawer{margin-top:7px}
+}
 
 @media (max-width:1000px){
   body{overflow:auto}
+  /* the page scrolls here, so the board must not be a scroller of its own */
+  .board{overflow:visible}
   .stage{grid-template-columns:minmax(0,1fr);padding:6px 14px 20px}
   .side{min-height:0}
   .panel{max-height:none;overflow:visible}
-  .boardscroll{flex:none;overflow-x:auto;overflow-y:visible}
 }
 
 @media (max-width:640px){

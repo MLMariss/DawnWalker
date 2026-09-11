@@ -12,6 +12,9 @@ Pages and it works as the site index.
 
 - **All 54 perks and 9 ultimates**, laid out at their in-game grid positions with
   connector lines drawn from the prerequisite graph.
+- **All 27 active abilities**, in a collapsible drawer per tree, with what each
+  costs to *use* (activation charges and health) as well as to learn. They are
+  learned independently of the perk graph and count toward the same totals.
 - **Point spending with real rules** — a perk level only becomes learnable when every
   prerequisite has at least one level, and refunding is blocked while a downstream
   perk still depends on it.
@@ -51,13 +54,15 @@ give the tree its height back.
 ## Layout
 
 ```
-index.html            markup and page chrome
-assets/styles.css     the dark skin
-assets/app.js         planner logic — reads the JSON, renders everything from it
-assets/icons.js       original inline SVG glyphs (no game assets) + node mapping
-data/perks.json       the perk registry — single source of truth
-tools/verify_perks.py cross-checks the registry against a published perk list
-VERIFICATION.md       what was checked, and where the sources disagreed
+index.html                 markup and page chrome
+assets/styles.css          the dark skin
+assets/app.js              planner logic — reads the JSON, renders from it
+assets/icons.js            original inline SVG glyphs (no game assets) + mapping
+data/perks.json            the perk registry — single source of truth
+data/abilities.json        the ability registry, generated from two saved pages
+tools/verify_perks.py      checks both registries, and perks against a source page
+tools/extract_abilities.py rebuilds data/abilities.json from saved ability pages
+VERIFICATION.md            what was checked, and where the sources disagreed
 ```
 
 Nothing about the perks is hard-coded in `app.js` beyond the icon mapping. Adding,
@@ -77,6 +82,39 @@ python3 -m http.server
 For GitHub Pages: Settings → Pages → deploy from branch, root folder. No build step.
 
 ## Data format
+
+### `data/abilities.json`
+
+Generated — run `tools/extract_abilities.py <game8.html> <fextralife.html>` to
+rebuild it from saved copies of the two ability pages. Each tree holds an
+`abilities` array:
+
+```json
+{
+  "node_id": "AV10",
+  "name": "Voracious Bite",
+  "effect": "Restores Health by drinking target's blood.",
+  "max_level": 4,
+  "use_cost": { "text": "1 Activation Charge", "charges": 1, "health_percent": 0 },
+  "levels": [
+    { "level": 1, "effect": "Restores 60% of Health Segment. 124 Damage to target",
+      "skill_points": 1, "time_segments": 1, "gate": "none" }
+  ]
+}
+```
+
+- `use_cost` is what the ability costs to *fire*, not to learn; only the
+  Fextralife table publishes it.
+- Ability gates add one value to the perk set: `vrakhir blood`, a Phial of
+  Vrakhir Blood consumed to learn that level. It is counted in the build
+  overview rather than treated as a lock, because it is an item, not a
+  threshold.
+- Abilities have no prerequisites in either source, so they are learned
+  independently of the perk graph.
+- Ability node ids are prefixed `A` and never collide with perk ids; the
+  verifier checks this, because build state is keyed by id.
+
+### `data/perks.json`
 
 `data/perks.json` holds `game`, `subject`, `notes` and `trees`. Each tree has a short
 `key` (`wc`/`sm`/`vp`), a `perks` array, three `ultimates` and an `ultimate_rule`
@@ -113,6 +151,13 @@ string. A perk looks like this:
   reads `"Corruption 15"` and has no point requirement.
 - Top-level `source_overrides` records any field where the registry knowingly
   departs from the external source, with the reason.
+
+**Assumption worth knowing:** skill points spent on abilities count toward the
+tree total, and therefore toward the 35-point ultimate threshold on Witchcraft
+and Swordmastery. Abilities sit on the same tree screen and the published rule
+says "35 skill points in a tree", so this is the natural reading — but no source
+states it outright and no screenshot pins it down. It is one line in `app.js`
+(`spent()`) if it turns out otherwise.
 
 Integrity checks that hold for the committed data: every prerequisite and unlock
 resolves to a real node, and every perk's `max_level` matches its number of `levels`

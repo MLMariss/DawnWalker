@@ -104,3 +104,33 @@ per tree. Witchcraft is mixed — Unholy Fervour reads DAY ONLY, and one publish
 description calls the tree "a mix of perks that can only be used during the day
 and at both time periods" — so only the perk actually seen on a screen carries a
 value, and the rest show nothing rather than a guess.
+
+## Abilities
+
+`data/abilities.json` is generated from two saved pages rather than hand-written:
+Game8's *All Abilities List* for the upgrade levels and their costs, and the
+Fextralife *Abilities* table for what each ability costs to use. Re-run
+`tools/extract_abilities.py` against fresh saves to rebuild it.
+
+27 abilities, 107 levels. **The two sources agree on every tree assignment**,
+which is worth noting given that the same wiki misfiled two perks on its perk
+page — its ability table is the better half of that site. Every ability has an
+activation cost recorded.
+
+Two typos in the Game8 ability text are corrected during extraction, listed by
+the script each time it runs so the change is never silent:
+
+| Ability | Source text | Corrected to | Why |
+| --- | --- | --- | --- |
+| Charge | `…everyone on your way. "` | `…everyone on your way.` | stray quote mark in the blurb |
+| Shapeshift | `2 Gain Haste` | `Gain Haste` | stray leading digit in the level 1 text |
+
+Abilities introduce one gate the perks do not have: `vrakhir blood`, a Phial of
+Vrakhir Blood spent to learn certain Vampirism ability levels. The planner
+treats it as a consumable to count rather than a lock to satisfy — it is an item
+you can go and get, not a threshold you have to reach — and totals it beside the
+manuals in the build overview.
+
+**Not verifiable:** whether ability points count toward the 35-point ultimate
+threshold. The planner assumes they do, and the README says so. Nothing found
+states it either way.

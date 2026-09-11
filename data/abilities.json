@@ -1,0 +1,1129 @@
+{
+  "game": "The Blood of Dawnwalker",
+  "subject": "Ability registry",
+  "notes": [
+    "Upgrade levels and their costs come from the Game8 'All Abilities List' page.",
+    "Activation charge and health costs to use an ability come from the Fextralife ability table; Game8 does not list them.",
+    "The source labels the fourth row of four-level abilities 'Lv. 3'; levels here are numbered by position.",
+    "Abilities have no prerequisites in either source - they are learned independently of the perk graph.",
+    "Gates: manual, corruption <n>, vrakhir blood (a Phial of Vrakhir Blood), or none.",
+    "Two source typos are corrected on extraction; tools/extract_abilities.py names them."
+  ],
+  "trees": {
+    "Witchcraft": {
+      "key": "wc",
+      "abilities": [
+        {
+          "node_id": "AW1",
+          "name": "Astral Communion",
+          "effect": "Activates dormant magic in places of power scattered throughout the Valley.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "Passive — no activation cost",
+            "charges": 0,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+0.4% permanent Witchcraft Ability Damage for each place of power exorcised",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "+0.8% permanent Witchcraft Ability Damage for each place of power exorcised",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "+1.2% permanent Witchcraft Ability Damage for each place of power exorcised",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "none"
+            },
+            {
+              "level": 4,
+              "effect": "+1.6% permanent Witchcraft Ability Damage for each place of power exorcised",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "none"
+            }
+          ]
+        },
+        {
+          "node_id": "AW2",
+          "name": "Burning Blood",
+          "effect": "Deal Damage over time to a target.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "1 Activation Charge 15% Health",
+            "charges": 1,
+            "health_percent": 15
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Deal 52 Damage per second. Duration 10s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "Deal 55 Damage per second. Duration 12s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "Deal 56 Damage per second. Duration 14s. On Death, effect transfers to a different enemy",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "Deal 63 Damage per second. Duration 16s. On Death, effect transfers to a different enemy",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "AW3",
+          "name": "Compel Soul",
+          "effect": "Allows you to speak with the restless souls. Use together with objects associated with the dead to obtain additional information.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "Passive — no activation cost",
+            "charges": 0,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "-0.5% permanent Witchcraft Ability Cooldown for each soul compelled",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "-1.0% permanent Witchcraft Ability Cooldown for each soul compelled",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "none"
+            },
+            {
+              "level": 3,
+              "effect": "-1.5% permanent Witchcraft Ability Cooldown for each soul compelled",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "none"
+            },
+            {
+              "level": 4,
+              "effect": "-2% permanent Witchcraft Ability Cooldown for each soul compelled",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "none"
+            }
+          ]
+        },
+        {
+          "node_id": "AW4",
+          "name": "Cycle of Ruin",
+          "effect": "Extends duration of currently active Witchcraft Abilities with each landed Attack, Block, and Perfect Block.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "Passive — no activation cost",
+            "charges": 0,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Extends Duration of Witchcraft Abilities by 1s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "Extends Duration of Witchcraft Abilities by 2s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "Extends Duration of Witchcraft Abilities by 2s. Critical Hits extend Duration of Witchcraft Abilities by 4s",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "Extends Duration of Witchcraft Abilities by 3s. Critical Hits extend Duration of Witchcraft Abilities by 5s. +10% Witchcraft Ability Damage for each enemy currently affected by Witchcraft Abilities",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "AW5",
+          "name": "Life Lock",
+          "effect": "Blocks Damage and Reflects it back to the enemy.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "1 Activation Charge 10% Health",
+            "charges": 1,
+            "health_percent": 10
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Reflects 100% of Damage. Blocks 2 instances of Damage. Duration 90s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "Reflects 120% of Damage. Blocks 3 instances of Damage. Duration 90s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "Reflects 160% of Damage. Blocks 3 instances of Damage. Duration 90s",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "Reflects 200% of Damage. Blocks 4 instances of Damage. Duration 90s",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "AW6",
+          "name": "Mercurial Fervour",
+          "effect": "Gain Haste in exploration by briefly slowing down the world around you.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "Passive — no activation cost",
+            "charges": 0,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Gain Haste",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "Haste costs 50% less Stamina",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "Haste costs 50% less Stamina. Haste is 20% faster",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "Haste doesn't cost Stamina. Haste is 20% faster",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "AW7",
+          "name": "Ravenous Flock",
+          "effect": "Area Attack and Stun on target. Attacking the target triggers additional Area Attacks.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "2 Activation Charges 40% Health",
+            "charges": 2,
+            "health_percent": 40
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Area Damage 88. Ravenous Flock cancels after 1 hit. 100% Critical Hits on target. Duration 20s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "Area Damage 96. Ravenous Flock cancels after 2 hits. 100% Critical Hits on target. Duration 20s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "Area Damage 105. Ravenous Flock cancels after 3 hits. 100% Critical Hits on target. Duration 20s",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "Area Damage 114. Ravenous Flock cancels after 4 hits. 100% Critical Hits on target. Duration 20s",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "AW8",
+          "name": "Soul Reaping",
+          "effect": "Lifesteals target over time and keep him away.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "2 Activation Charges 15% Health",
+            "charges": 2,
+            "health_percent": 15
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "32 Lifesteal per second. Duration 18s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "38 Lifesteal per second. Duration 24s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "44 Lifesteal per second. 20% Damage you receive transfers to the target. Duration 30s",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "49 Lifesteal per second. 40% Damage you receive transfers to the target. 500 Heal on target's Death. Duration 36s",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "AW9",
+          "name": "Soul Stigma",
+          "effect": "Higher Critical Chance and Critical Damage on target.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "1 Activation Charge 35% Health",
+            "charges": 1,
+            "health_percent": 35
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+35% Critical Hit chance. +10% Critical Damage. Duration 20s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "+40% Critical Hit chance. +20% Critical Damage. Duration 25s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "+45% Critical Hit chance. +30% Critical Damage. On Death, effect transfers to a different enemy. Duration 30s",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "Area +50% Critical Hit chance. +40% Critical Damage. On Death, effect transfers to a different enemy and Stuns him. Duration 35s",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "AW10",
+          "name": "Unholy Vitality",
+          "effect": "Regenerates Health after using Active Abilities.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "Passive — no activation cost",
+            "charges": 0,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Regenerates 10% of Health over 10 seconds",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "Regenerates 15% of Health over 10 seconds",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "Regenerates 20% of Health over 10 seconds. Heal 20% of dealt Damage from Critical Hits on enemies affected by Witchcraft Abilities",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "Regenerates 25% of Health over 10 seconds. Heal 40% of dealt Damage from Critical Hits on enemies affected by Witchcraft Abilities. No health cost for using Witchcraft Abilities when Health is below 30%",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "manual"
+            }
+          ]
+        }
+      ]
+    },
+    "Swordmastery": {
+      "key": "sm",
+      "abilities": [
+        {
+          "node_id": "AS1",
+          "name": "Adrenaline Rush",
+          "effect": "Increases Attack Damage after using Active Abilities. This Ability works passively once equipped in the Active Ability panel.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "Passive — no activation cost",
+            "charges": 0,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+20% Attack Damage. Duration 6s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "+30% Attack Damage. +50% Passive Activation Charge. Duration 6s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "+40% Attack Damage. +100% Passive Activation Charge. Duration 6s",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "+50% Attack Damage. +150% Passive Activation Charge. Attacks restore 10% of Activation Charge. Duration 6s",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "AS2",
+          "name": "Artery Strike",
+          "effect": "Critical Attack with a chance of Decapitating the target.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "2 Activation Charges",
+            "charges": 2,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Decapitation: 10%",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "Deals 560% Weapon Damage. Decapitation: 20%",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "Deals 680% Weapon Damage. Decapitation: 35% chance",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "Deals 800% Weapon Damage. Decapitation: 50% chance. Decapitation chance ×2 on bleeding enemies",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "AS3",
+          "name": "Broadswing",
+          "effect": "Weapon Area Attack.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "2 Activation Charges",
+            "charges": 2,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Deals 300% Weapon Damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "Deals 375% Weapon Damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "Deals 450% Weapon Damage. For each enemy you hit, increase Broad Swing Damage by 10%",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "Deals 525% Weapon Damage. For each enemy you hit, increase Broad Swing Damage by 10%",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "AS4",
+          "name": "Charge",
+          "effect": "Charge dealing Damage and Stunning a target and everyone on your way.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "1 Activation Charge",
+            "charges": 1,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Deals 200% Attack Damage. Stun Duration 2s. Bleed on target: 50% chance",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "Deals 250% Attack Damage. Stun Duration 2s. Bleed on target: 100% chance",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "Deals 300% Attack Damage. Stun Duration 2s. Bleed on target: 100% chance. +66% Bleed Duration",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "Deals 350% Attack Damage. Stun Duration 2s. Bleed on target: 100% chance. 1 Activation Charge restore on kill",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "AS5",
+          "name": "Dirty Trick",
+          "effect": "Stuns and Damages a target and makes them vulnerable to Active Abilities.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "1 Activation Charge",
+            "charges": 1,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Stun ends after 3 hits. Deals 44 Damage. +10% Damage from Active Abilities. Duration 15s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "Stun ends after 4 hits. Deals 55 Damage. +20% Damage from Active Abilities. Duration 20s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "Stun ends after 5 hits. Deals 66 Damage. +30% Damage from Active Abilities. Duration 25s",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "Stun ends after 6 hits. Deals 77 Damage. +50% Damage from Active Abilities. Duration 30s. -1 Activation Charge cost for Active Abilities used on Stunned enemies (minimum 1)",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "AS6",
+          "name": "Swiftness",
+          "effect": "Boost Attack Speed after Perfect Block. This Ability works passively once equipped in the Active Ability panel.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "Passive — no activation cost",
+            "charges": 0,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "+10% Attack Speed. Duration 6s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "+15% Attack Speed. Duration 8s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "+20% Attack Speed. +5% Critical Hit chance. Duration 10s",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "+30% Attack Speed. +15% Critical Hit chance. Critical Hits cost no Stamina. Duration 12s",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "manual"
+            }
+          ]
+        },
+        {
+          "node_id": "AS7",
+          "name": "Walking Fortress",
+          "effect": "Perfect Block restores a portion of Activity Charge.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "Passive — no activation cost",
+            "charges": 0,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Restores 10% of Activation Charge",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 2,
+              "effect": "Restores 15% of Activation Charge. -1s Cooldowns of Active Abilities after Directional Block or Perfect Block",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 3,
+              "effect": "Restores 20% of Activation Charge. -1s Cooldowns of Active Abilities after Directional Block or Perfect Block",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "manual"
+            },
+            {
+              "level": 4,
+              "effect": "Restores 50% of Activation Charge. -2s Cooldowns of Active Abilities after Directional Block or Perfect Block. -1 Activation Charge cost for the next Active Ability if used within 5s after a Perfect Block (minimum 1)",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "manual"
+            }
+          ]
+        }
+      ]
+    },
+    "Vampirism": {
+      "key": "vp",
+      "abilities": [
+        {
+          "node_id": "AV1",
+          "name": "Blood Surge",
+          "effect": "Explodes target. Bosses receive Damage instead.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "3 Activation Charges 25% Health",
+            "charges": 3,
+            "health_percent": 25
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Area Damage 178 in 3m radius after Explosion. 623 Damage to Bosses",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "vrakhir blood"
+            },
+            {
+              "level": 2,
+              "effect": "Area Damage 222 in 4m radius after Explosion. 756 Damage to Bosses",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 10"
+            },
+            {
+              "level": 3,
+              "effect": "Area Damage 267 in 5m radius after Explosion. 890 Damage to Bosses",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 12"
+            },
+            {
+              "level": 4,
+              "effect": "Area Damage 311 in 6m radius after Explosion. 1023 Damage to Bosses",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "corruption 14"
+            }
+          ]
+        },
+        {
+          "node_id": "AV2",
+          "name": "Crimson Rush",
+          "effect": "Increase Damage of Active Abilities, the higher your Health percentage is.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "Passive — no activation cost",
+            "charges": 0,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Up to +25% Active Ability Damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 3"
+            },
+            {
+              "level": 2,
+              "effect": "Up to +30% Active Ability Damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 7"
+            },
+            {
+              "level": 3,
+              "effect": "Up to +35% Active Ability Damage",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 11"
+            },
+            {
+              "level": 4,
+              "effect": "Up to +40% Active Ability Damage",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "corruption 14"
+            }
+          ]
+        },
+        {
+          "node_id": "AV3",
+          "name": "Death From Above",
+          "effect": "Instantly Kill a target below you. Bosses receive Damage instead.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "Passive — no activation cost",
+            "charges": 0,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "578 Damage to bosses and Tough enemies",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 3"
+            },
+            {
+              "level": 2,
+              "effect": "667 Damage to bosses and Tough enemies. +20% Attack Damage for 15s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 7"
+            },
+            {
+              "level": 3,
+              "effect": "765 Damage to bosses and Tough enemies. +40% Attack Damage for 15s",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 10"
+            },
+            {
+              "level": 4,
+              "effect": "845 Damage to bosses and Tough enemies. +60% Attack Damage for 15s. Restores 1 Activation Charge",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "corruption 13"
+            }
+          ]
+        },
+        {
+          "node_id": "AV4",
+          "name": "Mesmerise",
+          "effect": "Mind Control a target and force him to Fight on your side.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "2 Activation Charges 30% Health",
+            "charges": 2,
+            "health_percent": 30
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Duration 25s",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "vrakhir blood"
+            },
+            {
+              "level": 2,
+              "effect": "Duration 35s. +25% to target's Damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 9"
+            },
+            {
+              "level": 3,
+              "effect": "Duration 45s. +50% to target's Damage",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 12"
+            },
+            {
+              "level": 4,
+              "effect": "Duration 60s. +75% to target's Damage. Target's Attacks restore 20% of Activation Charge",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "corruption 14"
+            }
+          ]
+        },
+        {
+          "node_id": "AV5",
+          "name": "Piercing Shriek",
+          "effect": "Stuns all enemies in front of you, Weakens their Defence and Attack Damage. Blocking their attacks reflects Damage back at them.",
+          "max_level": 3,
+          "use_cost": {
+            "text": "1 Activation Charge 20% Health",
+            "charges": 1,
+            "health_percent": 20
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Stun duration 2s. +15 Damage to targets and -15% Damage dealt by targets. Block reflects 10% of Damage back to the attacker. Perfect Block reflects 40%. Duration 35s",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "vrakhir blood"
+            },
+            {
+              "level": 2,
+              "effect": "Stun duration 3s. +20 Damage to targets and -15% Damage dealt by targets. Block reflects 10% of Damage back to the attacker. Perfect Block reflects 60%. Duration 25s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 7"
+            },
+            {
+              "level": 3,
+              "effect": "Stun duration 4s. +25 Damage to targets and -25% Damage dealt by targets. Block reflects 20% of Damage back to the attacker. Perfect Block reflects 80%. Duration 45s",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 11"
+            }
+          ]
+        },
+        {
+          "node_id": "AV6",
+          "name": "Scarlet Shield",
+          "effect": "Health Regeneration chance after Block.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "Passive — no activation cost",
+            "charges": 0,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "20% of Health Segment after Perfect Block. 20% chance to also trigger after Directional Block and 10% after Omniblock",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "vrakhir blood"
+            },
+            {
+              "level": 2,
+              "effect": "25% of Health Segment after Perfect Block. 20% chance to also trigger after Directional Block and 15% after Omniblock",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 6"
+            },
+            {
+              "level": 3,
+              "effect": "25% of Health Segment after Perfect Block. 20% chance to also trigger after Directional Block and 20% after Omniblock. Attack after Perfect Block heals you for 10% of dealt Damage",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 10"
+            },
+            {
+              "level": 4,
+              "effect": "Up to +40% Active Ability Damage",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "corruption 14"
+            }
+          ]
+        },
+        {
+          "node_id": "AV7",
+          "name": "Shadow Storm",
+          "effect": "Slows down Time around you.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "1 Activation Charge 15% Health",
+            "charges": 1,
+            "health_percent": 15
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Duration 4s",
+              "skill_points": 1,
+              "time_segments": 0,
+              "gate": "vrakhir blood"
+            },
+            {
+              "level": 2,
+              "effect": "Duration 5s",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 8"
+            },
+            {
+              "level": 3,
+              "effect": "Duration 6s. +20% Attack Damage",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 11"
+            },
+            {
+              "level": 4,
+              "effect": "Duration 7s. Extend Duration by 1s on enemy kill. +25% Attack Damage",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "corruption 14"
+            }
+          ]
+        },
+        {
+          "node_id": "AV8",
+          "name": "Shapeshift",
+          "effect": "Shapeshift into a Wolf and gain Haste in exploration.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "Passive — no activation cost",
+            "charges": 0,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Gain Haste",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 1"
+            },
+            {
+              "level": 2,
+              "effect": "Haste costs 50% less Stamina",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 6"
+            },
+            {
+              "level": 3,
+              "effect": "Haste costs 50% less Stamina. Haste is 20% faster",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 9"
+            },
+            {
+              "level": 4,
+              "effect": "Haste doesn't cost Stamina. Haste is 20% faster",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "corruption 12"
+            }
+          ]
+        },
+        {
+          "node_id": "AV9",
+          "name": "Shred",
+          "effect": "Increase Damage of Active Abilities, the higher your Health percentage is.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "Passive — no activation cost",
+            "charges": 0,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "20% Bleed chance",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 1"
+            },
+            {
+              "level": 2,
+              "effect": "25% Bleed chance. +25% Bleed Damage",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 5"
+            },
+            {
+              "level": 3,
+              "effect": "30% Bleed chance. +50% Bleed Damage",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 9"
+            },
+            {
+              "level": 4,
+              "effect": "35% Bleed chance. +100% Bleed Damage. 89 Damage when Bleed is reapplied",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "corruption 13"
+            }
+          ]
+        },
+        {
+          "node_id": "AV10",
+          "name": "Voracious Bite",
+          "effect": "Restores Health by drinking target's blood.",
+          "max_level": 4,
+          "use_cost": {
+            "text": "1 Activation Charge",
+            "charges": 1,
+            "health_percent": 0
+          },
+          "levels": [
+            {
+              "level": 1,
+              "effect": "Restores 60% of Health Segment. 124 Damage to target",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "none"
+            },
+            {
+              "level": 2,
+              "effect": "Restores 80% of Health Segment. 151 Damage to target",
+              "skill_points": 1,
+              "time_segments": 1,
+              "gate": "corruption 3"
+            },
+            {
+              "level": 3,
+              "effect": "Restores 80% of Health Segment. 178 Damage to target. +10 Claw Damage for 30s",
+              "skill_points": 2,
+              "time_segments": 1,
+              "gate": "corruption 8"
+            },
+            {
+              "level": 4,
+              "effect": "Restores 120% of Health Segment. 204 Damage to target. +25 Claw Damage for 60s. No Cooldown if you kill the target",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "corruption 14"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

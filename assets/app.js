@@ -20,31 +20,47 @@
   var el = {};
   ['tabs', 'tree', 'links', 'nodes', 'ults', 'ult-gate', 'panel', 'toast', 'corruption',
    'corruption-out', 'manuals', 'synergy', 'm-sp', 'm-ts', 'm-bk', 'boardscroll',
-   'ov-body', 'ov-note', 'ovdrawer', 'ultdrawer'].forEach(function (id) {
+   'ov-body', 'ov-note', 'ovdrawer', 'ultdrawer', 'abils', 'abil-note', 'abildrawer'].forEach(function (id) {
     el[id.replace(/-(\w)/g, function (_, c) { return c.toUpperCase(); })] = document.getElementById(id);
   });
 
   /* ---------------------------------------------------------------- data */
 
-  fetch('data/perks.json', { cache: 'no-cache' })
-    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(boot)
+  function load(file) {
+    return fetch(file, { cache: 'no-cache' }).then(function (r) {
+      if (!r.ok) throw new Error(file + ': HTTP ' + r.status);
+      return r.json();
+    });
+  }
+
+  Promise.all([load('data/perks.json'), load('data/abilities.json')])
+    .then(function (both) { boot(both[0], both[1]); })
     .catch(function (err) {
-      el.panel.innerHTML = '<div class="panel-empty"><b>Could not load data/perks.json</b>' +
+      el.panel.innerHTML = '<div class="panel-empty"><b>Could not load the registry</b>' +
         'Browsers block fetch on <code>file://</code> URLs. Serve the folder instead:' +
         '<br><br><code>python3 -m http.server</code><br>then open <code>http://localhost:8000</code>.' +
         '<br><br>' + esc(String(err)) + '</div>';
     });
 
-  function boot(json) {
+  function boot(json, abilities) {
     DATA = json;
     Object.keys(DATA.trees).forEach(function (name) {
       var t = DATA.trees[name];
+      var a = (abilities.trees[name] || {}).abilities || [];
       var tree = {
         name: name, key: t.key, perks: t.perks, ultimates: t.ultimates,
-        ultimate_rule: t.ultimate_rule, active_time: t.active_time
+        ultimate_rule: t.ultimate_rule, active_time: t.active_time, abilities: a
       };
       TREES.push(tree);
+      // Abilities are learned independently of the perk graph, so they get the
+      // empty graph fields the shared rules expect.
+      a.forEach(function (ab) {
+        ab.is_ability = true;
+        ab.prerequisites = []; ab.unlocks = []; ab.quest_unlock = false;
+        BY_ID[ab.node_id] = ab; TREE_OF[ab.node_id] = tree;
+        CHILDREN[ab.node_id] = [];
+        TAGS[ab.node_id] = tagsFor(ab);
+      });
       t.perks.forEach(function (p) {
         BY_ID[p.node_id] = p; TREE_OF[p.node_id] = tree;
         CHILDREN[p.node_id] = CHILDREN[p.node_id] || [];
@@ -80,6 +96,9 @@
   function gateOk(gate) {
     if (!gate || gate === 'none' || gate === 'quest') return true;
     if (gate === 'manual') return state.manuals;
+    // A Phial of Vrakhir Blood is consumed, not a permanent gate — it is
+    // counted in the build overview rather than blocking the level.
+    if (gate === 'vrakhir blood') return true;
     var c = corruptionOf(gate);
     return c === null ? true : state.corruption >= c;
   }
@@ -87,6 +106,7 @@
   function gateLabel(gate) {
     if (!gate || gate === 'none') return '';
     if (gate === 'manual') return 'Manual required';
+    if (gate === 'vrakhir blood') return 'Phial of Vrakhir Blood';
     if (gate === 'quest') return 'Story unlock';
     var c = corruptionOf(gate);
     return c === null ? gate : 'Corruption ' + c;
@@ -146,11 +166,13 @@
   }
 
   /* Totals. Levels learned are the first `n` entries of a perk's level list. */
+  function entries(t) { return t.perks.concat(t.abilities || []); }
+
   function tally(t, field) {
-    return t.perks.reduce(function (sum, p) {
+    return entries(t).reduce(function (sum, p) {
       var n = lv(p.node_id), s = 0;
-      for (var i = 0; i < n; i++) s += field === 'manual'
-        ? (p.levels[i].gate === 'manual' ? 1 : 0)
+      for (var i = 0; i < n; i++) s += (field === 'manual' || field === 'vrakhir blood')
+        ? (p.levels[i].gate === field ? 1 : 0)
         : p.levels[i][field];
       return sum + s;
     }, 0);
@@ -161,6 +183,7 @@
     return tally(t, 'time_segments') + (u != null ? (t.ultimates[u].cost.time_segments || 0) : 0);
   }
   function manualsNeeded(t) { return tally(t, 'manual'); }
+  function phialsNeeded(t) { return tally(t, 'vrakhir blood'); }
 
   /* A requirement string may name several conditions; all of them must hold. */
   function ultReq(t) {
@@ -223,15 +246,16 @@
      (Endless Effort's +100% is not +25% and +50% and +75% as well), so take the
      highest. Across different perks the stats add up. */
   function summarise() {
-    var stats = {}, other = [], manuals = [];
+    var stats = {}, other = [], manuals = [], phials = [];
     TREES.forEach(function (t) {
-      t.perks.forEach(function (p) {
+      entries(t).forEach(function (p) {
         var n = lv(p.node_id);
         if (!n) return;
         var best = {};
         for (var i = 0; i < n; i++) {
           var l = p.levels[i];
           if (l.gate === 'manual') manuals.push(p.name + ' — level ' + l.level);
+          if (l.gate === 'vrakhir blood') phials.push(p.name + ' — level ' + l.level);
           var r = readEffect(l.effect);
           if (!r) { other.push({ perk: p.name, text: l.effect }); continue; }
           var key = (r.label + '|' + r.unit).toLowerCase();
@@ -249,7 +273,7 @@
       var u = state.ults[t.key];
       if (u != null) other.push({ perk: t.ultimates[u].name + ' (ultimate)', text: t.ultimates[u].effect });
     });
-    return { stats: stats, other: other, manuals: manuals };
+    return { stats: stats, other: other, manuals: manuals, phials: phials };
   }
 
   /* Experimental: which systems a perk touches, so the board can mark the other
@@ -314,9 +338,26 @@
      spacing is kept, with a floor on the gap between adjacent columns. */
   function layout(t) {
     var node = cssPx('--node', 92), colmin = cssPx('--colmin', 132);
-    var pad = node / 2 + 38;
     var availW = (el.boardscroll.clientWidth || 1000) - 4;
-    var availH = (el.boardscroll.clientHeight || 700) - 6;
+    // The board column is the scroller; the drawers and hint under the tree are
+    // siblings, so measure what they leave rather than what the tree box is now.
+    var col = el.boardscroll.parentNode, used = 0;
+    Array.prototype.forEach.call(col.children, function (c) {
+      if (c !== el.boardscroll) used += c.offsetHeight + 12;
+    });
+    var availH = (col.clientHeight || 700) - used - 16;
+
+    var rows = Math.max.apply(null, t.perks.map(function (p) { return p.row; }));
+    var labelRoom = 48, rowFloorGap = 58;
+    // Rows may not go below what a two-line label needs, so when the column is
+    // short it is the node that gives way, not the spacing.
+    if (!window.matchMedia('(max-width:1000px)').matches && rows > 1) {
+      var fits = (availH - 56 - rowFloorGap * (rows - 1)) / rows;
+      node = Math.max(52, Math.min(node, fits));
+    }
+    el.tree.style.setProperty('--node', node + 'px');
+    el.tree.style.setProperty('--icon', Math.round(node * 0.5) + 'px');
+    var pad = node / 2 + 38;
 
     var xs = [];
     t.perks.forEach(function (p) { if (xs.indexOf(p.x) < 0) xs.push(p.x); });
@@ -341,14 +382,13 @@
     // nor the edge of the board — hence the padding cap as well as the pitch.
     var labelW = Math.max(64, Math.min(152, pitch - 8, 2 * pad - 8));
 
-    var rows = Math.max.apply(null, t.perks.map(function (p) { return p.row; }));
-    var labelRoom = 48, top = node / 2 + 8;
+    var top = node / 2 + 8;
     // Below the stacking breakpoint the page scrolls anyway, so let the board
     // keep its full row height instead of nesting a second scroller inside it.
     var stacked = window.matchMedia('(max-width:1000px)').matches;
     var rowH = cssPx('--row', 180);
     if (!stacked && rows > 1) {
-      rowH = Math.max(node + 58, Math.min(rowH, (availH - top - node / 2 - labelRoom) / (rows - 1)));
+      rowH = Math.max(node + rowFloorGap, Math.min(rowH, (availH - top - node / 2 - labelRoom) / (rows - 1)));
     }
     var height = top + (rows - 1) * rowH + node / 2 + labelRoom;
 
@@ -364,6 +404,7 @@
     document.body.className = 't-' + (tree() ? tree().key : 'wc');
     renderTabs();
     renderTree();
+    renderAbilities();
     renderUltimates();
     renderPanel();
     renderMeters();
@@ -446,6 +487,39 @@
       '<span class="name" style="width:' + L.labelW + 'px">' + esc(p.name) + '</span></button>';
   }
 
+  function renderAbilities() {
+    var t = tree(), list = t.abilities || [];
+    var learned = list.filter(function (a) { return lv(a.node_id) > 0; }).length;
+    var pts = list.reduce(function (sum, a) {
+      var n = lv(a.node_id), s = 0;
+      for (var i = 0; i < n; i++) s += a.levels[i].skill_points;
+      return sum + s;
+    }, 0);
+    el.abilNote.textContent = learned + ' of ' + list.length + ' learned · ' + pts + ' points';
+
+    el.abils.innerHTML = list.map(function (a) {
+      var n = lv(a.node_id), can = canLearn(a).ok;
+      var cls = 'abil' + (n ? ' taken' : '') + (n >= a.max_level ? ' maxed' : '') +
+                (can ? ' avail' : '') + (state.sel === a.node_id ? ' selected' : '');
+      var pips = '';
+      for (var i = 0; i < a.max_level; i++) pips += '<span class="pip' + (i < n ? ' on' : '') + '"></span>';
+      var nl = a.levels[n];
+      var use = a.use_cost && a.use_cost.text ? a.use_cost.text : '';
+      return '<button class="' + cls + '" type="button" data-node="' + a.node_id + '"' +
+        ' aria-label="' + esc(a.name) + ', level ' + n + ' of ' + a.max_level + '">' +
+        '<span class="abil-mark">' + Icons.svg(Icons.forAbility(a.name)) + '</span>' +
+        '<span class="abil-txt"><b>' + esc(a.name) + '</b>' +
+        '<span class="abil-use">' + esc(use) + '</span>' +
+        '<span class="abil-eff">' + esc(a.effect) + '</span>' +
+        '<span class="abil-foot"><span class="pips">' + pips + '</span>' +
+        (nl ? '<span class="abil-next">' + costHTML(nl.skill_points, nl.time_segments, nl.gate) +
+              (gateLabel(nl.gate) && nl.gate !== 'manual'
+                ? '<span class="gate-tag">' + esc(gateLabel(nl.gate)) + '</span>' : '') + '</span>'
+            : '<span class="abil-next done">Maxed</span>') +
+        '</span></span></button>';
+    }).join('') || '<p class="ov-empty">No abilities listed for this tree.</p>';
+  }
+
   function renderUltimates() {
     var t = tree(), prog = ultProgress(t), met = prog.every(function (x) { return x.met; });
     el.ultGate.className = 'ult-gate' + (met ? ' met' : '');
@@ -486,7 +560,9 @@
     var when = activeTime(p);
 
     var reqLine = '';
-    if (p.quest_unlock) {
+    if (p.is_ability) {
+      reqLine = '<p class="req">Costs <b>' + esc(p.use_cost.text) + '</b> to use</p>';
+    } else if (p.quest_unlock) {
       reqLine = '<p class="req"><b>Story unlock.</b> No skill point or time cost — ' +
         (state.quests[id] ? 'marked as found.' : 'click the node to mark it found.') + '</p>';
     } else if (p.prerequisites.length) {
@@ -514,7 +590,7 @@
     if (p.quest_unlock) btn = state.quests[id] ? 'Found' : 'Mark as found';
 
     el.panel.innerHTML =
-      '<div class="panel-hero">' + Icons.svg(Icons.forNode(id)) +
+      '<div class="panel-hero">' + Icons.svg(p.is_ability ? Icons.forAbility(p.name) : Icons.forNode(id)) +
         '<span class="hero-tree">' + esc(t.name) + '</span>' +
         '<span class="hero-lv">Level ' + n + ' / ' + p.max_level + '</span></div>' +
       '<div class="panel-body">' +
@@ -549,7 +625,9 @@
     var s = summarise();
     var keys = Object.keys(s.stats);
     var t = tree();
-    el.ovNote.textContent = t.name + ': ' + spent(t) + ' points · ' + manualsNeeded(t) + ' manuals needed';
+    var ph = phialsNeeded(t);
+    el.ovNote.textContent = t.name + ': ' + spent(t) + ' points · ' + manualsNeeded(t) + ' manuals needed' +
+      (ph ? ' · ' + ph + (ph === 1 ? ' phial' : ' phials') : '');
 
     if (!keys.length && !s.other.length) {
       el.ovBody.innerHTML = '<p class="ov-empty">Nothing learned yet. Totals appear here as you spend points.</p>';
@@ -581,6 +659,11 @@
     if (s.manuals.length) {
       html += '<details class="ov-sub"><summary>Manuals to find (' + s.manuals.length + ')</summary>' +
         '<ul class="ov-list">' + s.manuals.map(function (m) { return '<li>' + esc(m) + '</li>'; }).join('') +
+        '</ul></details>';
+    }
+    if (s.phials.length) {
+      html += '<details class="ov-sub"><summary>Phials of Vrakhir Blood (' + s.phials.length + ')</summary>' +
+        '<ul class="ov-list">' + s.phials.map(function (m) { return '<li>' + esc(m) + '</li>'; }).join('') +
         '</ul></details>';
     }
     el.ovBody.innerHTML = html;
@@ -638,6 +721,28 @@
       renderAll(); focusNode(b.dataset.node);
     });
 
+    el.abils.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-node]');
+      if (!b) return;
+      state.sel = b.dataset.node;
+      learn(BY_ID[b.dataset.node]);
+      renderAll();
+    });
+    el.abils.addEventListener('contextmenu', function (e) {
+      var b = e.target.closest('[data-node]');
+      if (!b) return;
+      e.preventDefault();
+      state.sel = b.dataset.node;
+      refund(BY_ID[b.dataset.node]);
+      renderAll();
+    });
+    el.abils.addEventListener('mouseover', function (e) {
+      var b = e.target.closest('[data-node]');
+      if (!b || state.sel === b.dataset.node) return;
+      state.sel = b.dataset.node;
+      renderPanel();
+    });
+
     el.ults.addEventListener('click', function (e) {
       var b = e.target.closest('[data-ult]');
       if (!b) return;
@@ -693,8 +798,16 @@
       if (writingHash) return;
       readHash(); renderAll();
     });
-    [el.ovdrawer, el.ultdrawer].forEach(function (d) {
-      d.addEventListener('toggle', debounce(function () { renderTree(); }, 60));
+    [el.ovdrawer, el.ultdrawer, el.abildrawer].forEach(function (d) {
+      d.addEventListener('toggle', function () {
+        // Abilities and Ultimates sit under the board and would squeeze it flat
+        // together, so opening one closes the other.
+        if (d.open && (d === el.ultdrawer || d === el.abildrawer)) {
+          var other = d === el.ultdrawer ? el.abildrawer : el.ultdrawer;
+          if (other.open) other.open = false;
+        }
+        renderTree();
+      });
     });
 
     el.corruption.value = state.corruption;
