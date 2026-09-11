@@ -206,6 +206,17 @@ def ability_checks(abilities, perk_ids):
             if ability.get("kind") != kind:
                 findings.append(f"{where}: kind is {ability.get('kind')!r} but "
                                 f"use_cost makes it {kind!r}")
+            # `story_granted` is observed in game and appears in no published
+            # table, so there is nothing to cross-check it against. What can be
+            # checked is that it is a real boolean and that the level it makes
+            # free actually exists.
+            granted = ability.get("story_granted")
+            if granted is not None:
+                if granted is not True:
+                    findings.append(f"{where}: story_granted is {granted!r}; "
+                                    "omit the field rather than writing a falsey value")
+                elif not ability["levels"]:
+                    findings.append(f"{where}: story_granted but the ability has no levels")
             for level in ability["levels"]:
                 gate = level["gate"]
                 if gate not in ABILITY_GATES and not re.match(r"corruption \d+$", gate):
@@ -382,6 +393,10 @@ def main():
         print("No source page given — running internal checks only.\n"
               "Pass a saved Game8 'All Perks List' page to cross-check costs and gates.\n")
 
+    granted = sum(1 for t in (abilities or {"trees": {}})["trees"].values()
+                  for a in t["abilities"] if a.get("story_granted"))
+    quest = sum(1 for t in registry["trees"].values()
+                for p in t["perks"] if p.get("quest_unlock"))
     perks = sum(len(t["perks"]) for t in registry["trees"].values())
     ults = sum(len(t["ultimates"]) for t in registry["trees"].values())
     abils = sum(len(t["abilities"]) for t in abilities["trees"].values()) if abilities else 0
@@ -403,6 +418,7 @@ def main():
               f"check out against {label}.")
         print(f"Mechanics graph: {len(mech['systems'])} systems, {len(mech['edges'])} edges, "
               f"{len(mech['nodes'])} nodes mapped.")
+        print(f"Story-driven, costing no points: {quest} perks and {granted} ability first levels.")
     else:
         print(f"{perks} perks, {ults} ultimates and {abils} abilities "
               f"check out against {label}.")

@@ -151,7 +151,7 @@
       }
     }
     var t = TREE_OF[p.node_id];
-    var after = perkSpent(t) - (p.is_ability ? 0 : p.levels[n - 1].skill_points);
+    var after = perkSpent(t) - (p.is_ability ? 0 : levelCost(p, n - 1, 'skill_points'));
     if (state.ults[t.key] != null && !ultMet(t, after)) {
       return { ok: false, why: 'Deselect the ultimate perk first.' };
     }
@@ -176,12 +176,22 @@
   /* Totals. Levels learned are the first `n` entries of a perk's level list. */
   function entries(t) { return t.perks.concat(t.abilities || []); }
 
+  /* The story hands you the first level of a few abilities outright. They still
+     appear, still occupy an ability slot and still upgrade at the usual price —
+     but level 1 is free, so nothing may charge for it. Every cost in the planner
+     reads through here. */
+  function levelCost(p, i, field) {
+    if (p.story_granted && i === 0) return 0;
+    return p.levels[i][field];
+  }
+  function isFree(p, i) { return !!p.story_granted && i === 0; }
+
   function tallyOf(list, field) {
     return list.reduce(function (sum, p) {
       var n = lv(p.node_id), s = 0;
       for (var i = 0; i < n; i++) s += (field === 'manual' || field === 'vrakhir blood')
         ? (p.levels[i].gate === field ? 1 : 0)
-        : p.levels[i][field];
+        : levelCost(p, i, field);
       return sum + s;
     }, 0);
   }
@@ -656,7 +666,7 @@
     var learned = list.filter(function (a) { return lv(a.node_id) > 0; }).length;
     var pts = list.reduce(function (sum, a) {
       var n = lv(a.node_id), s = 0;
-      for (var i = 0; i < n; i++) s += a.levels[i].skill_points;
+      for (var i = 0; i < n; i++) s += levelCost(a, i, 'skill_points');
       return sum + s;
     }, 0);
     var act = list.filter(function (a) { return a.kind === 'active'; }).length;
@@ -677,11 +687,16 @@
       return '<button class="' + cls + '" type="button" data-node="' + a.node_id + '"' +
         ' aria-label="' + esc(a.name) + ', level ' + n + ' of ' + a.max_level + '">' +
         '<span class="abil-mark">' + Icons.svg(Icons.forAbility(a.name)) + '</span>' +
-        '<span class="abil-txt"><b>' + esc(a.name) + '</b>' +
+        '<span class="abil-txt"><b>' + esc(a.name) +
+          (a.story_granted ? '<span class="story-tag" title="The story grants level 1 — ' +
+            'it costs no skill points and no time segments. Upgrades are paid for normally.">' +
+            'Story</span>' : '') + '</b>' +
         '<span class="abil-use">' + esc(use) + '</span>' +
         '<span class="abil-eff">' + esc(a.effect) + '</span>' +
         '<span class="abil-foot"><span class="pips">' + pips + '</span>' +
-        (nl ? '<span class="abil-next">' + costHTML(nl.skill_points, nl.time_segments, nl.gate) +
+        (nl ? '<span class="abil-next">' +
+              (isFree(a, n) ? '<span class="free-tag">Story — free</span>'
+                            : costHTML(nl.skill_points, nl.time_segments, nl.gate)) +
               (gateLabel(nl.gate) && nl.gate !== 'manual'
                 ? '<span class="gate-tag">' + esc(gateLabel(nl.gate)) + '</span>' : '') + '</span>'
             : '<span class="abil-next done">Maxed</span>') +
@@ -769,7 +784,9 @@
         ? '<span class="gate-tag">' + esc(gateLabel(l.gate)) + '</span>' : '';
       return '<li class="' + (owned ? 'on ' : '') + (isNext ? 'next ' : '') + (blocked ? 'blocked' : '') + '">' +
         '<span class="lp"></span><span class="lv-text">' + esc(l.effect) + '</span>' +
-        '<span class="lv-meta">' + tag + costHTML(l.skill_points, l.time_segments, l.gate) + '</span></li>';
+        '<span class="lv-meta">' + tag +
+          (isFree(p, i) ? '<span class="free-tag">Story — no points</span>'
+                        : costHTML(l.skill_points, l.time_segments, l.gate)) + '</span></li>';
     }).join('');
 
     var btn = nl ? 'Learn level ' + nl.level : 'Fully learned';
@@ -783,7 +800,8 @@
         (when ? '<p class="panel-when">' + esc(when) + '</p>' : '') +
         (nl && gateLabel(nl.gate) ? '<p class="panel-gate' + (gateOk(nl.gate) ? ' ok' : '') + '">' +
           esc(gateLabel(nl.gate)) + '</p>' : '') +
-        '<h3>' + esc(p.name) + '</h3>' +
+        '<h3>' + esc(p.name) +
+          (p.story_granted ? '<span class="story-tag">Story</span>' : '') + '</h3>' +
         '<p class="desc">' + esc(p.effect) + '</p>' + reqLine +
         '<ul class="levels">' + levels + '</ul>' +
       '</div>' +

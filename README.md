@@ -25,6 +25,11 @@ Pages and it works as the site index.
   the header, 0–15). Levels that need a Manual found in the world are gated behind the
   "Manuals found" toggle. The two padlocked story nodes — *Font of Life* and
   *Mandrake Ward* — are click-to-toggle and cost nothing.
+- **Story grants are free and marked.** Five abilities are handed to you by the
+  story rather than bought — *Astral Communion*, *Burning Blood*, *Compel Soul*,
+  *Dirty Trick* and *Voracious Bite*. Their first level costs no skill points and
+  no time segments, carries a green **Story** badge, and never appears in any
+  total. Upgrades past level 1 are paid for normally.
 - **Ultimates.** Three per tree, one selectable, unlocked at 35 points spent on
   *perks* in that tree (Witchcraft, Swordmastery) or Corruption 15 (Vampirism).
   They sit directly under the tree and are always on screen — the choice is
@@ -122,6 +127,11 @@ rebuild it from saved copies of the two ability pages. Each tree holds an
 
 - `use_cost` is what the ability costs to *fire*, not to learn; only the
   Fextralife table publishes it.
+- `story_granted: true` means the story hands you level 1: it costs no skill
+  points and no time segments, and the planner shows "Story — no points" in its
+  place. Upgrades are unaffected. This is observed in game and appears in neither
+  source table, so nothing can cross-check *which* abilities carry it — the
+  verifier only checks the flag is a real boolean on an ability that has levels.
 - `kind` is `active` or `passive`, decided by `use_cost`: anything that pays an
   activation charge or health is active. The drawer groups by it. Passives still
   take an ability slot — they work "once equipped in the Active Ability panel" —
