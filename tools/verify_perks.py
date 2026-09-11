@@ -174,7 +174,7 @@ def compare(src, registry, overrides=None):
     return findings, expected
 
 
-ABILITY_GATES = {"none", "manual", "vrakhir blood"}
+ABILITY_GATES = {"none", "manual", "vrakhir blood", "road shrine"}
 
 
 def ability_checks(abilities, perk_ids):

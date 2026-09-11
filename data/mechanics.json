@@ -1245,7 +1245,7 @@
       ]
     },
     "AS3": {
-      "name": "Broadswing",
+      "name": "Broad Swing",
       "provides": [
         "ability_damage"
       ],
@@ -1367,7 +1367,7 @@
       ]
     },
     "AV7": {
-      "name": "Shadow Storm",
+      "name": "Shadowstorm",
       "provides": [
         "attacks_landed",
         "survivability"
@@ -1411,7 +1411,7 @@
       "note": "Sanguine Renewal makes this reset every active cooldown, which is why it carries cooldown reduction."
     },
     "Uwc1": {
-      "name": "Arcane Cascade",
+      "name": "Aether Cascade",
       "provides": [
         "witchcraft_damage"
       ],

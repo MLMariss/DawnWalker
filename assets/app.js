@@ -106,6 +106,8 @@
     // A Phial of Vrakhir Blood is consumed, not a permanent gate — it is
     // counted in the build overview rather than blocking the level.
     if (gate === 'vrakhir blood') return true;
+    // Road shrines are free to reach and never consumed — not a real block.
+    if (gate === 'road shrine') return true;
     var c = corruptionOf(gate);
     return c === null ? true : state.corruption >= c;
   }
@@ -114,6 +116,7 @@
     if (!gate || gate === 'none') return '';
     if (gate === 'manual') return 'Manual required';
     if (gate === 'vrakhir blood') return 'Phial of Vrakhir Blood';
+    if (gate === 'road shrine') return 'Road shrine';
     if (gate === 'quest') return 'Story unlock';
     var c = corruptionOf(gate);
     return c === null ? gate : 'Corruption ' + c;

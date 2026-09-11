@@ -2,14 +2,18 @@
   "game": "The Blood of Dawnwalker",
   "subject": "Ability registry",
   "notes": [
-    "Upgrade levels and their costs come from the Game8 'All Abilities List' page.",
-    "Activation charge and health costs to use an ability come from the Fextralife ability table; Game8 does not list them.",
+    "Every line of effect text is transcribed verbatim from the in-game Active Abilities panel.",
+    "`cooldown` and `active_time` come from the in-game panel; neither published source carries them.",
+    "`note` holds the italic line the game prints under the effect - either that the ability works passively once equipped, or that it does not take up a common slot in the Active Abilities panel.",
+    "`no_common_slot` marks an ability that does not consume one of the tree's ability slots.",
+    "Activation charge and health costs to use an ability come from the in-game Cost line, cross-checked against the Fextralife ability table.",
     "The source labels the fourth row of four-level abilities 'Lv. 3'; levels here are numbered by position.",
     "Abilities have no prerequisites in either source - they are learned independently of the perk graph.",
-    "Gates: manual, corruption <n>, vrakhir blood (a Phial of Vrakhir Blood), or none.",
-    "Two source typos are corrected on extraction; tools/extract_abilities.py names them.",
+    "Gates: manual, corruption <n>, road shrine, vrakhir blood (a Phial of Vrakhir Blood), or none.",
+    "Some levels cost skill points but no time segments, so `time_segments` can be 0.",
+    "A level whose cost the game hides is one the capture's save had already bought; those costs are kept from the published tables.",
     "`kind` is active or passive, decided by use_cost: anything that pays an activation charge or health is active. Passive abilities still take an ability slot - they work once equipped in the Active Ability panel.",
-    "`story_granted` marks an ability whose first level the story hands you: it costs no skill points and no time segments to learn. Upgrades past level 1 are paid for normally. This is observed in game, not published in either source table, so verify_perks.py cannot cross-check it - it only checks that the flag is a boolean on a real ability."
+    "`story_granted` marks an ability whose first level the story hands you: it costs no skill points and no time segments to learn. Upgrades past level 1 are paid for normally."
   ],
   "trees": {
     "Witchcraft": {
@@ -30,21 +34,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "+0.4% permanent Witchcraft Ability Damage for each place of power exorcised",
+              "effect": "+0.4% permanent Witchcraft Ability Damage for each place of power exorcised.",
               "skill_points": 1,
               "time_segments": 0,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "+0.8% permanent Witchcraft Ability Damage for each place of power exorcised",
+              "effect": "+0.8% permanent Witchcraft Ability Damage for each place of power exorcised.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "+1.2% permanent Witchcraft Ability Damage for each place of power exorcised",
+              "effect": "+1.2% permanent Witchcraft Ability Damage for each place of power exorcised.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "none"
@@ -56,12 +60,15 @@
               "time_segments": 0,
               "gate": "none"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY",
+          "note": "This Ability doesn't take up a common slot in the Active Abilities panel.",
+          "no_common_slot": true
         },
         {
           "node_id": "AW2",
           "name": "Burning Blood",
-          "effect": "Deal Damage over time to a target.",
+          "effect": "Deals Damage over time to a target.",
           "kind": "active",
           "story_granted": true,
           "max_level": 4,
@@ -73,21 +80,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Deal 52 Damage per second. Duration 10s",
+              "effect": "Deals 96 Damage per second. Duration 10s.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "Deal 55 Damage per second. Duration 12s",
+              "effect": "Deals 100 Damage per second. Duration 12s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "Deal 56 Damage per second. Duration 14s. On Death, effect transfers to a different enemy",
+              "effect": "Deals 103 Damage per second. On Death, effect transfers to different enemy. Duration 14s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
@@ -99,12 +106,14 @@
               "time_segments": 2,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY",
+          "cooldown": "30s"
         },
         {
           "node_id": "AW3",
           "name": "Compel Soul",
-          "effect": "Allows you to speak with the restless souls. Use together with objects associated with the dead to obtain additional information.",
+          "effect": "Allows you to speak with restless souls. Use together with objects associated with the dead to obtain additional information.",
           "kind": "passive",
           "story_granted": true,
           "max_level": 4,
@@ -116,21 +125,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "-0.5% permanent Witchcraft Ability Cooldown for each soul compelled",
+              "effect": "-0.5% permanent Witchcraft Ability Cooldown for each soul compelled.",
               "skill_points": 1,
               "time_segments": 0,
-              "gate": "none"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "-1.0% permanent Witchcraft Ability Cooldown for each soul compelled",
+              "effect": "-1% permanent Witchcraft Ability Cooldown for each soul compelled.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "none"
             },
             {
               "level": 3,
-              "effect": "-1.5% permanent Witchcraft Ability Cooldown for each soul compelled",
+              "effect": "-1.5% permanent Witchcraft Ability Cooldown for each soul compelled.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "none"
@@ -142,12 +151,15 @@
               "time_segments": 0,
               "gate": "none"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY",
+          "note": "This Ability doesn't take up a common slot in the Active Abilities panel.",
+          "no_common_slot": true
         },
         {
           "node_id": "AW4",
           "name": "Cycle of Ruin",
-          "effect": "Extends duration of currently active Witchcraft Abilities with each landed Attack, Block, and Perfect Block.",
+          "effect": "Extends Duration of currently active Witchcraft Abilities with each landed Attack, Block and Perfect Block.",
           "kind": "passive",
           "max_level": 4,
           "use_cost": {
@@ -158,21 +170,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Extends Duration of Witchcraft Abilities by 1s",
+              "effect": "Extends Duration of Witchcraft Abilities by 1s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "Extends Duration of Witchcraft Abilities by 2s",
+              "effect": "Extends Duration of Witchcraft Abilities by 2s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "Extends Duration of Witchcraft Abilities by 2s. Critical Hits extend Duration of Witchcraft Abilities by 4s",
+              "effect": "Extends Duration of Witchcraft Abilities by 2s. Critical Hits extend Duration of Witchcraft Abilities by 4s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
@@ -184,7 +196,9 @@
               "time_segments": 2,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY",
+          "note": "This Ability works passively once equipped in the Active Abilities panel."
         },
         {
           "node_id": "AW5",
@@ -193,28 +207,28 @@
           "kind": "active",
           "max_level": 4,
           "use_cost": {
-            "text": "1 Activation Charge 10% Health",
-            "charges": 1,
+            "text": "2 Activation Charges 10% Health",
+            "charges": 2,
             "health_percent": 10
           },
           "levels": [
             {
               "level": 1,
-              "effect": "Reflects 100% of Damage. Blocks 2 instances of Damage. Duration 90s",
+              "effect": "Reflects 100% of Damage. Blocks 2 instances of Damage. Duration 90s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "Reflects 120% of Damage. Blocks 3 instances of Damage. Duration 90s",
+              "effect": "Reflects 120% of Damage. Blocks 3 instances of Damage. Duration 90s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "Reflects 160% of Damage. Blocks 3 instances of Damage. Duration 90s",
+              "effect": "Reflects 160% of Damage. Blocks 3 instances of Damage. Duration 90s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
@@ -226,7 +240,9 @@
               "time_segments": 2,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY",
+          "cooldown": "30s"
         },
         {
           "node_id": "AW6",
@@ -242,33 +258,36 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Gain Haste",
+              "effect": "Gain Haste.",
               "skill_points": 1,
               "time_segments": 0,
-              "gate": "manual"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "Haste costs 50% less Stamina",
+              "effect": "Haste costs 50% less Stamina.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "Haste costs 50% less Stamina. Haste is 20% faster",
+              "effect": "Haste costs 50% less Stamina. Haste is 20% faster.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "manual"
             },
             {
               "level": 4,
-              "effect": "Haste doesn't cost Stamina. Haste is 20% faster",
+              "effect": "Haste doesn't cost Stamina. Haste is 20% faster.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY",
+          "note": "This Ability doesn't take up a common slot in the Active Abilities panel.",
+          "no_common_slot": true
         },
         {
           "node_id": "AW7",
@@ -284,14 +303,14 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Area Damage 88. Ravenous Flock cancels after 1 hit. 100% Critical Hits on target. Duration 20s",
+              "effect": "Area Damage 161. Ravenous Flock cancels after 1 hit. 100% Critical Hits on target. Duration 20s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "Area Damage 96. Ravenous Flock cancels after 2 hits. 100% Critical Hits on target. Duration 20s",
+              "effect": "Area Damage 177. Ravenous Flock cancels after 2 hits. 100% Critical Hits on target. Duration 20s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
@@ -310,7 +329,9 @@
               "time_segments": 2,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY",
+          "cooldown": "45s"
         },
         {
           "node_id": "AW8",
@@ -326,21 +347,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "32 Lifesteal per second. Duration 18s",
+              "effect": "59 Lifesteal per second. Duration 18s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "38 Lifesteal per second. Duration 24s",
+              "effect": "70 Lifesteal per second. Duration 24s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "44 Lifesteal per second. 20% Damage you receive transfers to the target. Duration 30s",
+              "effect": "80 Lifesteal per second. 20% Damage you receive transfers to the target. Duration 30s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
@@ -352,7 +373,9 @@
               "time_segments": 2,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY",
+          "cooldown": "45s"
         },
         {
           "node_id": "AW9",
@@ -368,21 +391,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "+35% Critical Hit chance. +10% Critical Damage. Duration 20s",
+              "effect": "+35% Critical Hit chance. +10% Critical Damage. Duration 20s.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "+40% Critical Hit chance. +20% Critical Damage. Duration 25s",
+              "effect": "+40% Critical Hit chance. +20% Critical Damage. Duration 25s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "+45% Critical Hit chance. +30% Critical Damage. On Death, effect transfers to a different enemy. Duration 30s",
+              "effect": "+45% Critical Hit chance. +30% Critical Damage. On Death, effect transfers to different enemy.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
@@ -394,7 +417,9 @@
               "time_segments": 2,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY",
+          "cooldown": "35s"
         },
         {
           "node_id": "AW10",
@@ -410,21 +435,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Regenerates 10% of Health over 10 seconds",
+              "effect": "Regenerates 10% of Health over 10 seconds.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "Regenerates 15% of Health over 10 seconds",
+              "effect": "Regenerates 15% of Health over 10 seconds.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "Regenerates 20% of Health over 10 seconds. Heal 20% of dealt Damage from Critical Hits on enemies affected by Witchcraft Abilities",
+              "effect": "Regenerates 20% Health. Heal 20% of dealt Damage from Critical Hits on enemies affected by Witchcraft Abilities.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
@@ -436,7 +461,9 @@
               "time_segments": 2,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "DAY ONLY",
+          "note": "This Ability works passively once equipped in the Active Abilities panel."
         }
       ]
     },
@@ -446,7 +473,7 @@
         {
           "node_id": "AS1",
           "name": "Adrenaline Rush",
-          "effect": "Increases Attack Damage after using Active Abilities. This Ability works passively once equipped in the Active Ability panel.",
+          "effect": "Increases Attack Damage after using Active Abilities.",
           "kind": "passive",
           "max_level": 4,
           "use_cost": {
@@ -457,21 +484,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "+20% Attack Damage. Duration 6s",
+              "effect": "+20% Attack Damage. Duration 6s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "+30% Attack Damage. +50% Passive Activation Charge. Duration 6s",
+              "effect": "+30% Attack Damage. +50% passive Activation Charge Regeneration. Duration 6s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "+40% Attack Damage. +100% Passive Activation Charge. Duration 6s",
+              "effect": "+40% Attack Damage. +100% passive Activation Charge Regeneration. Duration 6s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
@@ -483,7 +510,9 @@
               "time_segments": 2,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME",
+          "note": "This Ability works passively once equipped in Active Ability panel."
         },
         {
           "node_id": "AS2",
@@ -499,21 +528,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Decapitation: 10%",
+              "effect": "Deals 450% Weapon Damage. Decapitation : 10% chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "Deals 560% Weapon Damage. Decapitation: 20%",
+              "effect": "Deals 560% Weapon Damage. Decapitation : 20% chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "Deals 680% Weapon Damage. Decapitation: 35% chance",
+              "effect": "Deals 680% Weapon Damage. Decapitation : 35% chance.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
@@ -525,11 +554,13 @@
               "time_segments": 2,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME",
+          "cooldown": "25s"
         },
         {
           "node_id": "AS3",
-          "name": "Broadswing",
+          "name": "Broad Swing",
           "effect": "Weapon Area Attack.",
           "kind": "active",
           "max_level": 4,
@@ -541,33 +572,36 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Deals 300% Weapon Damage",
+              "effect": "Deals 300% Weapon Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "Deals 375% Weapon Damage",
+              "effect": "Deals 375% Weapon Damage.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "Deals 450% Weapon Damage. For each enemy you hit, increase Broad Swing Damage by 10%",
+              "effect": "Deals 450% Weapon Damage. For each enemy you hit, increase Broad Swing Damage by 10%.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 4,
-              "effect": "Deals 525% Weapon Damage. For each enemy you hit, increase Broad Swing Damage by 10%",
+              "effect": "Deals 525% Weapon Damage. For each enemy you hit, increase Broad Swing Damage by 10%.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual"
             }
-          ]
+          ],
+          "alias": "Broadswing",
+          "active_time": "ANYTIME",
+          "cooldown": "40s"
         },
         {
           "node_id": "AS4",
@@ -583,14 +617,14 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Deals 200% Attack Damage. Stun Duration 2s. Bleed on target: 50% chance",
+              "effect": "Deals 200% Attack Damage. Stun Duration 2s. Bleed on target: 50% chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "Deals 250% Attack Damage. Stun Duration 2s. Bleed on target: 100% chance",
+              "effect": "Deals 250% Attack Damage. Stun Duration 2s. Bleed on target: 100% chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
@@ -609,7 +643,9 @@
               "time_segments": 2,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME",
+          "cooldown": "20s"
         },
         {
           "node_id": "AS5",
@@ -626,14 +662,14 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Stun ends after 3 hits. Deals 44 Damage. +10% Damage from Active Abilities. Duration 15s",
+              "effect": "Stun ends after 3 hits. Deals 154 Damage. +10% Damage from Active Abilities. Duration 15s.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "Stun ends after 4 hits. Deals 55 Damage. +20% Damage from Active Abilities. Duration 20s",
+              "effect": "Stun ends after 4 hits. Deals 192 Damage. +20% Damage from Active Abilities. Duration 20s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
@@ -652,12 +688,14 @@
               "time_segments": 2,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME",
+          "cooldown": "30s"
         },
         {
           "node_id": "AS6",
           "name": "Swiftness",
-          "effect": "Boost Attack Speed after Perfect Block. This Ability works passively once equipped in the Active Ability panel.",
+          "effect": "Boosts Attack Speed after Perfect Block.",
           "kind": "passive",
           "max_level": 4,
           "use_cost": {
@@ -668,21 +706,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "+10% Attack Speed. Duration 6s",
+              "effect": "+10% Attack Speed. Duration 6s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 2,
-              "effect": "+15% Attack Speed. Duration 8s",
+              "effect": "+15% Attack Speed. Duration 8s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "+20% Attack Speed. +5% Critical Hit chance. Duration 10s",
+              "effect": "+20% Attack Speed. +5% Critical Hit chance. Duration 10s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
@@ -694,12 +732,14 @@
               "time_segments": 2,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME",
+          "note": "This Ability works passively once equipped in the Active Abilities panel."
         },
         {
           "node_id": "AS7",
           "name": "Walking Fortress",
-          "effect": "Perfect Block restores a portion of Activity Charge.",
+          "effect": "Perfect Block restores portion of Activation Charge.",
           "kind": "passive",
           "max_level": 4,
           "use_cost": {
@@ -710,21 +750,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Restores 10% of Activation Charge",
+              "effect": "Restores 10% of Activation Charge.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "road shrine"
             },
             {
               "level": 2,
-              "effect": "Restores 15% of Activation Charge. -1s Cooldowns of Active Abilities after Directional Block or Perfect Block",
+              "effect": "Restores 15% of Activation Charge. -1s Cooldowns of Active Abilites after Directional Block or Perfect Block.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual"
             },
             {
               "level": 3,
-              "effect": "Restores 20% of Activation Charge. -1s Cooldowns of Active Abilities after Directional Block or Perfect Block",
+              "effect": "Restores 20% of Activation Charge. -1s Cooldowns of Active Abilites after Directional Block or Perfect Block.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual"
@@ -736,7 +776,9 @@
               "time_segments": 2,
               "gate": "manual"
             }
-          ]
+          ],
+          "active_time": "ANYTIME",
+          "note": "This Ability works passively once equipped in the Active Abilities panel."
         }
       ]
     },
@@ -757,21 +799,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Area Damage 178 in 3m radius after Explosion. 623 Damage to Bosses",
+              "effect": "Area Damage 320 in 3m radius after Explosion. 1,120 Damage to Bosses.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "vrakhir blood"
             },
             {
               "level": 2,
-              "effect": "Area Damage 222 in 4m radius after Explosion. 756 Damage to Bosses",
+              "effect": "Area Damage 400 in 4m radius after Explosion. 1,360 Damage to Bosses.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 10"
             },
             {
               "level": 3,
-              "effect": "Area Damage 267 in 5m radius after Explosion. 890 Damage to Bosses",
+              "effect": "Area Damage 480 in 5m radius after Explosion. 1,600 Damage to Bosses.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 12"
@@ -783,12 +825,14 @@
               "time_segments": 2,
               "gate": "corruption 14"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY",
+          "cooldown": "30s"
         },
         {
           "node_id": "AV2",
           "name": "Crimson Rush",
-          "effect": "Increase Damage of Active Abilities, the higher your Health percentage is.",
+          "effect": "Increases Damage of Active Abilities, the higher your Health percentage is.",
           "kind": "passive",
           "max_level": 4,
           "use_cost": {
@@ -799,33 +843,35 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Up to +25% Active Ability Damage",
+              "effect": "Up to +25% Active Ability Damage.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 3"
             },
             {
               "level": 2,
-              "effect": "Up to +30% Active Ability Damage",
+              "effect": "Up to +30% Active Ability Damage.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 7"
             },
             {
               "level": 3,
-              "effect": "Up to +35% Active Ability Damage",
+              "effect": "Up to +35% Active Ability Damage.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 11"
             },
             {
               "level": 4,
-              "effect": "Up to +40% Active Ability Damage",
+              "effect": "Up to +40% Active Ability Damage.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "corruption 14"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY",
+          "note": "This Ability works passively once equipped in the Active Abilities panel."
         },
         {
           "node_id": "AV3",
@@ -841,21 +887,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "578 Damage to bosses and Tough enemies",
+              "effect": "1,040 Damage to Bosses and Tough enemies.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 3"
             },
             {
               "level": 2,
-              "effect": "667 Damage to bosses and Tough enemies. +20% Attack Damage for 15s",
+              "effect": "1,200 Damage to Bosses and Tough enemies. +20% Attack Damage for 15s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 7"
             },
             {
               "level": 3,
-              "effect": "765 Damage to bosses and Tough enemies. +40% Attack Damage for 15s",
+              "effect": "1,360 Damage to Bosses and Tough enemies. +40% Attack Damage for 15s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 10"
@@ -867,12 +913,15 @@
               "time_segments": 2,
               "gate": "corruption 13"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY",
+          "note": "This Ability doesn't take up a common slot in the Active Abilities panel.",
+          "no_common_slot": true
         },
         {
           "node_id": "AV4",
           "name": "Mesmerise",
-          "effect": "Mind Control a target and force him to Fight on your side.",
+          "effect": "Mind Control a target and force him to Fight on your side. Can't be used on Bosses.",
           "kind": "active",
           "max_level": 4,
           "use_cost": {
@@ -883,21 +932,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Duration 25s",
+              "effect": "Duration 25s.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "vrakhir blood"
             },
             {
               "level": 2,
-              "effect": "Duration 35s. +25% to target's Damage",
+              "effect": "+25% to target's Damage. Duration 35s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 9"
             },
             {
               "level": 3,
-              "effect": "Duration 45s. +50% to target's Damage",
+              "effect": "+50% to target's Damage. Duration 45s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 12"
@@ -909,7 +958,9 @@
               "time_segments": 2,
               "gate": "corruption 14"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY",
+          "cooldown": "45s"
         },
         {
           "node_id": "AV5",
@@ -925,7 +976,7 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Stun duration 2s. +15 Damage to targets and -15% Damage dealt by targets. Block reflects 10% of Damage back to the attacker. Perfect Block reflects 40%. Duration 35s",
+              "effect": "Stun Duration 2s. +15% Damage to targets and -15% Damage dealt by targets. Block reflects 10% of Damage back to the attacker. Perfect Block reflects 40%. Duration 25s.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "vrakhir blood"
@@ -944,7 +995,9 @@
               "time_segments": 1,
               "gate": "corruption 11"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY",
+          "cooldown": "30s"
         },
         {
           "node_id": "AV6",
@@ -960,14 +1013,14 @@
           "levels": [
             {
               "level": 1,
-              "effect": "20% of Health Segment after Perfect Block. 20% chance to also trigger after Directional Block and 10% after Omniblock",
+              "effect": "Restore 20% of Health Segment after Perfect Block. 20% chance to also trigger after Directional Block and 10% chance after Omniblock.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "vrakhir blood"
             },
             {
               "level": 2,
-              "effect": "25% of Health Segment after Perfect Block. 20% chance to also trigger after Directional Block and 15% after Omniblock",
+              "effect": "Restore 25% of Health Segment after Perfect Block. 20% chance to also trigger after Directional Block and 15% chance after Omniblock.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 6"
@@ -986,49 +1039,54 @@
               "time_segments": 2,
               "gate": "corruption 14"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY",
+          "note": "This Ability works passively once equipped in the Active Abilities panel."
         },
         {
           "node_id": "AV7",
-          "name": "Shadow Storm",
+          "name": "Shadowstorm",
           "effect": "Slows down Time around you.",
           "kind": "active",
           "max_level": 4,
           "use_cost": {
-            "text": "1 Activation Charge 15% Health",
-            "charges": 1,
+            "text": "2 Activation Charges 15% Health",
+            "charges": 2,
             "health_percent": 15
           },
           "levels": [
             {
               "level": 1,
-              "effect": "Duration 4s",
+              "effect": "Duration 4s.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "vrakhir blood"
             },
             {
               "level": 2,
-              "effect": "Duration 5s",
+              "effect": "Duration 5s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 8"
             },
             {
               "level": 3,
-              "effect": "Duration 6s. +20% Attack Damage",
+              "effect": "+20% Attack Damage. Duration 6s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 11"
             },
             {
               "level": 4,
-              "effect": "Duration 7s. Extend Duration by 1s on enemy kill. +25% Attack Damage",
+              "effect": "+25% Attack Damage. Extend Duration by 1s on enemy kill. Duration 7s.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "corruption 14"
             }
-          ]
+          ],
+          "alias": "Shadow Storm",
+          "active_time": "NIGHT ONLY",
+          "cooldown": "90s"
         },
         {
           "node_id": "AV8",
@@ -1044,38 +1102,41 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Gain Haste",
+              "effect": "Gain Haste.",
               "skill_points": 1,
-              "time_segments": 1,
+              "time_segments": 0,
               "gate": "corruption 1"
             },
             {
               "level": 2,
-              "effect": "Haste costs 50% less Stamina",
+              "effect": "Haste costs 50% less Stamina.",
               "skill_points": 1,
-              "time_segments": 1,
+              "time_segments": 0,
               "gate": "corruption 6"
             },
             {
               "level": 3,
-              "effect": "Haste costs 50% less Stamina. Haste is 20% faster",
-              "skill_points": 2,
-              "time_segments": 1,
+              "effect": "Haste costs 50% less Stamina. Haste is 20% faster.",
+              "skill_points": 1,
+              "time_segments": 0,
               "gate": "corruption 9"
             },
             {
               "level": 4,
-              "effect": "Haste doesn't cost Stamina. Haste is 20% faster",
-              "skill_points": 3,
-              "time_segments": 2,
+              "effect": "Haste doesn't cost Stamina. Haste is 20% faster.",
+              "skill_points": 1,
+              "time_segments": 0,
               "gate": "corruption 12"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY",
+          "note": "This Ability doesn't take up a common slot in the Active Abilities panel.",
+          "no_common_slot": true
         },
         {
           "node_id": "AV9",
           "name": "Shred",
-          "effect": "Increase Damage of Active Abilities, the higher your Health percentage is.",
+          "effect": "Bleed chance on your Weapon or Claw Attacks.",
           "kind": "passive",
           "max_level": 4,
           "use_cost": {
@@ -1086,33 +1147,35 @@
           "levels": [
             {
               "level": 1,
-              "effect": "20% Bleed chance",
+              "effect": "20% Bleed chance.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 1"
             },
             {
               "level": 2,
-              "effect": "25% Bleed chance. +25% Bleed Damage",
+              "effect": "25% Bleed chance. +25% Bleed Damage.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 5"
             },
             {
               "level": 3,
-              "effect": "30% Bleed chance. +50% Bleed Damage",
+              "effect": "30% Bleed chance. +50% Bleed Damage.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 9"
             },
             {
               "level": 4,
-              "effect": "35% Bleed chance. +100% Bleed Damage. 89 Damage when Bleed is reapplied",
+              "effect": "35% Bleed chance. +100% Bleed Damage. 160 Damage when Bleed is reapplied.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "corruption 13"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY",
+          "note": "This Ability works passively once equipped in the Active Abilities panel."
         },
         {
           "node_id": "AV10",
@@ -1129,21 +1192,21 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Restores 60% of Health Segment. 124 Damage to target",
+              "effect": "Restores 60% of Health Segment. 224 Damage to target.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none"
             },
             {
               "level": 2,
-              "effect": "Restores 80% of Health Segment. 151 Damage to target",
+              "effect": "Restores 80% of Health Segment. 272 Damage to target.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 3"
             },
             {
               "level": 3,
-              "effect": "Restores 80% of Health Segment. 178 Damage to target. +10 Claw Damage for 30s",
+              "effect": "Restores 100% of Health Segment. 320 Damage to target. +10% Claw Damage for 30s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 8"
@@ -1155,7 +1218,11 @@
               "time_segments": 2,
               "gate": "corruption 14"
             }
-          ]
+          ],
+          "active_time": "NIGHT ONLY",
+          "cooldown": "30s",
+          "note": "This Ability doesn't take up a common slot in the Active Abilities panel.",
+          "no_common_slot": true
         }
       ]
     }
