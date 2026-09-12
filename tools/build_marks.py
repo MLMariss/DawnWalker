@@ -24,7 +24,7 @@ import re
 import sys
 
 try:
-    from PIL import Image
+    from PIL import Image, ImageFilter
 except ImportError:
     sys.exit('This needs Pillow to read .webp:  pip install pillow')
 
@@ -73,6 +73,12 @@ def to_mask(path):
     # shows through the strokes rather than through the empty background.
     ink = Image.eval(r.point(lambda v: 255 - v), lambda v: v)
     alpha = Image.composite(ink, Image.new('L', im.size, 0), a)
+
+    # The artwork fills its shapes with a fine stipple. Averaged down to a 46px
+    # node that dither reads as grey haze over the strokes rather than as
+    # texture, so a small median pass drops the isolated dots and leaves the
+    # linework, which is what carries the icon at that size.
+    alpha = alpha.filter(ImageFilter.MedianFilter(3))
 
     box = alpha.getbbox()
     if box:

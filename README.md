@@ -73,24 +73,21 @@ fits. Scrollbars are themed to the page rather than left as system chrome.
 ## Repository layout
 
 ```
-index.html                  markup and page chrome
-assets/styles.css           the dark skin
-assets/app.js               planner logic — reads the JSON, renders from it
-assets/icons.js             drawn SVG glyphs — the fallback where no mark exists
-assets/marks.js             generated — which nodes have a mask
-assets/marks/               the game's perk icons as tintable alpha masks
-icons-src/                  the source icons the masks are built from
-data/perks.json             the perk registry — single source of truth
-data/abilities.json         the ability registry, generated from two saved pages
-data/mechanics.json         the synergy graph — systems, causal edges, per-node mapping
-tools/verify_perks.py       checks all three registries, and perks against a source page
-tools/extract_abilities.py  rebuilds data/abilities.json from saved ability pages
-tools/build_mechanics.py    rebuilds data/mechanics.json
-tools/build_marks.py        rebuilds assets/marks/ from icons-src/
-tools/build_icon_prompts.py rebuilds docs/gemini-icon-prompts.md from the registries
-tools/slice_icon_sheet.py   cuts a generated icon sheet into per-node alpha masks
-docs/gemini-icon-prompts.md how to redraw all 90 node icons with Gemini
-VERIFICATION.md             what was checked, and where the sources disagreed
+index.html                 markup and page chrome
+assets/styles.css          the dark skin
+assets/app.js              planner logic — reads the JSON, renders from it
+assets/icons.js            drawn SVG glyphs — the fallback where no mark exists
+assets/marks.js            generated — which nodes have a mask
+assets/marks/              the game's perk icons as tintable alpha masks
+icons-src/                 the source icons the masks are built from
+data/perks.json            the perk registry — single source of truth
+data/abilities.json        the ability registry, generated from two saved pages
+data/mechanics.json        the synergy graph — systems, causal edges, per-node mapping
+tools/verify_perks.py      checks all three registries, and perks against a source page
+tools/extract_abilities.py rebuilds data/abilities.json from saved ability pages
+tools/build_mechanics.py   rebuilds data/mechanics.json
+tools/build_marks.py       rebuilds assets/marks/ from icons-src/
+VERIFICATION.md            what was checked, and where the sources disagreed
 ```
 
 Nothing about the perks is hard-coded in `app.js` beyond the icon mapping. Adding,
