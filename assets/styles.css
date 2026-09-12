@@ -200,6 +200,26 @@ a:hover{color:var(--gold-2)}
   stroke:#86786a;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;
   transition:.18s;
 }
+/* A node's mark is either a drawn glyph (stroked) or the game's icon as an
+   alpha mask painted with currentColor. Both have to answer to the same seven
+   state rules below, so the mask reads `color` where the glyph reads `stroke`. */
+.mark{
+  position:relative;display:inline-block;
+  width:var(--icon);height:var(--icon);
+  background:currentColor;color:#86786a;
+  -webkit-mask:var(--mark) center/contain no-repeat;
+          mask:var(--mark) center/contain no-repeat;
+  transition:.18s;
+}
+.node.avail .mark{color:var(--text)}
+.node.taken .mark{color:var(--gold-2)}
+.node.gated .mark{color:#7d6a5c}
+.node.locked .mark{color:#5a5148}
+.node:hover .mark{color:var(--gold-2)}
+.ult .ult-mark .mark{width:20px;height:20px;color:var(--text-faint)}
+.ult.on .ult-mark .mark{color:#150f09}
+.panel-hero .mark{width:52px;height:52px;color:var(--gold-2)}
+
 .node .pips{position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);display:flex;gap:5px}
 
 /* Level markers. The game draws a diamond per level: filled for what you have,

@@ -113,12 +113,36 @@
            ' aria-hidden="true"><path d="' + d + '"/></svg>';
   }
 
+  /* A node's mark is the game's icon where one has been built, and the drawn
+     glyph otherwise — the abilities have no icon files, so they stay on glyphs.
+     The mask is painted with currentColor so every board state still tints it.
+     The path is relative to assets/styles.css, not to the page: the custom
+     property is substituted into a mask declaration there, and that is what the
+     URL resolves against. 'assets/marks/...' here would ask for
+     assets/assets/marks/... and 404. */
+  function has(id) {
+    return !!(global.MARKS && global.MARKS.indexOf(id) !== -1);
+  }
+
+  function mark(id, glyphName, cls) {
+    if (!has(id)) return svg(glyphName, cls);
+    return '<i class="mark' + (cls ? ' ' + cls : '') + '" aria-hidden="true"' +
+           ' style="--mark:url(\'marks/' + id + '.png\')"></i>';
+  }
+
   global.Icons = {
     glyphs: GLYPHS,
     forNode: function (id) { return NODE_GLYPH[id] || 'hex'; },
     forTree: function (n) { return TREE_GLYPH[n] || 'hex'; },
     forUltimate: function (n) { return ULT_GLYPH[n] || 'star'; },
     forAbility: function (n) { return ABILITY_GLYPH[n] || 'hex'; },
-    svg: svg
+    svg: svg,
+    hasMark: has,
+    /* id is a node id; the glyph name is the fallback when no mask exists. */
+    mark: mark,
+    forNodeMark: function (id, cls) { return mark(id, NODE_GLYPH[id] || 'hex', cls); },
+    forUltMark: function (key, i, cls, name) {
+      return mark('U' + key + i, ULT_GLYPH[name] || 'star', cls);
+    }
   };
 })(window);
