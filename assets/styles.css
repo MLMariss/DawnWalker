@@ -28,7 +28,17 @@
   --icon:46px;
   --row:180px;
   --colmin:96px;
-  --side:400px;
+  /* A ceiling on the gap between adjacent columns as well as a floor. The board
+     holds no moving parts and nothing lives between the columns, so stretching
+     the tree across every pixel of a wide window bought nothing but distance
+     between the nodes — and it took the width out of the side panel, which does
+     have something to say. Columns now stop growing at `--colmax` and the tree
+     centres in whatever room is left. */
+  --colmax:150px;
+  /* The panel grows with the window instead of sitting at a fixed 400px: on a
+     wide screen the perk text was reading in a column half the width of the
+     empty space beside the tree. */
+  --side:clamp(360px,25vw,520px);
 
   --shadow:0 16px 40px rgba(0,0,0,.6);
 
@@ -185,8 +195,14 @@ a:hover{color:var(--gold-2)}
 .tab .tab-when i{width:12px;height:12px}
 
 /* -------------------------------------------------------------- stage */
+/* Past about 2240px neither the board nor the panel has anything left to do with
+   the width: the widest tree (Swordmastery, eleven columns) stops growing at
+   `--colmax` and the panel at its own clamp, so the rest would be margin either
+   way. Centring the stage puts that margin on both sides rather than stranding
+   the tree in the middle of an empty board. The top bar stays full-bleed — it is
+   a header, and it reads as one. */
 .stage{
-  flex:1;min-height:0;
+  flex:1;min-height:0;width:100%;max-width:2240px;margin-inline:auto;
   display:grid;grid-template-columns:minmax(0,1fr) var(--side);gap:16px;
   padding:6px 18px 14px;
 }
@@ -334,20 +350,23 @@ a:hover{color:var(--gold-2)}
 }
 .drawer[open]>summary::before{transform:rotate(45deg)}
 
-/* A section that is always open carries no disclosure triangle and no pointer —
-   there is nothing to click. Ultimates are permanent, so they read as a fixed
-   part of the tree rather than something you opened. */
-.drawer-fixed>.drawer-head{
-  display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;
-  border-bottom:1px solid var(--line);
-}
-.drawer-fixed{border-color:var(--line-2);background:rgba(24,18,13,.8)}
+/* Folded, the ultimates drawer is one row of counter. It only asks to be opened
+   at the moment the requirement is met and nothing has been chosen yet — before
+   that there is nothing to act on, and afterwards the choice is permanent. */
+.drawer.ready{border-color:var(--gold-dim);background:rgba(30,23,14,.8)}
+.drawer.ready>summary::before{border-color:var(--gold-2)}
 .drawer-title{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-2)}
 .drawer-note{font-size:12px;color:var(--text-faint);flex:1}
-.ult-gate{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--blood-2)}
+/* The counter sits on a folded summary, so it never wraps under the title and
+   never shrinks away: it is the whole reason the row is readable closed. */
+.ult-gate{
+  flex:none;font-size:12px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--blood-2);white-space:nowrap;
+}
 .ult-gate.met{color:var(--green)}
 
-.ults{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;padding:0 14px 14px}
+.ults{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;
+  padding:12px 14px 14px;border-top:1px solid var(--line)}
 .ult{
   display:flex;gap:12px;text-align:left;align-items:flex-start;padding:12px;
   border:1px solid var(--line);border-radius:3px;cursor:pointer;
@@ -641,7 +660,7 @@ a:hover{color:var(--gold-2)}
 .toast.warn{border-color:#8a3034;color:#f0bcbc}
 
 /* --------------------------------------------------------- responsive */
-@media (max-width:1360px){ :root{--side:332px;--node:80px;--icon:40px;--colmin:84px} }
+@media (max-width:1360px){ :root{--side:clamp(320px,26vw,380px);--node:80px;--icon:40px;--colmin:84px;--colmax:132px} }
 
 /* The tree's size by viewport height, and nothing else. This used to be two
    coarse steps with JavaScript squeezing the tree between them to fit whatever
