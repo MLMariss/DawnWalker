@@ -75,6 +75,8 @@
       t.perks.forEach(function (p) {
         p.prerequisites.forEach(function (q) { (CHILDREN[q] = CHILDREN[q] || []).push(p); });
       });
+      var w = treeWhen(tree);
+      tree.when = w.when; tree.whenMixed = w.mixed;
     });
     renderHintKey();
     state.tab = TREES[0].name;
@@ -120,6 +122,43 @@
     if (gate === 'quest') return 'Story unlock';
     var c = corruptionOf(gate);
     return c === null ? gate : 'Corruption ' + c;
+  }
+
+  /* A gate is a condition, not a price: it reads as its own mark plus the word
+     for it, so nobody has to recognise a bare icon. It used to be spelled twice
+     on the same row — once in words, once as an unlabelled chip among the skill
+     point and time segment costs — and the chip was the unreadable one. */
+  function gateKind(gate) {
+    if (gate === 'manual') return 'g-manual';
+    if (gate === 'road shrine') return 'g-shrine';
+    if (gate === 'vrakhir blood') return 'g-phial';
+    if (gate === 'quest') return 'g-quest';
+    return corruptionOf(gate) === null ? '' : 'g-cor';
+  }
+
+  function gateShort(gate) {
+    if (gate === 'manual') return 'Manual';
+    if (gate === 'road shrine') return 'Shrine';
+    if (gate === 'vrakhir blood') return 'Phial';
+    if (gate === 'quest') return 'Story';
+    var c = corruptionOf(gate);
+    return c === null ? gate : 'Corruption ' + c;
+  }
+
+  function gateWhy(gate) {
+    if (gate === 'manual') return 'Only learnable from a Manual found in the world';
+    if (gate === 'road shrine') return 'Learned at a road shrine — free to reach, never used up';
+    if (gate === 'vrakhir blood') return 'Consumes a Phial of Vrakhir Blood';
+    if (gate === 'quest') return 'Unlocked by the story, not bought';
+    var c = corruptionOf(gate);
+    return c === null ? gate : 'Needs Corruption ' + c + ' or higher';
+  }
+
+  function gateTag(gate, owned) {
+    if (!gate || gate === 'none') return '';
+    var ok = owned || gateOk(gate);
+    return '<span class="gate-tag ' + gateKind(gate) + (ok ? ' ok' : '') +
+      '" title="' + esc(gateWhy(gate)) + '"><i></i>' + esc(gateShort(gate)) + '</span>';
   }
 
   function nextLevel(p) { return p.levels[lv(p.node_id)] || null; }
@@ -244,6 +283,30 @@
   function ultMet(t, o) { return ultProgress(t, o).every(function (x) { return x.met; }); }
 
   function activeTime(p) { return p.active_time || TREE_OF[p.node_id].active_time || ''; }
+
+  /* When a tree's hours are the same all the way down — Swordmastery is ANYTIME
+     throughout, Vampirism NIGHT ONLY — that is a fact about the tree, and it was
+     printed again on every one of its 19 and 17 perk cards. It is read once, on
+     the tree's tab. The card carries it only where a perk disagrees with its
+     tree, which in the shipped data is the seven ANYTIME perks in an otherwise
+     DAY ONLY Witchcraft. */
+  function treeWhen(t) {
+    var count = {}, when = '', top = 0, total = 0;
+    t.perks.concat(t.abilities || [], t.ultimates || []).forEach(function (p) {
+      var w = p.active_time || t.active_time || '';
+      if (!w) return;
+      total++;
+      count[w] = (count[w] || 0) + 1;
+      if (count[w] > top) { top = count[w]; when = w; }
+    });
+    return { when: when, mixed: top !== total };
+  }
+
+  /* DAY ONLY / NIGHT ONLY / ANYTIME, short enough to ride a tab. */
+  function shortWhen(when) {
+    var w = whenMark(when);
+    return w === 'day' ? 'Day' : w === 'night' ? 'Night' : w ? 'Any' : '';
+  }
 
   /* The banner above a perk name is one of three, each with its own mark in
      game: a sun for DAY ONLY, a crescent for NIGHT ONLY, both for ANYTIME. */
@@ -589,11 +652,20 @@
   function renderTabs() {
     el.tabs.innerHTML = TREES.map(function (t) {
       var mn = manualsNeeded(t);
+      var when = t.when
+        ? '<span class="tab-when" title="' + esc(t.whenMixed
+              ? 'Most of ' + t.name + ' works ' + t.when.toLowerCase() +
+                '; the perks that do not are badged on their own card.'
+              : 'Every perk and ability in ' + t.name + ' works ' + t.when.toLowerCase() + '.') +
+          '"><i class="when-mark ' + whenMark(t.when) + '"></i>' + esc(shortWhen(t.when)) +
+          (t.whenMixed ? '*' : '') + '</span>'
+        : '';
       return '<button class="tab" role="tab" type="button" data-tree="' + t.name + '"' +
         ' aria-selected="' + (t.name === state.tab) + '">' +
-        '<span class="tab-mark">' + Icons.svg(Icons.forTree(t.name)) + '</span>' + t.name +
-        '<span class="tab-stat"><i class="s-sp"></i>' + spent(t) +
-        (mn ? '<i class="s-bk"></i>' + mn : '') + '</span></button>';
+        '<span class="tab-mark">' + Icons.svg(Icons.forTree(t.name)) + '</span>' + t.name + when +
+        '<span class="tab-stat"><i class="s-sp" title="Skill points spent in this tree"></i>' + spent(t) +
+        (mn ? '<i class="s-bk" title="Manuals this tree\'s build needs"></i>' + mn : '') +
+        '</span></button>';
     }).join('');
   }
 
@@ -708,9 +780,8 @@
         '<span class="abil-foot"><span class="pips">' + pips + '</span>' +
         (nl ? '<span class="abil-next">' +
               (isFree(a, n) ? '<span class="free-tag">Story — free</span>'
-                            : costHTML(nl.skill_points, nl.time_segments, nl.gate)) +
-              (gateLabel(nl.gate) && nl.gate !== 'manual'
-                ? '<span class="gate-tag">' + esc(gateLabel(nl.gate)) + '</span>' : '') + '</span>'
+                            : costHTML(nl.skill_points, nl.time_segments)) +
+              gateTag(nl.gate, false) + '</span>'
             : '<span class="abil-next done">Maxed</span>') +
         '</span></span></button>';
     }
@@ -752,19 +823,23 @@
         '<span class="ult-mark">' + Icons.forUltMark(t.key, i + 1, '', u.name) + '</span><span>' +
         '<b>' + esc(u.name) + (u.alias ? '<span class="alias">also listed as ' + esc(u.alias) + '</span>' : '') + '</b>' +
         '<span class="ult-eff">' + esc(u.effect) + '</span>' +
-        '<span class="ult-cost">' + costHTML(u.cost.skill_points, u.cost.time_segments, null) + '</span>' +
+        '<span class="ult-cost">' + costHTML(u.cost.skill_points, u.cost.time_segments) + '</span>' +
         '</span></button>';
     }).join('');
   }
 
-  function costHTML(sp, ts, gate) {
+  /* Price only: skill points and time segments. Gates used to be folded in here
+     as extra unlabelled chips, which put the same condition on a row twice and
+     left the reader to guess at a book, a shrine and a blood sigil at 13px.
+     They are `gateTag`s now, marks with the word beside them. `label` spells the
+     units out where the layout has room — the top bar was the only place they
+     were ever named. */
+  function costHTML(sp, ts, label) {
     var out = [];
-    if (sp) out.push('<span class="cost sp"><i></i>' + sp + '</span>');
-    if (ts) out.push('<span class="cost ts"><i></i>' + ts + '</span>');
-    if (gate === 'manual') out.push('<span class="cost bk"><i></i></span>');
-    if (gate === 'road shrine') out.push('<span class="cost shr"><i></i></span>');
-    var c = corruptionOf(gate);
-    if (c !== null) out.push('<span class="cost cor"><i></i>' + c + '</span>');
+    if (sp) out.push('<span class="cost sp" title="' + sp + ' skill point' + (sp > 1 ? 's' : '') +
+      '"><i></i>' + sp + (label ? '<u>pt' + (sp > 1 ? 's' : '') + '</u>' : '') + '</span>');
+    if (ts) out.push('<span class="cost ts" title="' + ts + ' time segment' + (ts > 1 ? 's' : '') +
+      '"><i></i>' + ts + (label ? '<u>seg' + (ts > 1 ? 's' : '') + '</u>' : '') + '</span>');
     return out.join(' ');
   }
 
@@ -795,30 +870,35 @@
     var levels = p.levels.map(function (l, i) {
       var owned = i < n, isNext = i === n;
       var blocked = !owned && (!gateOk(l.gate) || (isNext ? !learnable.ok : true));
-      var tag = (l.gate && l.gate !== 'none' && !owned)
-        ? '<span class="gate-tag">' + esc(gateLabel(l.gate)) + '</span>' : '';
       return '<li class="' + (owned ? 'on ' : '') + (isNext ? 'next ' : '') + (blocked ? 'blocked' : '') + '">' +
         '<span class="lp"></span><span class="lv-text">' + esc(l.effect) + '</span>' +
-        '<span class="lv-meta">' + tag +
-          (isFree(p, i) ? '<span class="free-tag">Story — no points</span>'
-                        : costHTML(l.skill_points, l.time_segments, l.gate)) + '</span></li>';
+        '<span class="lv-meta"><span class="lv-costs">' +
+          (isFree(p, i) ? '<span class="free-tag">Story — free</span>'
+                        : costHTML(l.skill_points, l.time_segments, true)) + '</span>' +
+          (owned ? '' : gateTag(l.gate, false)) + '</span></li>';
     }).join('');
 
     var btn = nl ? 'Learn level ' + nl.level : 'Fully learned';
     if (p.quest_unlock) btn = state.quests[id] ? 'Found' : 'Mark as found';
 
+    /* The hours ride the tree's tab. Here they appear only as an exception —
+       this perk does not keep its tree's hours — so the badge means something
+       when it is there, instead of being the same word on every card. */
+    var whenBadge = (when && when !== t.when)
+      ? '<span class="hero-when" title="' + esc(p.name + ' works ' + when.toLowerCase() +
+          ', unlike the rest of ' + t.name + '.') +
+        '"><i class="when-mark ' + whenMark(when) + '"></i>' + esc(when) + '</span>'
+      : '';
+
     el.panel.innerHTML =
       '<div class="panel-hero">' +
-        (p.is_ability ? Icons.forAbilityMark(id, p.name) : Icons.forNodeMark(id)) +
-        '<span class="hero-tree">' + esc(t.name) + '</span>' +
+        '<span class="hero-mark">' +
+          (p.is_ability ? Icons.forAbilityMark(id, p.name) : Icons.forNodeMark(id)) + '</span>' +
+        '<span class="hero-tree">' + esc(t.name) + whenBadge + '</span>' +
         '<span class="hero-lv">Level ' + n + ' / ' + p.max_level + '</span></div>' +
       '<div class="panel-body">' +
-        (when ? '<p class="panel-when"><i class="when-mark ' + whenMark(when) + '"></i>' +
-          esc(when) + '</p>' : '') +
         (p.cooldown ? '<p class="panel-cd"><i class="cd-mark"></i>Cooldown: ' +
           esc(p.cooldown) + '</p>' : '') +
-        (nl && gateLabel(nl.gate) ? '<p class="panel-gate' + (gateOk(nl.gate) ? ' ok' : '') + '">' +
-          esc(gateLabel(nl.gate)) + '</p>' : '') +
         '<h3>' + esc(p.name) +
           (p.story_granted ? '<span class="story-tag">Story</span>' : '') + '</h3>' +
         '<p class="desc">' + esc(p.effect) + '</p>' +
