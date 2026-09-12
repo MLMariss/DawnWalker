@@ -548,23 +548,34 @@ a:hover{color:var(--gold-2)}
   .node .name{font-size:12px}
 }
 
-/* ------------------------------------------------------- site footer
-   The attribution has to live on the page, not only in the README: a visitor
-   to the published site never sees the repository. */
-.sitefoot{
-  max-width:960px;margin:8px auto 0;padding:18px 20px 30px;
-  border-top:1px solid var(--line);
-  color:var(--text-faint);font-size:12px;line-height:1.6;text-align:center
+/* ------------------------------------------------------- legal notice
+   The attribution has to be on the page — a visitor to the published site
+   never reads the README — but the board is sized to the window, so anything
+   in the layout below it comes straight out of the board's height. It rides
+   the hint line instead and opens over the page, costing no height at all. */
+/* Its own centred row under the hint: at most widths the hint line is already
+   full, so it wraps anyway — better that it look deliberate than orphaned. */
+.legal{display:block;position:relative;width:max-content;margin:5px auto 0}
+.legal>summary{
+  cursor:pointer;color:var(--text-faint);text-decoration:underline dotted;
+  text-underline-offset:3px;list-style:none
 }
-.sitefoot p{margin:0 0 6px}
-.sitefoot p:last-child{margin-bottom:0}
-.sitefoot .foot-lead{
-  color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;
-  font-size:11px;margin-bottom:8px
+.legal>summary::-webkit-details-marker{display:none}
+.legal>summary:hover{color:var(--gold)}
+.legal[open]>summary{color:var(--gold)}
+.legal-body{
+  position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);
+  width:min(460px,86vw);z-index:40;text-align:left;
+  background:var(--panel-2);border:1px solid var(--line-2);border-radius:10px;
+  padding:13px 15px;box-shadow:var(--shadow);
+  font-size:12px;line-height:1.55;color:var(--text-faint)
 }
-.sitefoot strong{color:var(--text-dim);font-weight:600}
-.sitefoot em{font-style:italic}
-
-@media (max-width:640px){ .sitefoot{padding:16px 14px 24px;text-align:left} }
+.legal-body p{margin:0 0 7px}
+.legal-body p:last-child{margin-bottom:0}
+.legal-body strong{
+  color:var(--text-dim);font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;font-size:11px
+}
+.legal-body em{font-style:italic}
 
 @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
