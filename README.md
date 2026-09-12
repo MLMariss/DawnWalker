@@ -25,15 +25,33 @@ Pages and it works as the site index.
   the header, 0–15). Levels that need a Manual found in the world are gated behind the
   "Manuals found" toggle. The two padlocked story nodes — *Font of Life* and
   *Mandrake Ward* — are click-to-toggle and cost nothing.
-- **Story grants are free and marked.** Five abilities are handed to you by the
-  story rather than bought — *Astral Communion*, *Burning Blood*, *Compel Soul*,
-  *Dirty Trick* and *Voracious Bite*. Their first level costs no skill points and
-  no time segments, carries a green **Story** badge, and never appears in any
-  total. Upgrades past level 1 are paid for normally.
+- **Story grants start learned.** Five abilities are handed to you by the story
+  rather than bought — *Astral Communion*, *Burning Blood*, *Compel Soul*,
+  *Dirty Trick* and *Voracious Bite*. There is no build in which you do not have
+  them, so the planner opens with all five at level 1: Reset puts them back,
+  Refund will not take level 1 away, and their level-1 gate does not apply, so
+  neither manual-gated one (*Dirty Trick*, *Burning Blood*) is a manual to go and
+  find. Level 1 costs no skill points and no time segments, carries a green
+  **Story** badge and appears in no total. Upgrades are paid for normally, and a
+  build link records only the levels you bought on top.
 - **Ultimates.** Three per tree, one selectable, unlocked at 35 points spent on
   *perks* in that tree (Witchcraft, Swordmastery) or Corruption 15 (Vampirism).
   They sit directly under the tree and are always on screen — the choice is
   permanent, so it is not hidden behind a disclosure triangle.
+- **Totals carry the scope the perk gives them.** Three perks reduce
+  "Cooldowns" and three more add "Slots available", each scoped by its own effect
+  line to one tree's abilities. The level text drops the scope, so the overview
+  reads it off the perk and keeps the rows apart — *Cooldowns (Swordmastery
+  abilities)* is not the same number as Witchcraft's or Vampirism's, and summing
+  them was wrong. A chance written with the number in the middle ("Weapon
+  Critical Hit : 6% chance") is a total like any other; the three long lists
+  under the totals fold away behind their count and scroll in place.
+- **The tree is a fixed size, not a squeeze to fit.** `--node` and `--row` step
+  down by viewport height in the stylesheet and the board scrolls for whatever is
+  left over. It used to be sized from "the column minus what my siblings occupy",
+  which measured the drawers empty on the first paint and full on every one
+  after, so the board resized under the cursor on the first click — and made the
+  tree's size depend on the length of the page below it.
 - **Running totals** for skill points, time segments and manuals across all trees,
   plus a per-treepoint count and manual count on each tab — so you can see what a
   given tree actually costs you to find in the world.
