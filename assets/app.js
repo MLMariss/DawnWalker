@@ -874,22 +874,26 @@
         return '<div class="ov-group"><h4>' + g + '</h4>' + rows + '</div>';
       }).join('');
 
-    if (s.other.length) {
-      html += '<details class="ov-sub"><summary>Conditional &amp; unique effects (' + s.other.length + ')</summary>' +
-        '<ul class="ov-list">' + s.other.map(function (o) {
-          return '<li><b>' + esc(o.perk) + '</b>' + esc(o.text) + '</li>';
-        }).join('') + '</ul></details>';
+    /* These were collapsibles inside a collapsible, which buried the lists two
+       clicks deep and made the panel's height jump around as they opened. They
+       are plain sections now, like the stat groups above, and the overview
+       scrolls. */
+    function section(title, items, render) {
+      if (!items.length) return '';
+      return '<div class="ov-group"><h4>' + title + ' (' + items.length + ')</h4>' +
+        '<ul class="ov-list">' + items.map(render).join('') + '</ul></div>';
     }
-    if (s.manuals.length) {
-      html += '<details class="ov-sub"><summary>Manuals to find (' + s.manuals.length + ')</summary>' +
-        '<ul class="ov-list">' + s.manuals.map(function (m) { return '<li>' + esc(m) + '</li>'; }).join('') +
-        '</ul></details>';
-    }
-    if (s.phials.length) {
-      html += '<details class="ov-sub"><summary>Phials of Vrakhir Blood (' + s.phials.length + ')</summary>' +
-        '<ul class="ov-list">' + s.phials.map(function (m) { return '<li>' + esc(m) + '</li>'; }).join('') +
-        '</ul></details>';
-    }
+
+    html += section('Conditional &amp; unique effects', s.other, function (o) {
+      return '<li><b>' + esc(o.perk) + '</b>' + esc(o.text) + '</li>';
+    });
+    html += section('Manuals to find', s.manuals, function (m) {
+      return '<li>' + esc(m) + '</li>';
+    });
+    html += section('Phials of Vrakhir Blood', s.phials, function (m) {
+      return '<li>' + esc(m) + '</li>';
+    });
+
     el.ovBody.innerHTML = html;
   }
 

@@ -390,6 +390,30 @@ a:hover{color:var(--gold-2)}
 
 /* --------------------------------------------------------- side panel */
 .side{display:flex;flex-direction:column;min-height:0;gap:0}
+
+/* The build overview has to share the side column's height with the perk panel
+   rather than grow without limit. It was flex:none with no max-height and no
+   overflow, so opening a section first squashed the panel above it — flex:1 with
+   min-height:0 shrinks to nothing on demand — and then ran off the bottom of the
+   column with no scrollbar to reach the rest. Now it takes a bounded share,
+   scrolls inside itself, and the panel keeps a readable floor. */
+.side>.panel{flex:1 1 auto;min-height:180px}
+
+/* The cap goes on the body itself, not on the drawer with flex inside it:
+   <details> keeps its content in a shadow slot, so `display:flex` on the drawer
+   never makes .ovbody a flex item, `min-height:0` applies to nothing, and the
+   list grows straight through the drawer's max-height and off the page. A plain
+   max-height on the scrolling element cannot be routed around that way. */
+#ovdrawer>.ovbody{
+  max-height:min(34vh,480px);
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+}
+/* On a short screen the panel's floor becomes the binding constraint, so both
+   give ground rather than letting the overview run past the column again. */
+@media (max-height:700px){
+  .side>.panel{min-height:120px}
+  #ovdrawer>.ovbody{max-height:26vh}
+}
 .panel{
   flex:1;min-height:0;overflow:auto;scrollbar-width:thin;
   border:1px solid var(--line);border-radius:4px;
@@ -496,10 +520,7 @@ a:hover{color:var(--gold-2)}
 .ov-list li{padding:5px 0;border-bottom:1px solid rgba(58,48,42,.45);color:var(--text-dim);font-size:13px}
 .ov-list li b{display:block;color:var(--text);font-weight:600;font-size:13px}
 .ov-empty{color:var(--text-faint);font-size:13px;padding:8px 0}
-.ov-sub{margin-top:10px}
-.ov-sub summary{cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.1em;
   text-transform:uppercase;color:var(--text-faint);padding:6px 0}
-.ov-sub summary:hover{color:var(--text-dim)}
 
 /* -------------------------------------------------------------- toast */
 .toast{
