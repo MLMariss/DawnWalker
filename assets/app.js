@@ -667,7 +667,7 @@
     return '<button class="' + cls.join(' ') + '" type="button" data-node="' + p.node_id + '"' +
       ' style="left:' + pt.x + 'px;top:' + pt.y + 'px"' +
       ' aria-label="' + esc(p.name) + ', level ' + n + ' of ' + p.max_level + '">' +
-      '<span class="frame"></span>' + Icons.svg(Icons.forNode(p.node_id), 'glyph') +
+      '<span class="frame"></span>' + Icons.forNodeMark(p.node_id, 'glyph') +
       badge + bang + '<span class="syn"></span>' +
       '<span class="pips">' + pips + '</span>' +
       '<span class="name" style="width:' + L.labelW + 'px">' + esc(p.name) + '</span></button>';
@@ -749,7 +749,7 @@
       var on = state.ults[t.key] === i;
       return '<button class="ult' + (on ? ' on' : '') + (met ? '' : ' locked') + '" type="button"' +
         ' data-ult="' + i + '" aria-pressed="' + on + '">' +
-        '<span class="ult-mark">' + Icons.svg(Icons.forUltimate(u.name)) + '</span><span>' +
+        '<span class="ult-mark">' + Icons.forUltMark(t.key, i + 1, '', u.name) + '</span><span>' +
         '<b>' + esc(u.name) + (u.alias ? '<span class="alias">also listed as ' + esc(u.alias) + '</span>' : '') + '</b>' +
         '<span class="ult-eff">' + esc(u.effect) + '</span>' +
         '<span class="ult-cost">' + costHTML(u.cost.skill_points, u.cost.time_segments, null) + '</span>' +
@@ -808,7 +808,8 @@
     if (p.quest_unlock) btn = state.quests[id] ? 'Found' : 'Mark as found';
 
     el.panel.innerHTML =
-      '<div class="panel-hero">' + Icons.svg(p.is_ability ? Icons.forAbility(p.name) : Icons.forNode(id)) +
+      '<div class="panel-hero">' +
+        (p.is_ability ? Icons.svg(Icons.forAbility(p.name)) : Icons.forNodeMark(id)) +
         '<span class="hero-tree">' + esc(t.name) + '</span>' +
         '<span class="hero-lv">Level ' + n + ' / ' + p.max_level + '</span></div>' +
       '<div class="panel-body">' +
