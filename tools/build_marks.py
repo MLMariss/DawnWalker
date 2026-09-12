@@ -15,7 +15,9 @@ is the artwork's own coverage, to be used as a CSS mask over
 `background:currentColor`. That is the same trick styles.css already uses for the
 meter icons, and it keeps every state working with one file per node.
 
-Requires Pillow, to read .webp. Nothing the site serves needs it.
+Reads any image Pillow can open: the perk icons arrived as .webp textures, the
+ability marks as .png cut out of the skill screen. Nothing the site serves needs
+Pillow.
 """
 import argparse
 import json
@@ -74,11 +76,19 @@ def to_mask(path):
     im = Image.open(path).convert('RGBA')
     r, g, b, a = im.split()
 
-    # The art is dark strokes on transparency. Where a pixel is opaque, its
-    # darkness is the ink; that becomes the mask's alpha, so the board's colour
-    # shows through the strokes rather than through the empty background.
-    ink = Image.eval(r.point(lambda v: 255 - v), lambda v: v)
-    alpha = Image.composite(ink, Image.new('L', im.size, 0), a)
+    # Two conventions arrive here and they are opposites, so which one this is
+    # has to be read off the file rather than assumed. The perk textures are
+    # dark strokes on transparency: the ink is the darkness, inside the opaque
+    # part. The ability marks were cut out of the skill screen and are a bright
+    # glyph on flat black with no transparency at all: there the ink is the
+    # brightness. Getting this backwards renders a solid plaque instead of a
+    # mark, which is exactly what it looks like.
+    lum = Image.merge('RGB', (r, g, b)).convert('L')
+    if a.getextrema()[0] == 255:           # fully opaque: bright glyph on black
+        alpha = lum
+    else:                                  # dark strokes on transparency
+        alpha = Image.composite(lum.point(lambda v: 255 - v),
+                                Image.new('L', im.size, 0), a)
 
     # The artwork fills its shapes with a fine stipple. Averaged down to a 46px
     # node that dither reads as grey haze over the strokes rather than as
@@ -107,8 +117,10 @@ def main():
     args = ap.parse_args()
 
     ids = registry()
+    sources = sorted(f for f in SRC.iterdir()
+                     if f.suffix.lower() in ('.webp', '.png', '.jpg', '.jpeg'))
     built, unmatched = {}, []
-    for f in sorted(SRC.glob('*.webp')):
+    for f in sources:
         key = norm(PREFIX.sub('', f.stem))
         key = ALIAS.get(key, key)
         node = ids.get(key)
@@ -128,7 +140,7 @@ def main():
             'window.MARKS = [\n    %s\n];\n' % listing)
 
     print('%d source icons -> %d marks%s'
-          % (len(list(SRC.glob('*.webp'))), len(built),
+          % (len(sources), len(built),
              '' if args.check else ' in %s' % OUT.relative_to(ROOT)))
     if unmatched:
         print('unmatched, no node for these files:')

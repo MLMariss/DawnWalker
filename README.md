@@ -73,21 +73,22 @@ fits. Scrollbars are themed to the page rather than left as system chrome.
 ## Repository layout
 
 ```
-index.html                 markup and page chrome
-assets/styles.css          the dark skin
-assets/app.js              planner logic — reads the JSON, renders from it
-assets/icons.js            drawn SVG glyphs — the fallback where no mark exists
-assets/marks.js            generated — which nodes have a mask
-assets/marks/              the game's perk icons as tintable alpha masks
-icons-src/                 the source icons the masks are built from
-data/perks.json            the perk registry — single source of truth
-data/abilities.json        the ability registry, generated from two saved pages
-data/mechanics.json        the synergy graph — systems, causal edges, per-node mapping
-tools/verify_perks.py      checks all three registries, and perks against a source page
-tools/extract_abilities.py rebuilds data/abilities.json from saved ability pages
-tools/build_mechanics.py   rebuilds data/mechanics.json
-tools/build_marks.py       rebuilds assets/marks/ from icons-src/
-VERIFICATION.md            what was checked, and where the sources disagreed
+index.html                     markup and page chrome
+assets/styles.css              the dark skin
+assets/app.js                  planner logic — reads the JSON, renders from it
+assets/icons.js                drawn SVG glyphs — the fallback where no mark exists
+assets/marks.js                generated — which nodes have a mask
+assets/marks/                  the game's perk icons as tintable alpha masks
+icons-src/                     the source icons the masks are built from
+data/perks.json                the perk registry — single source of truth
+data/abilities.json            the ability registry, generated from two saved pages
+data/mechanics.json            the synergy graph — systems, causal edges, per-node mapping
+tools/verify_perks.py          checks all three registries, and perks against a source page
+tools/extract_abilities.py     rebuilds data/abilities.json from saved ability pages
+tools/build_mechanics.py       rebuilds data/mechanics.json
+tools/build_marks.py           rebuilds assets/marks/ from icons-src/
+tools/extract_ability_icons.py cuts ability marks out of skill-screen shots
+VERIFICATION.md                what was checked, and where the sources disagreed
 ```
 
 Nothing about the perks is hard-coded in `app.js` beyond the icon mapping. Adding,
@@ -291,17 +292,26 @@ result, and the three places the sources contradicted each other.
 - Node positions and the prerequisite graph are read from the in-game skill screens.
   No published list records tree topology, so `tools/verify_perks.py` has nothing to
   compare them against — a limit on the script, not on the data.
-- Perks and ultimates use the game's own icons; the 27 abilities have no icon
-  files yet and fall back to drawn glyphs. Rebel Wolves' community content
+- Every node — all 54 perks, 9 ultimates and 27 abilities — uses the game's own
+  icon. The drawn glyphs in `assets/icons.js` remain as the fallback for any node
+  whose mark is missing. Rebel Wolves' community content
   guidelines permit using content from the game for a community website, on four
   conditions this project meets: nothing commercial, nothing carried into another
   product, labelled unofficial, and lawful. The label is in the page footer, not
   only here. The guidelines do not override the EULA, so if you repackage this,
   read that too; `legal@rebel-wolves.com` is the contact for anything unclear.
-- `tools/build_marks.py` turns `icons-src/*.webp` into `assets/marks/<node id>.png`.
+- `tools/build_marks.py` turns the sources in `icons-src/` into
+  `assets/marks/<node id>.png`.
   Each is an alpha mask rather than a picture, painted with `currentColor`, because
   the board tints a node seven ways — avail, taken, maxed, gated, locked, hover and
   selected — and an `<img>` cannot follow that.
+- The perk icons came from the game as texture files. The abilities never did, so
+  `tools/extract_ability_icons.py` cuts them out of screenshots of the three
+  ability panels: it finds each frame, masks the heptagon border and level badge
+  away geometrically, and takes its threshold from each cell's own histogram,
+  because a frame is dim purple or gold-lit depending on whether you have levels
+  in it. Reading order is checked against `data/abilities.json`, so a misordered
+  screenshot fails the run instead of mislabelling a mark.
 - Individual level costs are the likeliest thing to drift between game patches. If you
   spot a mismatch, fix `data/perks.json` and the page follows.
 - Stinging Blade's level 4 cost is the one number still worth a second look; see
