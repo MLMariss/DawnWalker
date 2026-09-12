@@ -141,6 +141,9 @@
     /* id is a node id; the glyph name is the fallback when no mask exists. */
     mark: mark,
     forNodeMark: function (id, cls) { return mark(id, NODE_GLYPH[id] || 'hex', cls); },
+    forAbilityMark: function (id, name, cls) {
+      return mark(id, ABILITY_GLYPH[name] || 'hex', cls);
+    },
     forUltMark: function (key, i, cls, name) {
       return mark('U' + key + i, ULT_GLYPH[name] || 'star', cls);
     }

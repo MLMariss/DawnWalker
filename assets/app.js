@@ -698,7 +698,7 @@
       var use = a.use_cost && a.use_cost.text ? a.use_cost.text : '';
       return '<button class="' + cls + '" type="button" data-node="' + a.node_id + '"' +
         ' aria-label="' + esc(a.name) + ', level ' + n + ' of ' + a.max_level + '">' +
-        '<span class="abil-mark">' + Icons.svg(Icons.forAbility(a.name)) + '</span>' +
+        '<span class="abil-mark">' + Icons.forAbilityMark(a.node_id, a.name) + '</span>' +
         '<span class="abil-txt"><b>' + esc(a.name) +
           (a.story_granted ? '<span class="story-tag" title="The story grants level 1 — ' +
             'it costs no skill points and no time segments. Upgrades are paid for normally.">' +
@@ -809,7 +809,7 @@
 
     el.panel.innerHTML =
       '<div class="panel-hero">' +
-        (p.is_ability ? Icons.svg(Icons.forAbility(p.name)) : Icons.forNodeMark(id)) +
+        (p.is_ability ? Icons.forAbilityMark(id, p.name) : Icons.forNodeMark(id)) +
         '<span class="hero-tree">' + esc(t.name) + '</span>' +
         '<span class="hero-lv">Level ' + n + ' / ' + p.max_level + '</span></div>' +
       '<div class="panel-body">' +

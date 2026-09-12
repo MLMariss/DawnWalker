@@ -217,6 +217,9 @@ a:hover{color:var(--gold-2)}
 .node.locked .mark{color:#5a5148}
 .node:hover .mark{color:var(--gold-2)}
 .ult .ult-mark .mark{width:20px;height:20px;color:var(--text-faint)}
+.abil .abil-mark .mark{width:22px;height:22px;color:#8d7f70}
+.abil.avail .abil-mark .mark{color:var(--text)}
+.abil.taken .abil-mark .mark{color:#1a1309}
 .ult.on .ult-mark .mark{color:#150f09}
 .panel-hero .mark{width:52px;height:52px;color:var(--gold-2)}
 
