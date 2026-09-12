@@ -70,12 +70,12 @@
     'Cycle of Ruin':'spiral', 'Life Lock':'shield', 'Mercurial Fervour':'boot',
     'Ravenous Flock':'bat', 'Soul Reaping':'drop', 'Soul Stigma':'eye',
     'Unholy Vitality':'heart',
-    'Adrenaline Rush':'muscle', 'Artery Strike':'sword', 'Broadswing':'swords',
+    'Adrenaline Rush':'muscle', 'Artery Strike':'sword', 'Broad Swing':'swords',
     'Charge':'arrow', 'Dirty Trick':'gauntlet', 'Swiftness':'boot',
     'Walking Fortress':'block',
     'Blood Surge':'waves', 'Crimson Rush':'chalice', 'Death From Above':'claw',
     'Mesmerise':'eye', 'Piercing Shriek':'waves', 'Scarlet Shield':'shield',
-    'Shadow Storm':'hourglass', 'Shapeshift':'fang', 'Shred':'claw',
+    'Shadowstorm':'hourglass', 'Shapeshift':'fang', 'Shred':'claw',
     'Voracious Bite':'fang'
   };
 

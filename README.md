@@ -73,17 +73,20 @@ fits. Scrollbars are themed to the page rather than left as system chrome.
 ## Repository layout
 
 ```
-index.html                 markup and page chrome
-assets/styles.css          the dark skin
-assets/app.js              planner logic — reads the JSON, renders from it
-assets/icons.js            original inline SVG glyphs (no game assets) + mapping
-data/perks.json            the perk registry — single source of truth
-data/abilities.json        the ability registry, generated from two saved pages
-data/mechanics.json        the synergy graph — systems, causal edges, per-node mapping
-tools/verify_perks.py      checks all three registries, and perks against a source page
-tools/extract_abilities.py rebuilds data/abilities.json from saved ability pages
-tools/build_mechanics.py   rebuilds data/mechanics.json
-VERIFICATION.md            what was checked, and where the sources disagreed
+index.html                  markup and page chrome
+assets/styles.css           the dark skin
+assets/app.js               planner logic — reads the JSON, renders from it
+assets/icons.js             original inline SVG glyphs (no game assets) + mapping
+data/perks.json             the perk registry — single source of truth
+data/abilities.json         the ability registry, generated from two saved pages
+data/mechanics.json         the synergy graph — systems, causal edges, per-node mapping
+tools/verify_perks.py       checks all three registries, and perks against a source page
+tools/extract_abilities.py  rebuilds data/abilities.json from saved ability pages
+tools/build_mechanics.py    rebuilds data/mechanics.json
+tools/build_icon_prompts.py rebuilds docs/gemini-icon-prompts.md from the registries
+tools/slice_icon_sheet.py   cuts a generated icon sheet into per-node alpha masks
+docs/gemini-icon-prompts.md how to redraw all 90 node icons with Gemini
+VERIFICATION.md             what was checked, and where the sources disagreed
 ```
 
 Nothing about the perks is hard-coded in `app.js` beyond the icon mapping. Adding,
@@ -288,7 +291,13 @@ result, and the three places the sources contradicted each other.
   No published list records tree topology, so `tools/verify_perks.py` has nothing to
   compare them against — a limit on the script, not on the data.
 - Icons here are original line art, not ripped assets, so they suggest each perk
-  rather than reproduce it.
+  rather than reproduce it. They are a shared vocabulary of 40 glyphs reused across
+  nodes — one `heart` serves Font of Life, Vigour and Closing Wounds alike. To give
+  every node its own mark instead, [docs/gemini-icon-prompts.md](docs/gemini-icon-prompts.md)
+  is a generated prompt pack that redraws all 90 from screenshots of the in-game
+  skill screens, and `tools/slice_icon_sheet.py` cuts the results into alpha masks
+  the board can still tint per state. Nothing is wired to it yet: the planner
+  renders the SVG vocabulary until marks exist.
 - Individual level costs are the likeliest thing to drift between game patches. If you
   spot a mismatch, fix `data/perks.json` and the page follows.
 - Stinging Blade's level 4 cost is the one number still worth a second look; see
