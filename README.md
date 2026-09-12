@@ -81,31 +81,45 @@ ceiling* on the gap between neighbours — instead of zooming the whole board,
 which would drag the labels below a readable size. Nothing on the page is set
 under 12px.
 
-The board itself stops at `--board-max`, 1000px. Nothing about a skill tree gets
-better past that — the columns are already at `--colmax`, the nodes at `--node`,
-and the rest is distance between things you are trying to compare. What the
-board gives up goes to the panel, which is where the text is: `clamp(360px,
-34vw, 640px)`. Both tracks being bounded, the pair is centred and there is
-nothing left to cap at the page level.
+The ceiling on the column gap is why the tree does not sprawl on a wide monitor,
+and it is the only ceiling the board has. Capping the board's width outright was
+tried and reverted: at 1000px, eleven Swordmastery columns could not hold a
+full-size node, so the hexes shrank to fit and the whole board read cramped. A
+squeezed tree is a worse trade than a narrower column of text, so the panel takes
+`clamp(360px, 25vw, 520px)` and the board keeps the rest.
 
-Eleven columns do not fit in 1000px at a 92px node — the hexes themselves
-overlap, never mind the names — so the node is a ceiling rather than a size.
-`nodeThatFits` returns the largest node that leaves a gutter between neighbours
-at a given width and column count, and the layout takes whichever is smaller,
-that or the stylesheet's. Seven-column Witchcraft and Vampirism are untouched;
-Swordmastery's eleven come down to about 76px. Since the node's padding and its
-label allowance are both derived from it, the whole row scales together and
-nothing collides. Below `NODE_MIN` the board scrolls sideways instead, which is
-what happens to Swordmastery under about 1150px — a board you scroll is legible,
-overlapping hexes are not.
+The node is still a ceiling rather than a fixed size, as a safety net at the
+narrow end. `nodeThatFits` returns the largest node that leaves a gutter between
+neighbours for a given width and column count, and the layout takes whichever is
+smaller, that or the stylesheet's. On any desktop-width board that is never the
+stylesheet's, so nothing shrinks. Below about 1100px it is: eleven columns in a
+650px board used to overlap their hexes and run their names together, because
+`distribute` relaxed its column floor to fit. A column may now never be narrower
+than a node plus its gutter, the node shrinks instead — padding and label
+allowance derive from it, so the whole row scales together — and below `NODE_MIN`
+the board scrolls sideways. A board you scroll is legible; overlapping hexes are
+not.
 
-The side column is **one** scroller. It used to be three, nested: the panel
-scrolled inside the column, the build overview inside its sibling, and each
-conditional-effects list inside that — three bars a few pixels apart, each
-owning a different slice of the same text. Every one had been added to stop some
-box running off the bottom of the column, and the right fix for that is to let
-the column scroll once and let everything inside size to its content. Nothing in
-the side column sets `overflow` or a `max-height` any more.
+### The side column is an accordion
+
+Two panes, the perk panel and the build overview, and exactly one is open at a
+time. The open one takes the column and scrolls inside itself; the closed one is
+its own header bar and nothing else. The overview starts closed, so by default
+the perk panel has the column and the overview is a strip along the bottom;
+opening it gives it the full height and folds the panel to its hero row, and
+clicking that hero row is what brings the perk back and returns the overview to
+the bottom.
+
+The whole mechanism is the grid's row template — `1fr auto` one way, `auto 1fr`
+the other — with both rows `minmax(0, …)` so the open pane shrinks to the column
+and scrolls rather than growing to its content and pushing the other off. Each
+pane's header is sticky, because a scrolled pane whose title has gone is one you
+cannot tell from the other.
+
+This replaced three nested scrollbars: the panel scrolled inside the column, the
+overview inside its sibling, and each conditional-effects list inside that —
+three bars a few pixels apart, each owning a different slice of the same text.
+There is still only ever one, because only one pane is open.
 
 The Ultimate Perks, Abilities and Build overview sections are all collapsible, so
 a short screen can give the tree its height back. Ultimates start folded: the

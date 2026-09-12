@@ -35,14 +35,13 @@
      have something to say. Columns now stop growing at `--colmax` and the tree
      centres in whatever room is left. */
   --colmax:150px;
-  /* The board is never wider than this. Nothing about a skill tree gets better
-     past it — the columns are already at `--colmax`, the nodes at `--node`, and
-     the rest is distance between things you are trying to compare. Everything
-     the board gives up here goes to the panel, which is where the text is. */
-  --board-max:1000px;
-  /* Sized against the window rather than fixed, and allowed to get properly
-     wide now that the board has stopped competing for the room. */
-  --side:clamp(360px,34vw,640px);
+  /* The panel grows with the window instead of sitting at a fixed 400px: on a
+     wide screen the perk text was reading in a column half the width of the
+     empty space beside the tree. It is not allowed to take the width out of the
+     board, though — capping the board at 1000px to pay for a 640px panel made
+     eleven Swordmastery columns shrink their nodes to fit, and a squeezed tree
+     is a worse trade than a narrower column of text. */
+  --side:clamp(360px,25vw,520px);
 
   --shadow:0 16px 40px rgba(0,0,0,.6);
 
@@ -199,15 +198,15 @@ a:hover{color:var(--gold-2)}
 .tab .tab-when i{width:12px;height:12px}
 
 /* -------------------------------------------------------------- stage */
+/* Past about 2240px neither the board nor the panel has anything left to do with
+   the width: the widest tree stops growing at `--colmax` and the panel at its
+   own clamp, so the rest would be margin either way. Centring the stage puts
+   that margin on both sides rather than stranding the tree in the middle of an
+   empty board. The top bar stays full-bleed — it is a header, and it reads as
+   one. */
 .stage{
-  flex:1;min-height:0;width:100%;
-  /* The board track stops at `--board-max` instead of taking whatever is left,
-     and `justify-content:center` puts the spare room on both sides of the pair
-     rather than stranding the tree in the middle of an over-wide board. That
-     also replaces the old 2240px cap on the stage: with both tracks bounded,
-     there is nothing left to cap. */
-  display:grid;grid-template-columns:minmax(0,var(--board-max)) var(--side);
-  justify-content:center;gap:16px;
+  flex:1;min-height:0;width:100%;max-width:2240px;margin-inline:auto;
+  display:grid;grid-template-columns:minmax(0,1fr) var(--side);gap:16px;
   padding:6px 18px 14px;
 }
 .board{
@@ -399,8 +398,12 @@ a:hover{color:var(--gold-2)}
    itself tall to fit a column it never needed to be. auto-fit drops the empty
    tracks and the cards take the width back, which costs rows rather than
    buying them. */
+/* `align-items:start` sized every card to its own text, so a row of five ran
+   five different heights and the group read as a ragged pile rather than a set.
+   Stretching them to the tallest in the row costs the short ones some empty
+   space at the bottom and buys a straight line along both edges. */
 .abils-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;
-  align-items:start}
+  align-items:stretch}
 .abil-group + .abil-group{margin-top:16px}
 .abil-head{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin:0 0 8px;
   font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
@@ -460,20 +463,43 @@ a:hover{color:var(--gold-2)}
    So: nothing below here sets overflow or a max-height. Boxes are as tall as
    what they contain, the column is as tall as its boxes, and one bar moves the
    lot. */
-.side{
-  display:flex;flex-direction:column;min-height:0;gap:0;
-  overflow-y:auto;overscroll-behavior-y:contain;
-}
+/* Two panes, and exactly one of them is open at a time. The open one takes the
+   whole column and scrolls inside itself; the closed one is its header bar and
+   nothing else. So there is still only ever one scrollbar in this column — the
+   three nested ones this replaced were the real complaint, not the scrolling.
 
-/* Natural height, not a share of the column. `flex:1` made the panel a second
-   scrollport that fought the column for space; sized to content it simply
-   stacks above the overview and the column's own bar reaches both. */
-.side>.panel{flex:none}
+   The row template is the whole mechanism. `1fr auto` gives the column to the
+   perk panel and leaves the overview its summary; `auto 1fr` swaps them. Both
+   rows are `minmax(0,…)` so the open one may actually shrink to the column and
+   scroll, rather than growing to its content and pushing the other off. */
+.side{
+  display:grid;grid-template-rows:minmax(0,1fr) auto;
+  min-height:0;gap:10px;
+}
+.side.ov-open{grid-template-rows:auto minmax(0,1fr)}
+.side>.drawer{margin-top:0}
 
 .panel{
+  min-height:0;overflow-y:auto;overscroll-behavior:contain;
   border:1px solid var(--line);border-radius:4px;
   background:linear-gradient(180deg,rgba(30,23,17,.96),rgba(14,11,8,.96));
   box-shadow:var(--shadow);
+}
+#ovdrawer{min-height:0;overflow-y:auto;overscroll-behavior:contain}
+/* The pane scrolls, so its own header has to stay put — a scrolled pane whose
+   title has gone is a pane you cannot tell apart from the other one. */
+.panel-hero,#ovdrawer>summary{position:sticky;top:0;z-index:2}
+#ovdrawer>summary{background:linear-gradient(180deg,#1b1510,#181209)}
+
+/* Folded, the perk panel is its hero row, and that row is the way back. */
+.side.ov-open>.panel{overflow:visible}
+.side.ov-open>.panel>:not(.panel-hero){display:none}
+.side.ov-open .panel-hero{cursor:pointer;border-bottom:0}
+.side.ov-open .panel-hero:hover{filter:brightness(1.18)}
+.side.ov-open .panel-hero::after{
+  content:"";width:9px;height:9px;flex:none;margin-left:2px;
+  border-right:2px solid var(--gold);border-bottom:2px solid var(--gold);
+  transform:rotate(-45deg);
 }
 .panel-empty{padding:34px 22px;color:var(--text-faint);font-size:14px;text-align:center}
 .panel-empty b{display:block;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
@@ -658,7 +684,7 @@ a:hover{color:var(--gold-2)}
 .toast.warn{border-color:#8a3034;color:#f0bcbc}
 
 /* --------------------------------------------------------- responsive */
-@media (max-width:1360px){ :root{--side:clamp(320px,30vw,460px);--node:80px;--icon:40px;--colmin:84px;--colmax:132px} }
+@media (max-width:1360px){ :root{--side:clamp(320px,26vw,380px);--node:80px;--icon:40px;--colmin:84px;--colmax:132px} }
 
 /* The tree's size by viewport height, and nothing else. This used to be two
    coarse steps with JavaScript squeezing the tree between them to fit whatever
@@ -687,10 +713,14 @@ a:hover{color:var(--gold-2)}
      claim a slice of viewport height — each box sizes to its content and the
      column simply gets longer. Without this the stage keeps the height it had
      as a two-column layout, and the tree spills straight over the panel. */
-  .stage{grid-template-columns:minmax(0,1fr);justify-content:stretch;padding:6px 14px 20px;flex:none;min-height:auto}
+  .stage{grid-template-columns:minmax(0,1fr);padding:6px 14px 20px;flex:none;min-height:auto}
   .board{overflow:visible;flex:none;min-height:auto}
   .boardscroll{overflow-x:auto;overflow-y:hidden}
-  .side{min-height:auto;overflow:visible}
+  /* The page scrolls here, so neither pane is a scrollport and neither claims a
+     share of the column — but the accordion still works, because folding the
+     perk panel to its hero is just as useful on a phone. */
+  .side,.side.ov-open{min-height:auto;grid-template-rows:auto auto}
+  .panel,#ovdrawer{overflow:visible}
 }
 
 @media (max-width:640px){

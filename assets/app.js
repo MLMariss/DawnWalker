@@ -22,7 +22,7 @@
   ['tabs', 'tree', 'links', 'nodes', 'ults', 'ult-gate', 'panel', 'toast', 'corruption',
    'corruption-out', 'manuals', 'synergy', 'm-sp', 'm-ts', 'm-bk', 'boardscroll',
    'ov-body', 'ov-note', 'ovdrawer', 'abils', 'abil-note', 'abildrawer', 'ultdrawer',
-   'hint-key'].forEach(function (id) {
+   'side', 'hint-key'].forEach(function (id) {
     el[id.replace(/-(\w)/g, function (_, c) { return c.toUpperCase(); })] = document.getElementById(id);
   });
 
@@ -708,23 +708,18 @@
     xs.sort(function (a, b) { return a - b; });
 
     var availW = (el.boardscroll.clientWidth || 1000) - 4;
-    // The board takes no more than `--board-max` even when the column is wider,
-    // so the tree is bounded by its own ceiling rather than by the window.
-    if (!stacked) availW = Math.min(availW, cssPx('--board-max', 1000));
 
-    /* The node has to come down when the columns will not otherwise fit.
+    /* The node comes down only when the columns will not otherwise fit, which on
+       a desktop-width board is never — this is a safety net, not a size.
 
-       Squeezing the columns alone could not do it: a node is wider than the gap
-       it is placed in once eleven of them are asked to share 1000px, so the
-       hexes overlapped and the names underneath ran into each other — which is
-       what `distribute` relaxing its floor has always produced at narrow widths.
-       Shrinking the node shrinks its padding and its label allowance too, so the
-       whole row scales together and nothing collides.
-
-       It is a ceiling, not a size: a tree that fits at the stylesheet's node
-       keeps it, so Witchcraft and Vampirism at seven columns are untouched and
-       only Swordmastery's eleven pay for the width. Below NODE_MIN the board
-       scrolls sideways instead, which beats an unreadable icon. */
+       It earns its keep at the narrow end. Squeezing the columns alone cannot
+       help there: a node is wider than the gap it sits in once eleven of them
+       share a 650px board, so the hexes overlapped and the names underneath ran
+       into each other, which is what `distribute` relaxing its floor has always
+       produced. Shrinking the node shrinks its padding and its label allowance
+       with it, so the whole row scales together and nothing collides. Below
+       NODE_MIN the board scrolls sideways instead, which beats an unreadable
+       icon. */
     var node = cssPx('--node', 92), floored = false;
     if (!stacked) {
       var want = nodeThatFits(availW, xs.length);
@@ -1003,7 +998,12 @@
   function renderPanel() {
     var id = state.sel;
     if (!id || !BY_ID[id]) {
-      el.panel.innerHTML = '<div class="panel-empty"><b>No perk selected</b>' +
+      // Even with nothing selected the panel keeps a hero, because folded it is
+      // the only thing left of this pane and the only way to unfold it again.
+      el.panel.innerHTML =
+        '<div class="panel-hero panel-hero-bare">' +
+          '<span class="hero-tree">No perk selected</span></div>' +
+        '<div class="panel-empty"><b>Nothing to read yet</b>' +
         'Hover a node to read it. Click to learn its next level, right-click to refund.</div>';
       return;
     }
@@ -1283,6 +1283,19 @@
     // Each of these changes how much of the board's column is left for the tree.
     [el.ovdrawer, el.abildrawer, el.ultdrawer].forEach(function (d) {
       d.addEventListener('toggle', function () { renderTree(); });
+    });
+
+    /* The two side panes are one control with two ends. Opening the overview
+       hands it the column and folds the perk panel to its hero; clicking that
+       hero closes the overview again, which is what puts the perk back and
+       returns the overview to the bottom of the column. */
+    el.ovdrawer.addEventListener('toggle', function () {
+      el.side.classList.toggle('ov-open', el.ovdrawer.open);
+    });
+    el.panel.addEventListener('click', function (e) {
+      if (!el.ovdrawer.open) return;              // already the open pane
+      if (!e.target.closest('.panel-hero')) return;
+      el.ovdrawer.open = false;
     });
 
     el.corruption.value = state.corruption;
