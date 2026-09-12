@@ -190,8 +190,17 @@ a:hover{color:var(--gold-2)}
   display:grid;grid-template-columns:minmax(0,1fr) var(--side);gap:16px;
   padding:6px 18px 14px;
 }
-.board{display:flex;flex-direction:column;min-width:0;min-height:0;overflow-y:auto}
-.board>.tabs{padding-top:2px}
+.board{
+  display:flex;flex-direction:column;min-width:0;min-height:0;
+  overflow-y:auto;overscroll-behavior-y:contain;scroll-behavior:smooth;
+}
+/* The tab strip is the board's header and stays put while the board scrolls
+   under it — the tree is now allowed to be taller than the column, and losing
+   the tree selector off the top of a scrolled board is not a trade worth making. */
+.board>.tabs{
+  position:sticky;top:0;z-index:3;padding-top:2px;
+  background:linear-gradient(180deg,var(--ink) 62%,rgba(11,9,8,.86));
+}
 /* Horizontal only. `overflow-y:visible` next to `overflow-x:auto` is not honoured —
    the spec makes the browser compute it as `auto` — so it has to be said outright,
    or the board grows a second vertical scrollbar it never wanted. */
@@ -633,10 +642,23 @@ a:hover{color:var(--gold-2)}
 
 /* --------------------------------------------------------- responsive */
 @media (max-width:1360px){ :root{--side:332px;--node:80px;--icon:40px;--colmin:84px} }
-/* short viewports: give the board its height back */
-@media (max-height:860px){ :root{--node:80px;--icon:40px;--row:160px} }
+
+/* The tree's size by viewport height, and nothing else. This used to be two
+   coarse steps with JavaScript squeezing the tree between them to fit whatever
+   height its siblings left over — which measured the drawers empty on the first
+   paint and full on every one after, so the board resized under the cursor on
+   the first click, and bottomed out on a 52px node while the board scrolled
+   anyway. A media query cannot be changed by a click, so the ladder is the whole
+   mechanism now; it steps in sixes rather than tens so no single resize jumps.
+
+   Every `--row` here stays at or above `--node` + 58px, the room a two-line
+   perk name needs under its node, so labels never meet. */
+@media (max-height:1120px){ :root{--node:86px;--icon:43px;--row:160px} }
+@media (max-height:1000px){ :root{--node:80px;--icon:40px;--row:145px} }
+@media (max-height:900px){  :root{--node:74px;--icon:37px;--row:134px} }
+@media (max-height:820px){  :root{--node:68px;--icon:34px;--row:126px} }
 @media (max-height:720px){
-  :root{--node:70px;--icon:36px;--row:140px}
+  :root{--node:62px;--icon:31px;--row:120px}
   .hint{display:none}
   .drawer>summary{padding:7px 14px}
   .drawer{margin-top:7px}

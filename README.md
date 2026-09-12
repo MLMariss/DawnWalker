@@ -46,6 +46,12 @@ Pages and it works as the site index.
   them was wrong. A chance written with the number in the middle ("Weapon
   Critical Hit : 6% chance") is a total like any other; the three long lists
   under the totals fold away behind their count and scroll in place.
+- **The tree is a fixed size, not a squeeze to fit.** `--node` and `--row` step
+  down by viewport height in the stylesheet and the board scrolls for whatever is
+  left over. It used to be sized from "the column minus what my siblings occupy",
+  which measured the drawers empty on the first paint and full on every one
+  after, so the board resized under the cursor on the first click — and made the
+  tree's size depend on the length of the page below it.
 - **Running totals** for skill points, time segments and manuals across all trees,
   plus a per-treepoint count and manual count on each tab — so you can see what a
   given tree actually costs you to find in the world.

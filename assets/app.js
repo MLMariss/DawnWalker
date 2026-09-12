@@ -649,30 +649,33 @@
   /* Columns are remapped into the space available rather than the board being
      zoomed — scaling the board would drag the labels below 12px. Relative
      spacing is kept, with a floor on the gap between adjacent columns. */
+  /* The tree is laid out across the width it has, and at the size the stylesheet
+     says — never squeezed to fit the height it has left.
+
+     It used to do the latter, and it went wrong twice over. The height it
+     measured was "the column minus whatever my siblings currently occupy", and
+     `renderTree` runs before the ultimates and abilities drawers are filled in,
+     so the first paint measured them empty and every paint after that measured
+     them full: at a 1050px window the node went 92px on load and 70.75px on the
+     next render, the tree losing 119px under the cursor as soon as you clicked
+     anything. Below about 860px tall it bottomed out on its own 52px floor and
+     the board scrolled regardless, so the squeeze bought nothing there but an
+     illegible board — and it meant opening the Abilities drawer shrank the tree,
+     because the tree's size depended on the length of the page under it.
+
+     Height now comes from `--node`/`--row`, which the stylesheet steps down by
+     viewport height. That is stable — a media query cannot be changed by a click
+     — and where the tree still does not fit, the board scrolls, which is what a
+     board too tall for its column is supposed to do. */
   function layout(t) {
     var node = cssPx('--node', 92), colmin = cssPx('--colmin', 132);
     var availW = (el.boardscroll.clientWidth || 1000) - 4;
-    // The board column is the scroller; the drawers and hint under the tree are
-    // siblings, so measure what they leave rather than what the tree box is now.
-    var col = el.boardscroll.parentNode, used = 0;
-    Array.prototype.forEach.call(col.children, function (c) {
-      if (c !== el.boardscroll) used += c.offsetHeight + 12;
-    });
-    var availH = (col.clientHeight || 700) - used - 16;
 
     var rows = Math.max.apply(null, t.perks.map(function (p) { return p.row; }));
-    var labelRoom = 48, rowFloorGap = 58;
+    var labelRoom = 48;
     // Below the stacking breakpoint the page scrolls and the board may scroll
     // sideways, which changes what the layout is allowed to do to fit.
     var stacked = window.matchMedia('(max-width:1000px)').matches;
-    // Rows may not go below what a two-line label needs, so when the column is
-    // short it is the node that gives way, not the spacing.
-    if (!stacked && rows > 1) {
-      var fits = (availH - 56 - rowFloorGap * (rows - 1)) / rows;
-      node = Math.max(52, Math.min(node, fits));
-    }
-    el.tree.style.setProperty('--node', node + 'px');
-    el.tree.style.setProperty('--icon', Math.round(node * 0.5) + 'px');
     var pad = node / 2 + 38;
 
     var xs = [];
@@ -699,12 +702,7 @@
     var labelW = Math.min(152, Math.max(56, Math.min(pitch - 8, 2 * pad - 8)));
 
     var top = node / 2 + 8;
-    // Below the stacking breakpoint the page scrolls anyway, so let the board
-    // keep its full row height instead of nesting a second scroller inside it.
     var rowH = cssPx('--row', 180);
-    if (!stacked && rows > 1) {
-      rowH = Math.max(node + rowFloorGap, Math.min(rowH, (availH - top - node / 2 - labelRoom) / (rows - 1)));
-    }
     var height = top + (rows - 1) * rowH + node / 2 + labelRoom;
 
     return {
@@ -718,9 +716,9 @@
   function renderAll() {
     document.body.className = 't-' + (tree() ? tree().key : 'wc');
     renderTabs();
-    renderTree();
     renderAbilities();
     renderUltimates();
+    renderTree();
     renderPanel();
     renderMeters();
     renderOverview();
