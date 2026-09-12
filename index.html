@@ -118,10 +118,14 @@
     </p>
   </section>
 
-  <aside class="side">
+  <aside class="side" id="side">
     <div class="panel" id="panel"></div>
 
-    <details class="drawer" id="ovdrawer" open>
+    <!-- Closed by default, and one of exactly two panes in this column: opening
+         it gives it the column's full height and folds the perk panel above it
+         down to its own header bar, which is then the control that brings the
+         perk back and puts the overview back on the bottom. -->
+    <details class="drawer" id="ovdrawer">
       <summary>
         <span class="drawer-title">Build overview</span>
         <span class="drawer-note" id="ov-note"></span>
