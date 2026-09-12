@@ -1034,7 +1034,7 @@
             },
             {
               "level": 4,
-              "effect": "Up to +40% Active Ability Damage",
+              "effect": "Restore 30% of Health Segment after Perfect Block. 30% chance to also trigger after Directional Block and 25% chance after Omniblock. Attack after Perfect Block heals you for 10% of dealt Damage. 25% chance for any Block to become Perfect Block.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "corruption 14"

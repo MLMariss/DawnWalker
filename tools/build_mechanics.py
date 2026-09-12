@@ -193,9 +193,15 @@ edge("consumables", "damage_output", "weak",
 
 # node_id -> what it raises, and what raises it
 N = {}
-def node(nid, name, provides, scales_with, note=None):
+def node(nid, name, provides, scales_with, note=None, feedback=None):
+    """`feedback` names systems this node both provides and is paid by — a real
+    loop, not a modelling slip. A node is never scored against itself, so the
+    list changes nothing in the planner; it is there so the check for an
+    accidental self-synergy can tell a deliberate loop from a mistake, and it
+    must be explained in `note`."""
     rec = {"name": name, "provides": provides, "scales_with": scales_with}
     if note: rec["note"] = note
+    if feedback: rec["feedback"] = feedback
     N[nid] = rec
 
 # ---- Witchcraft perks
@@ -284,7 +290,7 @@ node("AW10", "Unholy Vitality",    ["health_regen"], ["ability_uptime", "cooldow
 # ---- Swordmastery abilities
 node("AS1", "Adrenaline Rush",   ["weapon_damage"], ["ability_uptime", "cooldown_reduction", "charges", "ability_slots"])
 node("AS2", "Artery Strike",     ["crit_events", "ability_damage"], ["crit_damage", "weapon_damage", "charges", "ability_uptime"])
-node("AS3", "Broadswing",        ["ability_damage"], ["weapon_damage", "charges", "ability_uptime"])
+node("AS3", "Broad Swing",        ["ability_damage"], ["weapon_damage", "charges", "ability_uptime"])
 node("AS4", "Charge",            ["stun", "ability_damage"], ["weapon_damage", "charges", "ability_uptime"])
 node("AS5", "Dirty Trick",       ["stun", "enemy_weakened"], ["charges", "ability_uptime"])
 node("AS6", "Swiftness",         ["attack_speed"], ["perfect_block", "ability_slots"],
@@ -297,15 +303,17 @@ node("AV2",  "Crimson Rush",      ["ability_damage"], ["health_percent", "health
 node("AV3",  "Death From Above",  ["kills"], ["ability_slots"])
 node("AV4",  "Mesmerise",         ["survivability", "damage_output"], ["charges", "ability_uptime", "ability_health_cost"])
 node("AV5",  "Piercing Shriek",   ["stun", "enemy_weakened"], ["charges", "ability_uptime", "perfect_block"])
-node("AV6",  "Scarlet Shield",    ["health_regen"], ["perfect_block", "ability_slots"])
-node("AV7",  "Shadow Storm",      ["attacks_landed", "survivability"], ["charges", "ability_uptime"])
+node("AV6",  "Scarlet Shield",    ["health_regen", "perfect_block"], ["perfect_block", "ability_slots"],
+     "Heals off perfect blocks, and at level 4 turns 25% of any block into one — the only source of perfect blocks outside Omniblock.",
+     feedback=["perfect_block"])
+node("AV7",  "Shadowstorm",      ["attacks_landed", "survivability"], ["charges", "ability_uptime"])
 node("AV8",  "Shapeshift",        ["haste", "exploration"], [])
 node("AV9",  "Shred",             ["ability_damage"], ["health_percent", "health_pool", "health_regen", "ability_slots"])
 node("AV10", "Voracious Bite",    ["health_regen", "cooldown_reduction"], ["blood_restore", "charges", "ability_uptime"],
      "Sanguine Renewal makes this reset every active cooldown, which is why it carries cooldown reduction.")
 
 # ---- Ultimates (synthetic ids: U<tree key><index from 1>)
-node("Uwc1", "Arcane Cascade",    ["witchcraft_damage"], ["ability_uptime", "ability_slots", "charges"],
+node("Uwc1", "Aether Cascade",    ["witchcraft_damage"], ["ability_uptime", "ability_slots", "charges"],
      "Stacks +20% per ability used, so it is worth whatever your cast rate is.")
 node("Uwc2", "Entwined Torment",  ["ability_damage"], ["witchcraft_damage", "ability_uptime"])
 node("Uwc3", "Runic Bulwark",     ["enemy_weakened"], ["perfect_block"])

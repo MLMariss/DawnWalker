@@ -162,13 +162,24 @@ which is worth noting given that the same wiki misfiled two perks on its perk
 page — its ability table is the better half of that site. Every ability has an
 activation cost recorded.
 
-Two typos in the Game8 ability text are corrected during extraction, listed by
-the script each time it runs so the change is never silent:
+Three faults in the Game8 ability text are corrected during extraction, listed
+by the script each time it runs so the change is never silent:
 
 | Ability | Source text | Corrected to | Why |
 | --- | --- | --- | --- |
 | Charge | `…everyone on your way. "` | `…everyone on your way.` | stray quote mark in the blurb |
 | Shapeshift | `2 Gain Haste` | `Gain Haste` | stray leading digit in the level 1 text |
+| Scarlet Shield, level 4 | `Up to +40% Active Ability Damage` | the Perfect Block text the game prints | the source repeats Crimson Rush's level 4 line here |
+
+The Scarlet Shield row is the one place a source line was not merely mistyped
+but belonged to another ability altogether, so it is worth stating what the game
+shows: *Restore 30% of Health Segment after Perfect Block. 30% chance to also
+trigger after Directional Block and 25% chance after Omniblock. Attack after
+Perfect Block heals you for 10% of dealt Damage. 25% chance for any Block to
+become Perfect Block.* That last clause is the only source of Perfect Blocks
+outside Omniblock, which is why the mechanics graph has Scarlet Shield providing
+`perfect_block` as well as being paid by it. Scanning every ability for level
+text duplicated across two different abilities turns up no other case.
 
 Of the 27, **14 are active and 13 passive**. The split is read from `use_cost`
 rather than from the blurb: anything that pays an activation charge or health is
@@ -244,7 +255,12 @@ What *is* checked, by `tools/verify_perks.py` on every run:
 - no edge is a self-loop, a duplicate, or missing its `why`,
 - no system is declared and then never used,
 - no node both provides and scales with the same system, which would make it
-  its own synergy partner.
+  its own synergy partner — unless it names that system in `feedback` and says
+  why in `note`. One node does: Scarlet Shield is paid by Perfect Block and, at
+  level 4, makes them. The planner never scores a node against itself, so the
+  declaration changes nothing it draws; it only separates a real loop from a
+  modelling slip, and a `feedback` entry that is not actually an overlap is
+  itself an error.
 
 Also checked: every edge carries a `strength` of strong/moderate/weak, the
 `scoring` block's transmission values fall strong > moderate > weak and its
