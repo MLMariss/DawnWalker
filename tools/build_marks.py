@@ -32,7 +32,10 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / 'icons-src'
 OUT = ROOT / 'assets' / 'marks'
 SIZE = 128
-PREFIX = 'T_Icon_Perk_'
+# The game names its icon textures T_Icon_Perk_<name>; abilities and anything
+# else follow the same shape, so strip whatever the middle word is rather than
+# hard-coding one prefix.
+PREFIX = re.compile(r'^T_Icon_[A-Za-z]+_')
 
 # Filenames that use the game's internal spelling rather than the registry's.
 ALIAS = {
@@ -49,9 +52,12 @@ def norm(s):
 
 
 def registry():
-    """node id -> name, for every perk and ultimate."""
+    """normalised name -> node id, for every perk, ultimate and ability."""
     d = json.loads((ROOT / 'data' / 'perks.json').read_text())
     out = {}
+    for t in json.loads((ROOT / 'data' / 'abilities.json').read_text())['trees'].values():
+        for a in t['abilities']:
+            out[norm(a['name'])] = a['node_id']
     for t in d['trees'].values():
         for p in t['perks']:
             out[norm(p['name'])] = p['node_id']
@@ -103,7 +109,7 @@ def main():
     ids = registry()
     built, unmatched = {}, []
     for f in sorted(SRC.glob('*.webp')):
-        key = norm(f.stem.replace(PREFIX, ''))
+        key = norm(PREFIX.sub('', f.stem))
         key = ALIAS.get(key, key)
         node = ids.get(key)
         if not node:
