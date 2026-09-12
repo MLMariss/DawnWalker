@@ -21,7 +21,8 @@
   var el = {};
   ['tabs', 'tree', 'links', 'nodes', 'ults', 'ult-gate', 'panel', 'toast', 'corruption',
    'corruption-out', 'manuals', 'synergy', 'm-sp', 'm-ts', 'm-bk', 'boardscroll',
-   'ov-body', 'ov-note', 'ovdrawer', 'abils', 'abil-note', 'abildrawer', 'hint-key'].forEach(function (id) {
+   'ov-body', 'ov-note', 'ovdrawer', 'abils', 'abil-note', 'abildrawer', 'ultdrawer',
+   'hint-key'].forEach(function (id) {
     el[id.replace(/-(\w)/g, function (_, c) { return c.toUpperCase(); })] = document.getElementById(id);
   });
 
@@ -289,6 +290,11 @@
         : (spentOverride == null ? perkSpent(t) : spentOverride);
       return {
         met: have >= c.n, have: have, n: c.n,
+        // Two readings of the same condition. `short` is a counter, for the
+        // folded drawer summary, which has room for one; `text` is the sentence
+        // the toast uses when you click a locked ultimate.
+        short: (c.type === 'corruption' ? 'Corruption ' : 'Perk points ') +
+          have + '/' + c.n,
         text: c.type === 'corruption' ? 'Corruption ' + c.n
           : 'Spend ' + c.n + ' on perks in this tree'
       };
@@ -623,9 +629,14 @@
      Clamping a narrow gap up has to come out of the wide ones, or the board
      would overflow — so the surplus is taken back from whatever is still above
      the floor, and the floor itself gives way if there is simply no room. */
-  function distribute(gaps, total, target, floor, mayOverflow) {
+  function distribute(gaps, total, target, floor, ceil, mayOverflow) {
     var n = gaps.length;
     if (!n) return [];
+    // A wide window used to be shared out in full, so the same seven columns
+    // that read tightly on a laptop drifted 300px apart on a 2560px monitor.
+    // The board gains nothing from that distance, so it takes no more than it
+    // needs and leaves the rest to the page.
+    if (ceil > floor) target = Math.min(target, ceil * n);
     // Normally the board is made to fit the window, so a floor that cannot fit
     // gives way. Where the board is allowed to scroll sideways it does not:
     // squeezing past the floor is what drives names into each other.
@@ -643,6 +654,11 @@
       var k = (freeTotal - give) / freeTotal;
       free.forEach(function (i) { w[i] *= k; });
     }
+    // Proportional sharing alone keeps the game's own ratios, which on the
+    // widest trees means one gap three times another. Clamping the long ones
+    // down closes the empty stretches without touching the short ones; the
+    // width it gives back is left as margin, not redistributed.
+    if (ceil > floor) w = w.map(function (x) { return Math.min(ceil, x); });
     return w;
   }
 
@@ -669,6 +685,7 @@
      board too tall for its column is supposed to do. */
   function layout(t) {
     var node = cssPx('--node', 92), colmin = cssPx('--colmin', 132);
+    var colmax = Math.max(colmin, cssPx('--colmax', 150));
     var availW = (el.boardscroll.clientWidth || 1000) - 4;
 
     var rows = Math.max.apply(null, t.perks.map(function (p) { return p.row; }));
@@ -685,7 +702,7 @@
     var gaps = [], total = 0, i;
     for (i = 1; i < xs.length; i++) { gaps.push(xs[i] - xs[i - 1]); total += xs[i] - xs[i - 1]; }
     var target = Math.max(availW - 2 * pad, 0);
-    var widths = distribute(gaps, total, target, colmin, stacked);
+    var widths = distribute(gaps, total, target, colmin, colmax, stacked);
 
     var at = {}, cursor = pad;
     at[xs[0]] = cursor;
@@ -884,13 +901,22 @@
     el.abils.innerHTML = html || '<p class="ov-empty">No abilities listed for this tree.</p>';
   }
 
+  /* The drawer is folded by default, so its summary has to carry the whole
+     state of the section: how far off the requirement is, whether it has been
+     met, and — once the choice is made — which ultimate was taken, since that
+     is permanent and the one thing worth seeing without opening anything. */
   function renderUltimates() {
     var t = tree(), prog = ultProgress(t), met = prog.every(function (x) { return x.met; });
+    var chosen = state.ults[t.key] != null ? t.ultimates[state.ults[t.key]] : null;
+
     el.ultGate.className = 'ult-gate' + (met ? ' met' : '');
-    el.ultGate.textContent = met
-      ? 'Unlocked — ' + prog.map(function (x) { return x.text; }).join(' · ')
-      : prog.filter(function (x) { return !x.met; })
-            .map(function (x) { return x.text + ' — ' + x.have + '/' + x.n; }).join(' · ');
+    el.ultGate.textContent = chosen
+      ? 'Chosen: ' + chosen.name
+      : prog.map(function (x) { return x.short; }).join(' · ') +
+        (met ? ' · ready to choose' : '');
+    // Unlocked and unspent is the only moment the fold is hiding something the
+    // reader can act on, so that is the only moment it calls attention to itself.
+    el.ultdrawer.classList.toggle('ready', met && !chosen);
 
     el.ults.innerHTML = t.ultimates.map(function (u, i) {
       var on = state.ults[t.key] === i;
@@ -1199,8 +1225,8 @@
       if (writingHash) return;
       readHash(); renderAll();
     });
-    // Ultimates are a fixed section now, not a drawer, so only these two toggle.
-    [el.ovdrawer, el.abildrawer].forEach(function (d) {
+    // Each of these changes how much of the board's column is left for the tree.
+    [el.ovdrawer, el.abildrawer, el.ultdrawer].forEach(function (d) {
       d.addEventListener('toggle', function () { renderTree(); });
     });
 

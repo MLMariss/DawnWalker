@@ -72,17 +72,19 @@
       </div>
     </div>
 
-    <!-- Ultimates sit directly under the tree they belong to, and are always
-         open: the choice is permanent and one per tree, so it is not something
-         to go looking for behind a disclosure triangle. -->
-    <section class="drawer drawer-fixed" id="ultdrawer" aria-labelledby="ult-head">
-      <div class="drawer-head" id="ult-head">
+    <!-- Ultimates sit directly under the tree they belong to. The choice is
+         permanent, but it is also unavailable until the tree is most of the way
+         spent, so the section stays folded and carries its own progress counter
+         on the summary: the row says whether there is anything behind it worth
+         opening, which is the only thing a locked ultimate has to tell you. -->
+    <details class="drawer" id="ultdrawer">
+      <summary>
         <span class="drawer-title">Ultimate Perks</span>
         <span class="drawer-note">only one per skill tree, permanently</span>
         <span class="ult-gate" id="ult-gate"></span>
-      </div>
+      </summary>
       <div class="ults" id="ults"></div>
-    </section>
+    </details>
 
     <details class="drawer" id="abildrawer">
       <summary>

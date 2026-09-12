@@ -76,11 +76,27 @@ buttons for touch.
 ## Layout
 
 The board fits the window rather than scrolling. Columns are remapped into the
-space available — keeping the game's relative spacing, with a floor on the gap
-between neighbours — instead of zooming the whole board, which would drag the
-labels below a readable size. Nothing on the page is set under 12px. The
-Ultimate Perks and Build overview sections are collapsible, so a short screen can
-give the tree its height back.
+space available — keeping the game's relative spacing, with a floor *and a
+ceiling* on the gap between neighbours — instead of zooming the whole board,
+which would drag the labels below a readable size. Nothing on the page is set
+under 12px.
+
+The ceiling is why the tree does not sprawl on a wide monitor. The board holds
+no moving parts and nothing lives between the columns, so once the gaps reach
+`--colmax` the tree stops growing and centres in whatever room is left; the
+width it does not take goes to the side panel, which is where the perk text is.
+The panel is sized `clamp(360px, 25vw, 520px)` for the same reason, and past
+about 2240px the whole stage centres rather than stretching further, since by
+then neither column has anything left to do with the width.
+
+The Ultimate Perks, Abilities and Build overview sections are all collapsible, so
+a short screen can give the tree its height back. Ultimates start folded: the
+choice is permanent, but it is also unavailable until the tree is most of the
+way spent, so the summary carries the progress counter — `Perk points 12/35`,
+or `Corruption 15/15` on Vampirism — and says `ready to choose` once the
+requirement is met. Once one is taken the summary names it instead, which is the
+only thing about a settled, permanent choice worth seeing without opening
+anything.
 
 Below 1000px the columns stack and the page itself scrolls, so nothing inside it
 claims a slice of viewport height. Below 640px fitting the board to the window
