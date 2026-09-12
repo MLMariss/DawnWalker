@@ -584,6 +584,43 @@ a:hover{color:var(--gold-2)}
 .ov-list li b{display:block;color:var(--text);font-weight:600;font-size:13px}
 .ov-empty{color:var(--text-faint);font-size:13px;padding:8px 0}
 
+/* The three long lists. They sit under the totals, which are the reason to open
+   the overview at all, so they fold away behind their own count and each opens
+   into a scroller of its own rather than laying forty rows out in the column. */
+.ov-sub{margin-top:10px;border-top:1px solid var(--line)}
+/* The overview body is itself a scroller, so an open section's rows would carry
+   its own heading off the top and leave you reading a list with no idea which
+   one it is. The heading sticks to the top of that scroller instead. */
+.ov-sub>summary{
+  position:sticky;top:0;z-index:1;
+  cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;
+  padding:8px 0;font-size:12px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text-faint);transition:.15s;
+  background:linear-gradient(180deg,var(--panel) 72%,rgba(23,18,14,.92));
+}
+.ov-sub>summary::-webkit-details-marker{display:none}
+.ov-sub>summary::before{
+  content:"";width:0;height:0;flex:none;
+  border:4px solid transparent;border-left-color:currentColor;
+  transition:transform .15s;
+}
+.ov-sub[open]>summary::before{transform:rotate(90deg) translateX(1px)}
+.ov-sub>summary:hover{color:var(--text-dim)}
+.ov-sub[open]>summary{color:var(--gold)}
+.ov-count{
+  margin-left:auto;padding:1px 7px;border:1px solid var(--line-2);border-radius:9px;
+  font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--text-dim);
+}
+/* Its own bound, so reaching the last conditional effect never means scrolling
+   the twenty-two manuals past first, and opening one cannot run the overview
+   off the bottom of the side column. */
+.ov-sub>.ov-list{
+  max-height:min(26vh,210px);
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+  padding:2px 6px 6px 0;
+}
+.ov-sub>.ov-list li:last-child{border-bottom:0}
+
 /* -------------------------------------------------------------- toast */
 .toast{
   position:fixed;left:50%;bottom:24px;transform:translate(-50%,14px);

@@ -80,6 +80,7 @@
     });
     renderHintKey();
     state.tab = TREES[0].name;
+    seedStory();
     readHash();
     bindChrome();
     renderAll();
@@ -184,8 +185,12 @@
   }
 
   function canRefund(p) {
-    var n = lv(p.node_id);
-    if (!n) return { ok: false, why: 'Nothing learned here.' };
+    var n = lv(p.node_id), floor = storyFloor(p);
+    if (n <= floor) {
+      return { ok: false, why: floor
+        ? 'The story grants level 1 outright — it cannot be refunded.'
+        : 'Nothing learned here.' };
+    }
     if (n === 1) {
       var deps = (CHILDREN[p.node_id] || []).filter(function (c) { return lv(c.node_id) > 0; });
       if (deps.length) {
@@ -228,11 +233,25 @@
   }
   function isFree(p, i) { return !!p.story_granted && i === 0; }
 
+  /* The story does not offer these five abilities, it hands them over: you have
+     them whether the build planned for them or not. So level 1 is where they
+     start, Reset puts them back there, Refund cannot take it away, and nothing
+     gated on level 1 applies — Dirty Trick and Burning Blood are manual-gated at
+     level 1 and the story bypasses that, so neither is a manual to go and find. */
+  function storyFloor(p) { return p && p.story_granted ? 1 : 0; }
+
+  function seedStory() {
+    Object.keys(BY_ID).forEach(function (id) {
+      var f = storyFloor(BY_ID[id]);
+      if (f && lv(id) < f) state.levels[id] = f;
+    });
+  }
+
   function tallyOf(list, field) {
     return list.reduce(function (sum, p) {
       var n = lv(p.node_id), s = 0;
       for (var i = 0; i < n; i++) s += (field === 'manual' || field === 'vrakhir blood')
-        ? (p.levels[i].gate === field ? 1 : 0)
+        ? (!isFree(p, i) && p.levels[i].gate === field ? 1 : 0)
         : levelCost(p, i, field);
       return sum + s;
     }, 0);
@@ -319,23 +338,69 @@
 
   /* ------------------------------------------------- effect interpretation */
 
-  /* Effects are written as prose. Two shapes carry a number we can total:
-     a signed delta ("+25% max stamina", "-10% cooldowns") and a flat setting
-     ("10% critical chance", "2 slots"). Anything with more than one number in
-     it — "+4% per attack, up to +20%" — is conditional, and is listed as text
-     rather than folded into a total. */
+  /* Effects are written as prose. Three shapes carry a number we can total:
+     a signed delta ("+25% max stamina", "-10% cooldowns"), a flat setting
+     ("10% critical chance", "2 slots"), and a chance, which the game writes
+     with the number in the middle — "Weapon Critical Hit : 6% chance". That
+     last shape reached neither of the first two, so every crit chance in the
+     game fell through to the conditional text list and was never totalled:
+     Fate's Favour, Clawpierce, Evil Eye, Potent Blood, Unholy Fervour and
+     Forager, thirteen lines in all. Anything with more than one number in it —
+     "+4% per attack, up to +20%" — is genuinely conditional and stays text. */
   function readEffect(text) {
     var body = String(text).replace(/\.$/, '').trim();
     var signed = /^([+-])(\d+)(%?)\s+(.+)$/.exec(body);
-    if (signed && !/\d/.test(signed[4])) {
+    if (signed && isLabel(signed[4])) {
       return { kind: 'delta', value: (signed[1] === '-' ? -1 : 1) * +signed[2],
                unit: signed[3], label: signed[4] };
     }
     var flat = /^(\d+)(%?)\s+(.+)$/.exec(body);
-    if (flat && !/\d/.test(flat[3])) {
+    if (flat && isLabel(flat[3])) {
       return { kind: 'set', value: +flat[1], unit: flat[2], label: flat[3] };
     }
+    var chance = /^(.+?)\s*:\s*([+-]?\d+)(%?)\s*(chance)?$/i.exec(body);
+    if (chance && isLabel(chance[1])) {
+      return { kind: 'set', value: +chance[2], unit: chance[3],
+               label: chance[1] + (chance[4] ? ' chance' : '') };
+    }
     return null;
+  }
+
+  /* What follows the number has to be the name of a stat for the row to mean
+     anything. The test used to be only "no digits in it", which let a whole
+     sentence through: Omniblock's last level is "-40% Stamina cost. Directional
+     Block works like Omniblock if wrong direction is chosen.", and the overview
+     printed that entire sentence as a stat name with -40% against it, in a
+     different group from the "Stamina cost" it should have joined. A name is
+     one clause and a handful of words. */
+  function isLabel(text) {
+    var t = String(text).trim();
+    return !/\d/.test(t) && !/[.;:]/.test(t) && t.split(/\s+/).length <= 6;
+  }
+
+  /* Three perks reduce "Cooldowns" and three others add "Slots available", and
+     each is scoped by its own effect line to one tree's abilities — Restless
+     Blade to Swordmastery's, Aether Flow to Witchcraft's, Endless Ferocity to
+     Vampiric ones. The level text drops that scope, so the summary keyed three
+     separate pools to one label and added them together: "Cooldowns -50%" for
+     three unrelated -10/-20/-20 reductions, and "Slots available 12" for three
+     sets of four. The scope is in the perk's own effect, so read it from there
+     and keep the rows apart. */
+  var FAMILY = /\b(Witchcraft|Swordmastery|Vampiric)\b[^.]*\bAbilit(?:y|ies)\b/i;
+
+  function scopedLabel(p, label) {
+    var m = FAMILY.exec(p.effect || '');
+    if (!m) return label;
+    var fam = m[1];
+    if (new RegExp('\\b' + fam + '\\b', 'i').test(label)) return label;
+    return label + ' (' + fam.charAt(0).toUpperCase() + fam.slice(1).toLowerCase() + ' abilities)';
+  }
+
+  /* Two lines are versions of one another when they are the same sentence once
+     the numbers come out, so a perk that restates a rider at a bigger number
+     lists it once, at the number you actually have. */
+  function shapeOf(text) {
+    return String(text).toLowerCase().replace(/[\d]+(\.[\d]+)?/g, '#').replace(/\s+/g, ' ').trim();
   }
 
   var GROUPS = [
@@ -357,18 +422,31 @@
       entries(t).forEach(function (p) {
         var n = lv(p.node_id);
         if (!n) return;
-        var best = {};
+        var best = {}, cond = [], byShape = {};
         for (var i = 0; i < n; i++) {
           var l = p.levels[i];
-          if (l.gate === 'manual') manuals.push(p.name + ' — level ' + l.level);
-          if (l.gate === 'vrakhir blood') phials.push(p.name + ' — level ' + l.level);
+          // The story's own level is not a manual to go and find.
+          if (!isFree(p, i) && l.gate === 'manual') manuals.push(p.name + ' — level ' + l.level);
+          if (!isFree(p, i) && l.gate === 'vrakhir blood') phials.push(p.name + ' — level ' + l.level);
           var r = readEffect(l.effect);
-          if (!r) { other.push({ perk: p.name, text: l.effect }); continue; }
-          var key = (r.label + '|' + r.unit).toLowerCase();
+          if (!r) {
+            /* An ability's level text is a complete restatement of the ability —
+               Artery Strike at level 3 IS the ability, 560% and 680% are gone —
+               so only the level you hold is listed. A perk's levels are riders
+               that stack, and two different riders are both still true, so they
+               both stand; only a restatement of the same rider collapses. */
+            if (p.is_ability) cond = [l.effect];
+            else if (byShape[shapeOf(l.effect)] != null) cond[byShape[shapeOf(l.effect)]] = l.effect;
+            else { byShape[shapeOf(l.effect)] = cond.length; cond.push(l.effect); }
+            continue;
+          }
+          var label = scopedLabel(p, r.label);
+          var key = (label + '|' + r.unit).toLowerCase();
           if (!best[key] || Math.abs(r.value) > Math.abs(best[key].value)) {
-            best[key] = { value: r.value, unit: r.unit, label: r.label, kind: r.kind };
+            best[key] = { value: r.value, unit: r.unit, label: label, kind: r.kind };
           }
         }
+        cond.forEach(function (text) { other.push({ perk: p.name, text: text }); });
         Object.keys(best).forEach(function (key) {
           var b = best[key];
           if (!stats[key]) stats[key] = { value: 0, unit: b.unit, label: b.label, kind: b.kind, perks: [] };
@@ -925,6 +1003,9 @@
     el.mSp.textContent = sp; el.mTs.textContent = ts; el.mBk.textContent = bk;
   }
 
+  /* `toggle` does not bubble, so the listener is a capturing one on the body. */
+  var ovOpen = {};
+
   function renderOverview() {
     var s = summarise();
     var keys = Object.keys(s.stats);
@@ -954,18 +1035,26 @@
         return '<div class="ov-group"><h4>' + g + '</h4>' + rows + '</div>';
       }).join('');
 
-    /* These were collapsibles inside a collapsible, which buried the lists two
-       clicks deep and made the panel's height jump around as they opened. They
-       are plain sections now, like the stat groups above, and the overview
-       scrolls. */
+    /* Three lists that can run to dozens of rows each, under totals that are the
+       reason to open the overview at all. They fold away with their count on the
+       summary line, and each opens into a scroller of its own — so reaching the
+       fifteenth conditional effect never means scrolling the twenty-two manuals
+       past first, and opening one cannot push the overview off its column. The
+       open ones are remembered: the body is rewritten on every click anywhere in
+       the planner, and a section that snapped shut each time would be useless. */
     function section(title, items, render) {
       if (!items.length) return '';
-      return '<div class="ov-group"><h4>' + title + ' (' + items.length + ')</h4>' +
-        '<ul class="ov-list">' + items.map(render).join('') + '</ul></div>';
+      var key = title.replace(/\W+/g, '');
+      return '<details class="ov-sub" data-ov="' + key + '"' + (ovOpen[key] ? ' open' : '') + '>' +
+        '<summary>' + esc(title) + '<span class="ov-count">' + items.length + '</span></summary>' +
+        '<ul class="ov-list">' + items.map(render).join('') + '</ul></details>';
     }
 
-    html += section('Conditional &amp; unique effects', s.other, function (o) {
-      return '<li><b>' + esc(o.perk) + '</b>' + esc(o.text) + '</li>';
+    /* No perk name on the row. Every one of these is something the tree gives
+       you; which node it came off is not what you are reading the list for, and
+       the name was the widest thing in it. */
+    html += section('Conditional & unique effects', s.other, function (o) {
+      return '<li>' + esc(o.text) + '</li>';
     });
     html += section('Manuals to find', s.manuals, function (m) {
       return '<li>' + esc(m) + '</li>';
@@ -1090,8 +1179,14 @@
 
     document.getElementById('reset').addEventListener('click', function () {
       state.levels = {}; state.ults = {}; state.quests = {}; state.sel = null;
+      seedStory();
       renderAll(); toast('Build cleared.');
     });
+
+    el.ovBody.addEventListener('toggle', function (e) {
+      var d = e.target;
+      if (d && d.tagName === 'DETAILS' && d.dataset.ov) ovOpen[d.dataset.ov] = d.open;
+    }, true);
 
     document.getElementById('share').addEventListener('click', function () {
       writeHash();
@@ -1135,9 +1230,10 @@
       Object.keys(state.levels).forEach(function (id) {
         var p = BY_ID[id];
         if (!p) { delete state.levels[id]; changed = true; return; }
-        var n = state.levels[id];
-        while (n > 0 && !p.quest_unlock && !gateOk(p.levels[n - 1].gate)) { n--; changed = true; }
-        if (n > 0 && !unlocked(p)) { n = 0; changed = true; }
+        var n = state.levels[id], floor = storyFloor(p);
+        while (n > floor && !p.quest_unlock && !gateOk(p.levels[n - 1].gate)) { n--; changed = true; }
+        if (n > floor && !unlocked(p)) { n = floor; changed = true; }
+        if (n < floor) { n = floor; changed = true; }
         if (n) state.levels[id] = n; else delete state.levels[id];
       });
       TREES.forEach(function (t) {
@@ -1153,7 +1249,10 @@
   function writeHash() {
     var parts = ['1', 'c' + state.corruption, 'm' + (state.manuals ? 1 : 0)];
     var picks = Object.keys(state.levels)
-      .filter(function (id) { return !(BY_ID[id] && BY_ID[id].quest_unlock); })
+      .filter(function (id) {
+        return !(BY_ID[id] && BY_ID[id].quest_unlock) &&
+               state.levels[id] > storyFloor(BY_ID[id]);
+      })
       .sort().map(function (id) { return id + '.' + state.levels[id]; });
     if (picks.length) parts.push('p=' + picks.join(','));
     var q = Object.keys(state.quests).filter(function (id) { return state.quests[id]; }).sort();
@@ -1196,6 +1295,7 @@
     });
     if (el.corruption) { el.corruption.value = state.corruption; el.corruptionOut.textContent = state.corruption; }
     if (el.manuals) el.manuals.checked = state.manuals;
+    seedStory();
     dropInvalid();
   }
 
