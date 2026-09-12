@@ -35,6 +35,15 @@ CLEANUPS = {
                     "stray quote mark in the source blurb"),
     ("Shapeshift", 1): ("2 Gain Haste", "Gain Haste",
                         "stray leading 2 in the source's level 1 text"),
+    # The source page repeats Crimson Rush's level 4 line here. The in-game
+    # panel prints the Perfect Block text below, which is what the game shows.
+    ("Scarlet Shield", 4): (
+        "Up to +40% Active Ability Damage",
+        "Restore 30% of Health Segment after Perfect Block. 30% chance to also "
+        "trigger after Directional Block and 25% chance after Omniblock. Attack "
+        "after Perfect Block heals you for 10% of dealt Damage. 25% chance for "
+        "any Block to become Perfect Block.",
+        "source carries Crimson Rush's level 4 text for this row"),
 }
 APPLIED = []
 

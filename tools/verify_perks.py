@@ -318,10 +318,21 @@ def mechanics_checks(registry, abilities):
                 referenced.add(sysid)
                 if sysid not in systems:
                     findings.append(f"mechanics/{nid}: {field} names unknown system {sysid!r}")
+        # A node that both provides and is paid by a system is usually a slip.
+        # A few are real loops — Scarlet Shield heals off perfect blocks and at
+        # level 4 makes them — and those declare the system in `feedback` and
+        # say why in `note`. Nothing else may overlap.
+        declared = set(rec.get("feedback", []))
         both = set(rec.get("provides", [])) & set(rec.get("scales_with", []))
-        if both:
-            findings.append(f"mechanics/{nid}: {sorted(both)} is both provided and scaled with, "
+        undeclared = both - declared
+        if undeclared:
+            findings.append(f"mechanics/{nid}: {sorted(undeclared)} is both provided and scaled with, "
                             "which makes the node its own synergy")
+        for sysid in sorted(declared - both):
+            findings.append(f"mechanics/{nid}: feedback names {sysid!r}, which the node does not "
+                            "both provide and scale with")
+        if declared and not rec.get("note"):
+            findings.append(f"mechanics/{nid}: declares a feedback loop but no note explaining it")
 
     for nid, name in sorted(real.items()):
         if nid not in mech.get("nodes", {}):

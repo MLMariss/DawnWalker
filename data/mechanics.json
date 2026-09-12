@@ -33,19 +33,19 @@
     "attack_speed": {
       "name": "Attack speed",
       "note": "How fast swings come out.",
-      "meeting_pairs": 14,
+      "meeting_pairs": 21,
       "breadth": "normal"
     },
     "attacks_landed": {
       "name": "Attacks landed",
       "note": "Hits put on a target per fight. The hinge of the melee loop: almost everything that rolls a chance rolls it per hit.",
-      "meeting_pairs": 216,
+      "meeting_pairs": 228,
       "breadth": "hub"
     },
     "weapon_damage": {
       "name": "Weapon damage",
       "note": "Damage from sword attacks.",
-      "meeting_pairs": 96,
+      "meeting_pairs": 99,
       "breadth": "normal"
     },
     "claw_damage": {
@@ -75,7 +75,7 @@
     "damage_output": {
       "name": "Damage output",
       "note": "Total damage dealt — where every damage line ends up.",
-      "meeting_pairs": 65,
+      "meeting_pairs": 66,
       "breadth": "normal"
     },
     "crit_chance": {
@@ -87,13 +87,13 @@
     "crit_events": {
       "name": "Critical hits landed",
       "note": "How many criticals actually happen. Chance times hits, not chance alone.",
-      "meeting_pairs": 72,
+      "meeting_pairs": 75,
       "breadth": "normal"
     },
     "crit_damage": {
       "name": "Critical damage",
       "note": "How hard a critical lands once it does.",
-      "meeting_pairs": 22,
+      "meeting_pairs": 24,
       "breadth": "normal"
     },
     "stamina_pool": {
@@ -111,19 +111,19 @@
     "charges": {
       "name": "Activation charges",
       "note": "The pool and regeneration of activation charges abilities are paid for with.",
-      "meeting_pairs": 180,
+      "meeting_pairs": 198,
       "breadth": "hub"
     },
     "cooldown_reduction": {
       "name": "Cooldown reduction",
       "note": "How quickly abilities come back.",
-      "meeting_pairs": 40,
+      "meeting_pairs": 42,
       "breadth": "normal"
     },
     "ability_uptime": {
       "name": "Ability uptime",
       "note": "How often an ability is actually available and cast.",
-      "meeting_pairs": 783,
+      "meeting_pairs": 812,
       "breadth": "hub"
     },
     "ability_duration": {
@@ -177,7 +177,7 @@
     "perfect_block": {
       "name": "Perfect block",
       "note": "Blocking on the beat. Swordmastery's whole economy hangs off it.",
-      "meeting_pairs": 11,
+      "meeting_pairs": 22,
       "breadth": "normal"
     },
     "dodge": {
@@ -1359,11 +1359,16 @@
     "AV6": {
       "name": "Scarlet Shield",
       "provides": [
-        "health_regen"
+        "health_regen",
+        "perfect_block"
       ],
       "scales_with": [
         "perfect_block",
         "ability_slots"
+      ],
+      "note": "Heals off perfect blocks, and at level 4 turns 25% of any block into one — the only source of perfect blocks outside Omniblock.",
+      "feedback": [
+        "perfect_block"
       ]
     },
     "AV7": {
