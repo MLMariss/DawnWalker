@@ -176,11 +176,17 @@ string. A perk looks like this:
 
 - `row` (1–4) and `x` (in-game pixel column) drive the layout; the board is scaled to
   fit the viewport.
-- `gate` is one of `none`, `manual`, `quest`, or `corruption <n>`.
+- `gate` is one of `none`, `manual`, `road shrine`, `vrakhir blood`, `quest`, or
+  `corruption <n>`. The planner renders it as its own mark plus the word for it —
+  never as a bare icon, and never twice on the same row.
 - `unlocks` is the exact inverse of `prerequisites` across all three trees; the app
   builds its graph from `prerequisites` and treats `unlocks` as documentation.
 - `active_time` (`ANYTIME`, `DAY ONLY`, `NIGHT ONLY`) may sit on a tree or on a
-  single perk; a perk's own value wins.
+  single perk; a perk's own value wins. It is read on the tree's own tab, which
+  carries whatever the tree is mostly (starred when the tree is not unanimous);
+  a perk card shows it only where the perk disagrees with its tree, so the badge
+  always means "this one is the exception". Swordmastery and Vampirism are
+  unanimous, so it never appears on their cards at all.
 - An ultimate may carry an `alias` when published lists disagree on its name; the
   planner shows it on the card.
 - `requirement` on an ultimate may name more than one condition and all of them

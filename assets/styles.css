@@ -32,17 +32,26 @@
 
   --shadow:0 16px 40px rgba(0,0,0,.6);
 
-  --m-sp:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M15.6 2.4a9.6 9.6 0 1 0 6 18 7.8 7.8 0 0 1-6-18z'/></svg>");
+  /* Every mark here is painted as an alpha mask, so a subpath with no area —
+     a bare `M..v..` line with no stroke — contributes nothing and vanishes.
+     Several of these were drawn as if they were strokable glyphs and rendered
+     as featureless blobs: a sun with no rays, a clock with no hands, a book
+     that came out a solid white bar. Outlines now say `stroke` outright, and
+     the shapes that cut holes say `fill-rule='evenodd'`.
+
+     Skill points are a four-pointed star, not the crescent they used to share
+     with NIGHT ONLY and nothing else — one glyph cannot mean two things. */
+  --m-sp:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 1l2.7 8.3L23 12l-8.3 2.7L12 23l-2.7-8.3L1 12l8.3-2.7z'/></svg>");
   --m-ts:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M4.5 2h15v2.4h-1.8c0 3.3-2 5-3.7 7.6 1.7 2.6 3.7 4.3 3.7 7.6h1.8V22h-15v-2.4h1.8c0-3.3 2-5 3.7-7.6C8.3 9.4 6.3 7.7 6.3 4.4H4.5z'/></svg>");
-  --m-cor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2c4 0 7.5 1.2 8.5 2.6-.6 6.4-3 12.4-8.5 17.4C6.5 17 4.1 11 3.5 4.6 4.5 3.2 8 2 12 2zM8 8l1.6 3.4L11.2 8zm4.8 0l1.6 3.4L16 8z'/></svg>");
-  --m-shr:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2L4.5 8h15zM7 8v13M17 8v13M4 21.5h16M10 12h4v9h-4z'/></svg>");
-  --m-sun:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 6.8a5.2 5.2 0 1 0 0 10.4 5.2 5.2 0 0 0 0-10.4zM12 1v3.2M12 19.8V23M1 12h3.2M19.8 12H23M4.2 4.2l2.3 2.3M17.5 17.5l2.3 2.3M19.8 4.2l-2.3 2.3M6.5 17.5l-2.3 2.3'/></svg>");
+  --m-cor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill-rule='evenodd' d='M12 1.6c4.2 0 7.7 1.3 8.7 2.8-.6 6.6-3.1 12.8-8.7 17.9C6.4 17.2 3.9 11 3.3 4.4 4.3 2.9 7.8 1.6 12 1.6zM8.2 7.4l1.7 3.7 1.7-3.7zm4.9 0 1.7 3.7 1.7-3.7z'/></svg>");
+  --m-shr:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 1.8L2.8 8.4h18.4zM5.6 8.4v11.2M18.4 8.4v11.2M2.4 21.4h19.2M9.4 12.6h5.2v7h-5.2z' fill='none' stroke='black' stroke-width='2.1' stroke-linejoin='round'/></svg>");
+  --m-sun:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z'/><path d='M12 .9v3.3M12 19.8v3.3M.9 12h3.3M19.8 12h3.3M4.1 4.1l2.3 2.3M17.6 17.6l2.3 2.3M19.9 4.1l-2.3 2.3M6.4 17.6l-2.3 2.3' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'/></svg>");
   --m-moon:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M15.6 2.4a9.6 9.6 0 1 0 6 18 7.8 7.8 0 0 1-6-18z'/></svg>");
-  --m-any:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M8 5.2a6.8 6.8 0 1 0 0 13.6A6.8 6.8 0 0 0 8 5.2zM8 1.2v2.4M8 20.4v2.4M1.2 12h2.4M18.4 6.4a6.4 6.4 0 0 1 3.8 11.7A7.6 7.6 0 0 0 18.4 6.4z'/></svg>");
-  --m-cd:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2.8a9.2 9.2 0 1 0 0 18.4 9.2 9.2 0 0 0 0-18.4zM12 6.6V12l3.8 2.6'/></svg>");
+  --m-any:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M8 7.4a4.6 4.6 0 1 0 0 9.2 4.6 4.6 0 0 0 0-9.2z'/><path d='M8 3.4v2.2M8 18.4v2.2M1.2 12h2.2M2.9 6.9l1.5 1.5M2.9 17.1l1.5-1.5' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'/><path d='M18.6 5.9a6.6 6.6 0 0 1 3.6 12.2A7.8 7.8 0 0 0 18.6 5.9z'/></svg>");
+  --m-cd:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2.6a9.4 9.4 0 1 0 0 18.8 9.4 9.4 0 0 0 0-18.8zM12 6.8V12l3.9 2.7' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
   --m-chg:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2l5.4 5.2L12 22 6.6 7.2zM6.6 7.2h10.8M12 2v20'/></svg>");
   --m-hp:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 21S3.2 15.2 3.2 9.4A4.8 4.8 0 0 1 12 6.7a4.8 4.8 0 0 1 8.8 2.7C20.8 15.2 12 21 12 21z'/></svg>");
-  --m-bk:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M3 3h8.2v18H3zM12.8 3H21v18h-8.2zM11.2 3h1.6v18h-1.6z' fill='black'/><path d='M3 3h8.2v18H3z' fill='black'/></svg>");
+  --m-bk:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 6.4C9.7 4.5 6.7 3.9 3.2 4.3v13.4c3.5-.4 6.5.2 8.8 2.1 2.3-1.9 5.3-2.5 8.8-2.1V4.3c-3.5-.4-6.5.2-8.8 2.1zm0 0v13.4' fill='none' stroke='black' stroke-width='2.1' stroke-linejoin='round'/></svg>");
   --m-lock:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 10h12v11H6zM9 10V7a3 3 0 0 1 6 0v3' fill='none' stroke='black' stroke-width='2.2'/></svg>");
 }
 
@@ -134,7 +143,11 @@ a:hover{color:var(--gold-2)}
 .btn:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.4)}
 
 /* --------------------------------------------------------------- tabs */
-.tabs{flex:none;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:10px 16px 4px}
+/* The tab strip belongs to the board, not to the page: it is the board's own
+   header. Spanning the full width left the whole right-hand third of the row
+   empty and pushed the side column down by the height of a row it had no part
+   in, so the panel started 48px below the top bar with nothing in between. */
+.tabs{flex:none;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 0 8px}
 .tab{
   display:flex;align-items:center;gap:10px;padding:8px 18px;
   border:1px solid transparent;border-radius:3px;background:none;cursor:pointer;
@@ -158,6 +171,18 @@ a:hover{color:var(--gold-2)}
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain}
 .tab .tab-stat .s-sp{-webkit-mask-image:var(--m-sp);mask-image:var(--m-sp)}
 .tab .tab-stat .s-bk{-webkit-mask-image:var(--m-bk);mask-image:var(--m-bk)}
+/* When a whole tree works only by day, or only by night, that is a fact about
+   the tree — it was printed again on all 19 of Swordmastery's perk cards and
+   all 17 of Vampirism's, which is 36 lines saying one thing. It is read once,
+   here, on the tree's own tab. A perk card carries it only where it disagrees
+   with its tree, which in the shipped data is the seven ANYTIME perks in an
+   otherwise DAY ONLY Witchcraft. */
+.tab .tab-when{
+  display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  letter-spacing:.1em;color:var(--text-faint);
+}
+.tab[aria-selected=true] .tab-when{color:var(--gold-dim)}
+.tab .tab-when i{width:12px;height:12px}
 
 /* -------------------------------------------------------------- stage */
 .stage{
@@ -166,6 +191,7 @@ a:hover{color:var(--gold-2)}
   padding:6px 18px 14px;
 }
 .board{display:flex;flex-direction:column;min-width:0;min-height:0;overflow-y:auto}
+.board>.tabs{padding-top:2px}
 /* Horizontal only. `overflow-y:visible` next to `overflow-x:auto` is not honoured —
    the spec makes the browser compute it as `auto` — so it has to be said outright,
    or the board grows a second vertical scrollbar it never wanted. */
@@ -221,7 +247,7 @@ a:hover{color:var(--gold-2)}
 .abil.avail .abil-mark .mark{color:var(--text)}
 .abil.taken .abil-mark .mark{color:#1a1309}
 .ult.on .ult-mark .mark{color:#150f09}
-.panel-hero .mark{width:52px;height:52px;color:var(--gold-2)}
+.panel-hero .mark{width:40px;height:40px;color:var(--gold-2)}
 
 .node .pips{position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);display:flex;gap:5px}
 
@@ -423,19 +449,30 @@ a:hover{color:var(--gold-2)}
 .panel-empty{padding:34px 22px;color:var(--text-faint);font-size:14px;text-align:center}
 .panel-empty b{display:block;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
   color:var(--text-dim);margin-bottom:8px}
+/* A 104px block to hold a 52px icon, with the tree name and the level pinned
+   into two of the corners it left over. It is one row now: mark, tree, level,
+   all on the icon's own line, and the 44px it was wasting goes to the perk. */
 .panel-hero{
-  height:104px;position:relative;display:grid;place-items:center;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:12px;padding:10px 14px;
+  border-bottom:1px solid var(--line);
   background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 30%,transparent),rgba(0,0,0,0)),
              linear-gradient(150deg,#2c1f16,#120d0a);
 }
-.panel-hero svg{width:52px;height:52px;stroke:var(--gold-2);fill:none;stroke-width:1.4}
-.panel-hero .hero-tree{position:absolute;left:14px;bottom:8px;font-size:12px;font-weight:600;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim)}
-.panel-hero .hero-lv{position:absolute;right:14px;bottom:8px;font-size:13px;font-weight:600;color:var(--gold-2)}
-.panel-body{padding:16px 18px 0}
-.panel-when{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 8px}
-.panel-gate{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--blood-2);margin:0 0 6px}
-.panel-gate.ok{color:var(--text-faint)}
+.panel-hero .hero-mark{width:40px;height:40px;flex:none;display:grid;place-items:center}
+.panel-hero svg{width:40px;height:40px;stroke:var(--gold-2);fill:none;stroke-width:1.4}
+.panel-hero .hero-tree{
+  flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+  font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);
+}
+.panel-hero .hero-lv{flex:none;font-size:13px;font-weight:600;color:var(--gold-2);white-space:nowrap}
+/* The exception badge: this perk does not keep its tree's hours. */
+.hero-when{
+  display:inline-flex;align-items:center;gap:5px;padding:2px 8px;
+  border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);border-radius:10px;
+  font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--gold);
+}
+.hero-when i{width:11px;height:11px;margin-right:0}
+.panel-body{padding:14px 18px 0}
 .panel h3{margin:0 0 8px;font-size:22px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gold-2)}
 .panel .desc{margin:0 0 14px;font-size:16px;color:var(--text)}
 /* The game prints this under the effect in italics — a passive note, or that
@@ -452,18 +489,45 @@ a:hover{color:var(--gold-2)}
 .tier-dot.tier-red{background:var(--tier-red)}
 
 .levels{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.levels li{display:flex;gap:11px;align-items:flex-start;flex-wrap:wrap;padding:11px 0;
+/* A level is a three-column row: marker, what it does, what it costs. The
+   price used to be `flex:1 1 100%`, which forced it onto a line of its own and
+   right-aligned it — so it sat hard against the divider under its row and read
+   as the heading of the next level instead of the price of this one, with the
+   empty half-line above it for good measure. A column cannot be misread that
+   way, and it costs no extra height. */
+.levels li{display:grid;grid-template-columns:13px minmax(0,1fr) max-content;
+  column-gap:11px;align-items:start;padding:9px 0;
   border-bottom:1px solid rgba(58,48,42,.6);font-size:15px}
 .levels .lp{width:13px;height:13px;flex:none;margin-top:4px;transform:rotate(45deg);
   background:#2b241e;box-shadow:inset 0 0 0 1px #5d4d3e}
 .levels li.on .lp{background:var(--gold);box-shadow:0 0 8px rgba(231,179,86,.6)}
 .levels li.next .lp{box-shadow:inset 0 0 0 1px var(--gold)}
 .levels li.blocked{opacity:.55}
-.levels .lv-text{flex:1 1 160px;color:var(--text)}
+.levels .lv-text{min-width:0;color:var(--text)}
 .levels li.on .lv-text{color:var(--text-dim)}
-.levels .lv-meta{display:flex;gap:9px;align-items:center;flex:1 1 100%;font-size:13px;
-  flex-wrap:wrap;justify-content:flex-end;margin-top:2px}
-.gate-tag{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--blood-2)}
+.levels .lv-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;
+  padding-top:2px;font-size:13px;text-align:right}
+/* The price stays on one line — a `2 PTS` that wraps away from its `1 SEG` reads
+   as two prices. The gate, when there is one, takes the line below it. */
+.lv-costs{display:flex;gap:9px;align-items:center;white-space:nowrap}
+
+/* A gate is a condition, not a price, and it says which condition in words next
+   to its own mark — the book, the shrine, the corruption sigil. It used to be
+   spelled twice on the same row, once as "MANUAL REQUIRED" and again as a bare
+   icon in among the costs, and the icon was the one nobody could place. */
+.gate-tag{
+  display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+  font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--blood-2);
+}
+.gate-tag.ok{color:var(--text-faint)}
+.gate-tag i{width:12px;height:12px;flex:none;background:currentColor;font-style:normal;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain}
+.gate-tag.g-manual i{-webkit-mask-image:var(--m-bk);mask-image:var(--m-bk)}
+.gate-tag.g-shrine i{-webkit-mask-image:var(--m-shr);mask-image:var(--m-shr)}
+.gate-tag.g-cor i{-webkit-mask-image:var(--m-cor);mask-image:var(--m-cor)}
+.gate-tag.g-phial i{-webkit-mask-image:var(--m-hp);mask-image:var(--m-hp)}
+.gate-tag.g-quest i{-webkit-mask-image:var(--m-lock);mask-image:var(--m-lock)}
 /* Given by the story, not bought. Marked in green because the useful fact is
    that it costs nothing, and priced rows are read in red and gold. */
 .free-tag{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--green)}
@@ -473,19 +537,18 @@ a:hover{color:var(--gold-2)}
   text-transform:uppercase;color:var(--green);vertical-align:middle;
 }
 .panel h3 .story-tag{font-size:11px}
+/* The numbers carry a word wherever there is room for one. The two marks are
+   drawn, not the game's — the top bar is the only place they were ever spelled
+   out, and a reader should not have to go back up there to price a level. */
 .cost{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-weight:600}
+.cost u{font-style:normal;text-decoration:none;font-size:11px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;opacity:.72}
 .cost i{width:13px;height:13px;background:currentColor;font-style:normal;
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain}
 .cost.sp{color:var(--blood-2)}
 .cost.sp i{-webkit-mask-image:var(--m-sp);mask-image:var(--m-sp)}
 .cost.ts{color:var(--gold)}
 .cost.ts i{-webkit-mask-image:var(--m-ts);mask-image:var(--m-ts)}
-.cost.bk{color:var(--text-dim)}
-.cost.bk i{-webkit-mask-image:var(--m-bk);mask-image:var(--m-bk)}
-.cost.cor{color:var(--blood-2)}
-.cost.cor i{-webkit-mask-image:var(--m-cor);mask-image:var(--m-cor)}
-.cost.shr{color:var(--text-dim)}
-.cost.shr i{-webkit-mask-image:var(--m-shr);mask-image:var(--m-shr)}
 
 /* The banner over a perk name, and the cooldown line on an ability. Both are
    read straight off the in-game panel, so both carry the game's own marks. */
@@ -520,7 +583,6 @@ a:hover{color:var(--gold-2)}
 .ov-list li{padding:5px 0;border-bottom:1px solid rgba(58,48,42,.45);color:var(--text-dim);font-size:13px}
 .ov-list li b{display:block;color:var(--text);font-weight:600;font-size:13px}
 .ov-empty{color:var(--text-faint);font-size:13px;padding:8px 0}
-  text-transform:uppercase;color:var(--text-faint);padding:6px 0}
 
 /* -------------------------------------------------------------- toast */
 .toast{
@@ -563,7 +625,7 @@ a:hover{color:var(--gold-2)}
   :root{--node:70px;--icon:36px;--colmin:118px;--row:150px}
   .topbar{padding:10px 12px;gap:14px}
   .meter-lbl{display:none}
-  .tabs{padding:8px 10px 2px}
+  .tabs{padding:0 0 6px}
   .tab{padding:7px 12px;font-size:13px;letter-spacing:.08em}
   .stage{padding:6px 10px 18px}
   .node .name{font-size:12px}
