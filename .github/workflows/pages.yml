@@ -1,0 +1,56 @@
+# Publish the planner to GitHub Pages, with the asset URLs stamped so a deploy
+# is actually visible to anyone who has been to the site before.
+#
+# This replaces Pages' "deploy from a branch" setting, which served index.html's
+# asset references verbatim: assets/app.js never changed name, so a returning
+# browser kept running the previous build off its cache and the site looked like
+# the deploy had silently failed. Stamping happens here rather than in the
+# committed file, so the repo stays buildless — `python3 -m http.server` from a
+# clone still works, unstamped and unaffected.
+#
+# NOTE: this needs Settings -> Pages -> Source set to "GitHub Actions".
+name: Deploy to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it — a half-published site
+# is worse than a deploy that lands a minute late.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stamp asset URLs with the commit SHA
+        run: python3 tools/stamp_assets.py "${GITHUB_SHA:0:8}"
+
+      # The stamper fails if a reference moved; this fails if one was added and
+      # never registered. Between them, an unstamped asset cannot reach the site.
+      - name: Verify every asset carries a token
+        run: python3 tools/stamp_assets.py --check
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
