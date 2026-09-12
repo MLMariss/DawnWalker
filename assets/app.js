@@ -683,26 +683,74 @@
      viewport height. That is stable — a media query cannot be changed by a click
      — and where the tree still does not fit, the board scrolls, which is what a
      board too tall for its column is supposed to do. */
-  function layout(t) {
-    var node = cssPx('--node', 92), colmin = cssPx('--colmin', 132);
-    var colmax = Math.max(colmin, cssPx('--colmax', 150));
-    var availW = (el.boardscroll.clientWidth || 1000) - 4;
+  /* The largest node that lets `cols` columns stand side by side in `w` pixels
+     without touching. A node is centred on its column, the outermost two are
+     inset by `node/2 + 38`, so the pitch between columns is
+     `(w - node - 76) / (cols - 1)`; requiring that to clear the node itself by
+     `GUTTER` and solving for the node gives the line below. */
+  var GUTTER = 8;    // clear air between two neighbouring hexes
+  var NODE_MIN = 54; // below this the icons stop reading; scroll sideways instead
 
-    var rows = Math.max.apply(null, t.perks.map(function (p) { return p.row; }));
-    var labelRoom = 48;
+  function nodeThatFits(w, cols) {
+    if (cols < 2) return Infinity;
+    return (w - 76 - GUTTER * (cols - 1)) / cols;
+  }
+
+  function layout(t) {
+    var colmin = cssPx('--colmin', 132);
+    var colmax = Math.max(colmin, cssPx('--colmax', 150));
     // Below the stacking breakpoint the page scrolls and the board may scroll
     // sideways, which changes what the layout is allowed to do to fit.
     var stacked = window.matchMedia('(max-width:1000px)').matches;
-    var pad = node / 2 + 38;
 
     var xs = [];
     t.perks.forEach(function (p) { if (xs.indexOf(p.x) < 0) xs.push(p.x); });
     xs.sort(function (a, b) { return a - b; });
 
+    var availW = (el.boardscroll.clientWidth || 1000) - 4;
+    // The board takes no more than `--board-max` even when the column is wider,
+    // so the tree is bounded by its own ceiling rather than by the window.
+    if (!stacked) availW = Math.min(availW, cssPx('--board-max', 1000));
+
+    /* The node has to come down when the columns will not otherwise fit.
+
+       Squeezing the columns alone could not do it: a node is wider than the gap
+       it is placed in once eleven of them are asked to share 1000px, so the
+       hexes overlapped and the names underneath ran into each other — which is
+       what `distribute` relaxing its floor has always produced at narrow widths.
+       Shrinking the node shrinks its padding and its label allowance too, so the
+       whole row scales together and nothing collides.
+
+       It is a ceiling, not a size: a tree that fits at the stylesheet's node
+       keeps it, so Witchcraft and Vampirism at seven columns are untouched and
+       only Swordmastery's eleven pay for the width. Below NODE_MIN the board
+       scrolls sideways instead, which beats an unreadable icon. */
+    var node = cssPx('--node', 92), floored = false;
+    if (!stacked) {
+      var want = nodeThatFits(availW, xs.length);
+      if (want < NODE_MIN) { node = NODE_MIN; floored = true; }
+      else node = Math.min(node, want);
+    }
+
+    var rows = Math.max.apply(null, t.perks.map(function (p) { return p.row; }));
+    var labelRoom = 48;
+    var pad = node / 2 + 38;
+
     var gaps = [], total = 0, i;
     for (i = 1; i < xs.length; i++) { gaps.push(xs[i] - xs[i - 1]); total += xs[i] - xs[i - 1]; }
     var target = Math.max(availW - 2 * pad, 0);
-    var widths = distribute(gaps, total, target, colmin, colmax, stacked);
+    /* A column may never be narrower than a node and its gutter, or the hexes
+       themselves overlap — which is what used to happen at 1024px, where eleven
+       Swordmastery columns were squeezed into 652px and two pairs of nodes and
+       their names sat on top of each other.
+
+       Where the node was free to shrink this floor is already satisfied by
+       construction, since `nodeThatFits` sized it to leave exactly that much.
+       Where the node hit NODE_MIN it is not, and something has to give: the
+       board scrolls sideways rather than the floor, because a board you scroll
+       is legible and overlapping hexes are not. */
+    var floor = Math.max(colmin, node + GUTTER);
+    var widths = distribute(gaps, total, target, floor, colmax, stacked || floored);
 
     var at = {}, cursor = pad;
     at[xs[0]] = cursor;
@@ -713,7 +761,7 @@
 
     // Labels sit under their node, so they may be no wider than the tightest
     // column pitch or neighbouring names would collide.
-    var pitch = widths.length ? Math.min.apply(null, widths) : colmin;
+    var pitch = widths.length ? Math.min.apply(null, widths) : floor;
     // A label is centred on its node, so it may overhang neither its neighbour
     // nor the edge of the board — hence the padding cap as well as the pitch.
     var labelW = Math.min(152, Math.max(56, Math.min(pitch - 8, 2 * pad - 8)));
@@ -723,7 +771,7 @@
     var height = top + (rows - 1) * rowH + node / 2 + labelRoom;
 
     return {
-      node: node, width: width, height: height, labelW: labelW,
+      node: node, icon: node / 2, width: width, height: height, labelW: labelW,
       pos: function (p) { return { x: at[p.x] + shift, y: top + (p.row - 1) * rowH }; }
     };
   }
@@ -768,6 +816,13 @@
     var L = layout(t);
     el.tree.style.width = L.width + 'px';
     el.tree.style.height = L.height + 'px';
+    /* The size the layout settled on, published to the nodes inside it. The
+       stylesheet's `--node` is the ceiling and stays on :root, so reading it
+       next paint still gives the ceiling rather than last paint's answer —
+       a board that resized itself under the cursor is a bug this planner has
+       had once already. */
+    el.tree.style.setProperty('--node', L.node + 'px');
+    el.tree.style.setProperty('--icon', L.icon + 'px');
     el.links.setAttribute('viewBox', '0 0 ' + L.width + ' ' + L.height);
 
     var syn = state.synergy && state.sel && TREE_OF[state.sel] === t ? related(state.sel) : {};
