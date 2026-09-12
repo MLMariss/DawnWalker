@@ -35,10 +35,14 @@
      have something to say. Columns now stop growing at `--colmax` and the tree
      centres in whatever room is left. */
   --colmax:150px;
-  /* The panel grows with the window instead of sitting at a fixed 400px: on a
-     wide screen the perk text was reading in a column half the width of the
-     empty space beside the tree. */
-  --side:clamp(360px,25vw,520px);
+  /* The board is never wider than this. Nothing about a skill tree gets better
+     past it — the columns are already at `--colmax`, the nodes at `--node`, and
+     the rest is distance between things you are trying to compare. Everything
+     the board gives up here goes to the panel, which is where the text is. */
+  --board-max:1000px;
+  /* Sized against the window rather than fixed, and allowed to get properly
+     wide now that the board has stopped competing for the room. */
+  --side:clamp(360px,34vw,640px);
 
   --shadow:0 16px 40px rgba(0,0,0,.6);
 
@@ -195,15 +199,15 @@ a:hover{color:var(--gold-2)}
 .tab .tab-when i{width:12px;height:12px}
 
 /* -------------------------------------------------------------- stage */
-/* Past about 2240px neither the board nor the panel has anything left to do with
-   the width: the widest tree (Swordmastery, eleven columns) stops growing at
-   `--colmax` and the panel at its own clamp, so the rest would be margin either
-   way. Centring the stage puts that margin on both sides rather than stranding
-   the tree in the middle of an empty board. The top bar stays full-bleed — it is
-   a header, and it reads as one. */
 .stage{
-  flex:1;min-height:0;width:100%;max-width:2240px;margin-inline:auto;
-  display:grid;grid-template-columns:minmax(0,1fr) var(--side);gap:16px;
+  flex:1;min-height:0;width:100%;
+  /* The board track stops at `--board-max` instead of taking whatever is left,
+     and `justify-content:center` puts the spare room on both sides of the pair
+     rather than stranding the tree in the middle of an over-wide board. That
+     also replaces the old 2240px cap on the stage: with both tracks bounded,
+     there is nothing left to cap. */
+  display:grid;grid-template-columns:minmax(0,var(--board-max)) var(--side);
+  justify-content:center;gap:16px;
   padding:6px 18px 14px;
 }
 .board{
@@ -443,33 +447,30 @@ a:hover{color:var(--gold-2)}
 .hint-key .tier-dot{margin-right:2px}
 
 /* --------------------------------------------------------- side panel */
-.side{display:flex;flex-direction:column;min-height:0;gap:0}
+/* ONE scroller for the whole column, and it is this element.
 
-/* The build overview has to share the side column's height with the perk panel
-   rather than grow without limit. It was flex:none with no max-height and no
-   overflow, so opening a section first squashed the panel above it — flex:1 with
-   min-height:0 shrinks to nothing on demand — and then ran off the bottom of the
-   column with no scrollbar to reach the rest. Now it takes a bounded share,
-   scrolls inside itself, and the panel keeps a readable floor. */
-.side>.panel{flex:1 1 auto;min-height:180px}
+   There were three, nested: the panel scrolled inside the column, the build
+   overview scrolled inside the panel's sibling, and each conditional-effects
+   list scrolled inside that. Three bars stacked a few pixels apart, each owning
+   a different slice of the same text, and reaching a line meant guessing which
+   one it lived in. Every one of them was added to stop some box running off the
+   bottom of the column — the right fix for which is to let the column itself
+   scroll, once, and let everything inside size to its content.
 
-/* The cap goes on the body itself, not on the drawer with flex inside it:
-   <details> keeps its content in a shadow slot, so `display:flex` on the drawer
-   never makes .ovbody a flex item, `min-height:0` applies to nothing, and the
-   list grows straight through the drawer's max-height and off the page. A plain
-   max-height on the scrolling element cannot be routed around that way. */
-#ovdrawer>.ovbody{
-  max-height:min(34vh,480px);
-  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+   So: nothing below here sets overflow or a max-height. Boxes are as tall as
+   what they contain, the column is as tall as its boxes, and one bar moves the
+   lot. */
+.side{
+  display:flex;flex-direction:column;min-height:0;gap:0;
+  overflow-y:auto;overscroll-behavior-y:contain;
 }
-/* On a short screen the panel's floor becomes the binding constraint, so both
-   give ground rather than letting the overview run past the column again. */
-@media (max-height:700px){
-  .side>.panel{min-height:120px}
-  #ovdrawer>.ovbody{max-height:26vh}
-}
+
+/* Natural height, not a share of the column. `flex:1` made the panel a second
+   scrollport that fought the column for space; sized to content it simply
+   stacks above the overview and the column's own bar reaches both. */
+.side>.panel{flex:none}
+
 .panel{
-  flex:1;min-height:0;overflow:auto;scrollbar-width:thin;
   border:1px solid var(--line);border-radius:4px;
   background:linear-gradient(180deg,rgba(30,23,17,.96),rgba(14,11,8,.96));
   box-shadow:var(--shadow);
@@ -639,14 +640,11 @@ a:hover{color:var(--gold-2)}
   margin-left:auto;padding:1px 7px;border:1px solid var(--line-2);border-radius:9px;
   font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--text-dim);
 }
-/* Its own bound, so reaching the last conditional effect never means scrolling
-   the twenty-two manuals past first, and opening one cannot run the overview
-   off the bottom of the side column. */
-.ov-sub>.ov-list{
-  max-height:min(26vh,210px);
-  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
-  padding:2px 6px 6px 0;
-}
+/* No bound of its own: this was the innermost of the three nested scrollers. A
+   long list makes the column longer, which is what the column's scrollbar is
+   for — and the section is a <details>, so anyone who does not want the
+   twenty-two manuals in their way can fold them. */
+.ov-sub>.ov-list{padding:2px 6px 6px 0}
 .ov-sub>.ov-list li:last-child{border-bottom:0}
 
 /* -------------------------------------------------------------- toast */
@@ -660,7 +658,7 @@ a:hover{color:var(--gold-2)}
 .toast.warn{border-color:#8a3034;color:#f0bcbc}
 
 /* --------------------------------------------------------- responsive */
-@media (max-width:1360px){ :root{--side:clamp(320px,26vw,380px);--node:80px;--icon:40px;--colmin:84px;--colmax:132px} }
+@media (max-width:1360px){ :root{--side:clamp(320px,30vw,460px);--node:80px;--icon:40px;--colmin:84px;--colmax:132px} }
 
 /* The tree's size by viewport height, and nothing else. This used to be two
    coarse steps with JavaScript squeezing the tree between them to fit whatever
@@ -689,11 +687,10 @@ a:hover{color:var(--gold-2)}
      claim a slice of viewport height — each box sizes to its content and the
      column simply gets longer. Without this the stage keeps the height it had
      as a two-column layout, and the tree spills straight over the panel. */
-  .stage{grid-template-columns:minmax(0,1fr);padding:6px 14px 20px;flex:none;min-height:auto}
+  .stage{grid-template-columns:minmax(0,1fr);justify-content:stretch;padding:6px 14px 20px;flex:none;min-height:auto}
   .board{overflow:visible;flex:none;min-height:auto}
   .boardscroll{overflow-x:auto;overflow-y:hidden}
-  .side{min-height:auto}
-  .panel{max-height:none;overflow:visible}
+  .side{min-height:auto;overflow:visible}
 }
 
 @media (max-width:640px){

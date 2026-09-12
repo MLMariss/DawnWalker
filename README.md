@@ -81,13 +81,31 @@ ceiling* on the gap between neighbours — instead of zooming the whole board,
 which would drag the labels below a readable size. Nothing on the page is set
 under 12px.
 
-The ceiling is why the tree does not sprawl on a wide monitor. The board holds
-no moving parts and nothing lives between the columns, so once the gaps reach
-`--colmax` the tree stops growing and centres in whatever room is left; the
-width it does not take goes to the side panel, which is where the perk text is.
-The panel is sized `clamp(360px, 25vw, 520px)` for the same reason, and past
-about 2240px the whole stage centres rather than stretching further, since by
-then neither column has anything left to do with the width.
+The board itself stops at `--board-max`, 1000px. Nothing about a skill tree gets
+better past that — the columns are already at `--colmax`, the nodes at `--node`,
+and the rest is distance between things you are trying to compare. What the
+board gives up goes to the panel, which is where the text is: `clamp(360px,
+34vw, 640px)`. Both tracks being bounded, the pair is centred and there is
+nothing left to cap at the page level.
+
+Eleven columns do not fit in 1000px at a 92px node — the hexes themselves
+overlap, never mind the names — so the node is a ceiling rather than a size.
+`nodeThatFits` returns the largest node that leaves a gutter between neighbours
+at a given width and column count, and the layout takes whichever is smaller,
+that or the stylesheet's. Seven-column Witchcraft and Vampirism are untouched;
+Swordmastery's eleven come down to about 76px. Since the node's padding and its
+label allowance are both derived from it, the whole row scales together and
+nothing collides. Below `NODE_MIN` the board scrolls sideways instead, which is
+what happens to Swordmastery under about 1150px — a board you scroll is legible,
+overlapping hexes are not.
+
+The side column is **one** scroller. It used to be three, nested: the panel
+scrolled inside the column, the build overview inside its sibling, and each
+conditional-effects list inside that — three bars a few pixels apart, each
+owning a different slice of the same text. Every one had been added to stop some
+box running off the bottom of the column, and the right fix for that is to let
+the column scroll once and let everything inside size to its content. Nothing in
+the side column sets `overflow` or a `max-height` any more.
 
 The Ultimate Perks, Abilities and Build overview sections are all collapsible, so
 a short screen can give the tree its height back. Ultimates start folded: the
