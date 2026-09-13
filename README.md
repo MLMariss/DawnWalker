@@ -72,10 +72,11 @@ Pages and it works as the site index.
   after `#b=` — *is* the build, so a link, a save and a published build are the same
   thing wearing different hats. **Save** keeps it in this browser under a name, or
   publishes it to the community list; **Builds** is that list plus everything saved
-  here, each row showing what the build costs before you load it. Upvotes are 👍
-  reactions on GitHub, and the vote button only appears while the board still *is*
-  the published build: edit one node and it steps aside for "Back to original", so
-  an upvote always means the build it is attached to. See
+  here, each row showing what the build costs before you load it. Publishing and
+  upvoting happen in the page — no account, no sign-in, nowhere else to go — and
+  the vote button only appears while the board still *is* the published build:
+  edit one node and it steps aside for "Back to original", so an upvote always
+  means the build it is attached to. See
   [Community builds](#community-builds) for where the list lives.
 
 Controls: **click** a node to learn its next level, **right-click** to refund,
@@ -158,12 +159,14 @@ icons-src/                     the source icons the masks are built from
 data/perks.json                the perk registry — single source of truth
 data/abilities.json            the ability registry, generated from two saved pages
 data/mechanics.json            the synergy graph — systems, causal edges, per-node mapping
-data/builds.json               the community list — generated into the deploy, empty in the repo
+data/community.json            where the shared build list lives — empty means no list
 tools/verify_perks.py          checks all three registries, and perks against a source page
 tools/extract_abilities.py     rebuilds data/abilities.json from saved ability pages
 tools/build_mechanics.py       rebuilds data/mechanics.json
 tools/build_marks.py           rebuilds assets/marks/ from icons-src/
-tools/bake_builds.py           turns the build issues into data/builds.json at deploy time
+api/src/index.js               the build list's backend — a Cloudflare Worker over D1
+api/schema.sql                 its three tables
+api/README.md                  how to deploy it, and how to moderate the list
 tools/extract_ability_icons.py cuts ability marks out of skill-screen shots
 VERIFICATION.md                what was checked, and where the sources disagreed
 ```
@@ -183,41 +186,37 @@ python3 -m http.server
 ```
 
 For GitHub Pages: Settings → Pages → Source → **GitHub Actions**. There is still no
-build step — `.github/workflows/pages.yml` only bakes the community list and stamps
-the asset URLs before publishing the folder as-is.
+build step — `.github/workflows/pages.yml` only stamps the asset URLs before
+publishing the folder as-is.
 
-Served locally, the community tab is empty and says so: `data/builds.json` is
-generated into the deploy and committed empty. Saving, loading and links all work.
+Served locally the community tab says there is no list, because `data/community.json`
+points nowhere by default. Saving, loading, codes and links all work.
 
 ## Community builds
 
-The planner is a static site, so it has nowhere to keep shared state. The issue
-tracker is the database instead:
+The planner is a static site, so it cannot hold a credential — anything in
+`assets/app.js` is readable by everyone who loads the page. Writing to a shared
+list therefore needs something else to own that access, and that something is a
+Cloudflare Worker over a D1 database, in `api/`. Its address lives in
+`data/community.json`; an empty one means this copy has no list, which is what a
+fork or a folder served locally gets.
 
-- **Publishing** opens a prefilled issue from `.github/ISSUE_TEMPLATE/build.yml`.
-  The player presses Submit; nothing is posted on their behalf.
-- **Upvoting** is a 👍 reaction on that issue — one per GitHub account, no login
-  flow to build and no vote-stuffing logic to get wrong. The planner remembers
-  locally that you voted so the button can flip, which is a convenience, not a
-  count: the number comes from GitHub.
-- **Baking.** `tools/bake_builds.py` writes `data/builds.json` into the deploy
-  artifact — never a commit, so there are no bot commits in the history. An issue
-  counts as a build if it carries the `build` label *or* its body parses as the
-  form, so the feature does not depend on that label existing: an issue form drops
-  a label the repository does not have, silently, which would have swallowed the
-  first build anyone published. Visitors read a flat file from our own origin: no
-  API key, nothing to rate-limit, nothing to pay for.
-- **Moderation** is the tracker's. Close an issue, or label it `rejected`, `spam`,
-  `invalid` or `duplicate`, and it leaves the list at the next bake.
+The point of it is that publishing and upvoting never leave the planner. No
+account, no sign-in, no tab opening somewhere else — which was the whole problem
+with keeping the list on the issue tracker, where a casual upvote cost a round
+trip through GitHub and most people would simply not have bothered.
 
-The cost of all this is staleness. Reactions fire no webhook, so an upvote reaches
-the site only on the next deploy, and the workflow is on a half-hourly schedule for
-that reason. A published build appears sooner — the `issues` trigger deploys on
-submission. Half an hour of lag is the whole price of having no backend.
+What that buys in convenience it gives back in exposure: an anonymous write
+endpoint is an invitation. Three things push back, and `api/README.md` is honest
+about the limits of each — a salted, hashed fingerprint of address and user agent
+that dedupes votes, a cap of five published builds a day per fingerprint, and
+Turnstile if a secret is configured for it. None of them is unbeatable. The
+backstop is `ADMIN_TOKEN` and a curl command that hides a row, reversibly, which
+is the right amount of engineering for a fan planner's upvote count.
 
-Nothing needs setting up beyond Pages itself. Creating a `build` label makes the
-tracker easier to filter by hand, and the form will then apply it, but the list
-works without one.
+If the Worker is unreachable the planner says so and offers a retry. Nothing else
+degrades, because nothing else goes through it.
+
 
 A code that does not survive the planner's own rules — an ultimate its points no
 longer pay for, a perk a patch removed — is not rejected; it loads as much of
