@@ -770,6 +770,7 @@
 
     return {
       node: node, icon: node / 2, width: width, height: height, labelW: labelW,
+      rowH: rowH,
       pos: function (p) { return { x: at[p.x] + shift, y: top + (p.row - 1) * rowH }; }
     };
   }
@@ -834,7 +835,18 @@
         var y1 = a.y + r, y2 = b.y - r, d;
         if (Math.abs(a.x - b.x) < 2) d = 'M' + a.x + ' ' + y1 + ' L' + b.x + ' ' + y2;
         else {
-          var my = y1 + (y2 - y1) * 0.45;
+          /* The sideways jog goes in the gap directly above the child whenever
+             the link spans more than one row. Placing it at a fraction of the
+             whole span drops the second vertical run into whatever row that
+             lands in: Frugal Witchcraft -> Unholy Fervour skips a row, so it
+             drew itself straight down through Font of Life and read as a
+             prerequisite chain that neither perk has. Font of Life is a story
+             unlock with no parents and no children, and the only thing wrong
+             was the line. The gap above a node is empty by construction, so
+             crossing there cannot touch anything. */
+          var my = child.row - parent.row > 1
+            ? y2 - (L.rowH - L.node) / 2
+            : y1 + (y2 - y1) * 0.45;
           d = 'M' + a.x + ' ' + y1 + ' L' + a.x + ' ' + my + ' L' + b.x + ' ' + my + ' L' + b.x + ' ' + y2;
         }
         var cls = 'link';
