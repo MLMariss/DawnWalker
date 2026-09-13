@@ -19,6 +19,12 @@ npx wrangler d1 execute dawnwalker-builds --remote --file=schema.sql
 npx wrangler d1 execute dawnwalker-builds --remote --file=seed.sql   # optional, see below
 ```
 
+On a database that already exists, apply any migrations instead of `schema.sql`:
+
+```sh
+npx wrangler d1 execute dawnwalker-builds --remote --file=migrations/001_owner_hash.sql
+```
+
 Then the two secrets it needs. Any long random strings; keep the admin one:
 
 ```sh
@@ -56,9 +62,29 @@ Put the matching **site** key (the public half) in `data/community.json` as
 only when the save dialog is opened. With no secret set, the Worker skips the
 check and the daily cap is what holds.
 
+## Who can take a build down
+
+Whoever published it, and you.
+
+Publishing mints a random delete key, returns it exactly once, and stores only
+its SHA-256. The planner keeps the key in the browser that published the build,
+which is what makes a Delete button appear on that build and on no other. The key
+is not in the list, not in the row, and no endpoint will tell anyone what it was —
+so the database cannot hand out the ability to delete, and neither can a leaked
+backup of it.
+
+The cost is that the key lives in one browser. Clear your site data, or move to
+another device, and you can no longer remove your own build; the admin token
+still can. Builds published before `migrations/001_owner_hash.sql` ran have no
+key at all and are admin-only, because an empty hash deliberately matches
+nothing rather than matching an empty key.
+
+Deleting hides the row rather than dropping it. A mis-click costs one `PATCH` to
+undo, and the votes stay attached to the build they were cast for.
+
 ## Moderating
 
-There is no dashboard; there are four curl commands.
+There is no dashboard; there are five curl commands.
 
 ```sh
 TOKEN=...   # the ADMIN_TOKEN you set
@@ -68,6 +94,13 @@ curl -s $API/builds | python3 -m json.tool          # everything visible
 curl -s -H "Authorization: Bearer $TOKEN" $API/admin/reported   # what players flagged
 curl -s -X DELETE -H "Authorization: Bearer $TOKEN" $API/builds/12   # hide it
 curl -s -X PATCH  -H "Authorization: Bearer $TOKEN" $API/builds/12   # put it back
+```
+
+A player's own delete goes through the same route with the key instead of the
+token, which is what the planner's Delete button sends:
+
+```sh
+curl -s -X DELETE -H "X-Build-Key: <the key publishing returned>" $API/builds/12
 ```
 
 Hiding is reversible and keeps the row — nothing here deletes anything, so a

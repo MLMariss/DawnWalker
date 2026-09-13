@@ -1501,6 +1501,10 @@
   var K_MINE = 'bodw.builds.v1';
   var K_VOTED = 'bodw.voted.v1';
   var K_AUTHOR = 'bodw.author.v1';
+  /* The delete keys publishing handed back, by build id. This is the only copy
+     that exists anywhere — the server kept a hash — so losing it is losing the
+     ability to take that build down. */
+  var K_KEYS = 'bodw.buildkeys.v1';
 
   function readStore(key, fallback) {
     try {
@@ -1518,6 +1522,10 @@
     return Array.isArray(v) ? v.filter(function (b) { return b && b.code; }) : [];
   }
   function voted() { var v = readStore(K_VOTED, {}); return (v && typeof v === 'object') ? v : {}; }
+  function keys() { var v = readStore(K_KEYS, {}); return (v && typeof v === 'object') ? v : {}; }
+  function keyFor(b) { return b ? keys()[b.id] || '' : ''; }
+  function rememberKey(id, key) { if (!key) return; var k = keys(); k[id] = key; writeStore(K_KEYS, k); }
+  function forgetKey(id) { var k = keys(); delete k[id]; writeStore(K_KEYS, k); }
 
   function saveMine(name, author) {
     var list = myBuilds();
@@ -1593,11 +1601,14 @@
     return loadCommunity();
   }
 
-  function api(path, body) {
+  function api(path, body, opts) {
+    opts = opts || {};
+    var headers = { 'Content-Type': 'application/json' };
+    if (opts.key) headers['X-Build-Key'] = opts.key;
     return fetch(API + path, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body || {})
+      method: opts.method || 'POST',
+      headers: headers,
+      body: opts.method === 'DELETE' ? undefined : JSON.stringify(body || {})
     }).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (doc) {
         if (!r.ok) throw new Error(doc.error || ('the list service answered ' + r.status));
@@ -1877,11 +1888,14 @@
         '<div class="brow-main">' +
         '<h3>' + esc(b.name) + (on ? '<span class="brow-now">on the board</span>' : '') + '</h3>' +
         '<p class="brow-meta">' + (b.author ? esc(b.author) : 'Anonymous') +
-        '<span class="sep">·</span>' + esc(when(Date.parse(b.created || '') || 0)) + '</p>' +
+        '<span class="sep">·</span>' + esc(when(Date.parse(b.created || '') || 0)) +
+        (keyFor(b) ? '<span class="sep">·</span><em class="brow-yours">published from this browser</em>' : '') + '</p>' +
         (b.notes ? '<p class="brow-notes">' + esc(b.notes) + '</p>' : '') + statLine(s) + '</div>' +
         rowActs(
           '<button class="btn btn-sm" type="button" data-act="load-comm" data-id="' + esc(b.id) + '">Load</button>' +
-          '<button class="btn btn-ghost btn-sm danger" type="button" data-act="report" data-id="' + esc(b.id) + '">Report</button>') +
+          (keyFor(b)
+            ? '<button class="btn btn-ghost btn-sm danger" type="button" data-act="del-comm" data-id="' + esc(b.id) + '">Delete</button>'
+            : '<button class="btn btn-ghost btn-sm danger" type="button" data-act="report" data-id="' + esc(b.id) + '">Report</button>')) +
         '</article>';
     }).join('');
 
@@ -1942,6 +1956,30 @@
     });
   }
 
+  /* The key is the whole proof, so a browser that has lost it cannot do this and
+     says so rather than sending a request that would be refused. */
+  function removeBuild(b, button) {
+    var key = keyFor(b);
+    if (!key) { toast('This browser has no delete key for that build.', true); return; }
+    if (!window.confirm('Remove “' + b.name + '” from the community list?\n\n' +
+                        'It stops appearing for everyone. Anything saved in this browser stays.')) return;
+
+    button.disabled = true;
+    api('/builds/' + encodeURIComponent(b.id), null, { method: 'DELETE', key: key })
+      .then(function () {
+        forgetKey(b.id);
+        if (attached && attached.id === b.id) { attached = null; renderLoadedBar(); }
+        return refreshCommunity().then(function () {
+          renderBuilds();
+          toast('Removed from the community list.');
+        });
+      })
+      .catch(function (err) {
+        button.disabled = false;
+        toast('Could not remove it — ' + err.message, true);
+      });
+  }
+
   function report(b) {
     if (!API) return;
     api('/builds/' + encodeURIComponent(b.id) + '/report')
@@ -1967,6 +2005,7 @@
 
     api('/builds', { name: name, author: author, notes: notes, code: encodeBuild(false), token: token })
       .then(function (doc) {
+        rememberKey(doc.build.id, doc.key);
         closeModal();
         resetTurnstile();
         return refreshCommunity().then(function () {
@@ -2043,6 +2082,9 @@
       } else if (act === 'report') {
         var rb = commBy(t.dataset.id);
         if (rb) report(rb);
+      } else if (act === 'del-comm') {
+        var db = commBy(t.dataset.id);
+        if (db) removeBuild(db, t);
       }
     });
 

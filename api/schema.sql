@@ -11,7 +11,10 @@ CREATE TABLE IF NOT EXISTS builds (
   hidden     INTEGER NOT NULL DEFAULT 0,
   -- The salted fingerprint of whoever posted it, for the daily cap. Not a
   -- name, not reversible to an address, and never sent to the page.
-  author_key TEXT    NOT NULL DEFAULT ''
+  author_key TEXT    NOT NULL DEFAULT '',
+  -- SHA-256 of the delete key publishing handed out once. The key itself is
+  -- nowhere here, so this column grants nothing to whoever reads the database.
+  owner_hash TEXT    NOT NULL DEFAULT ''
 );
 
 CREATE INDEX IF NOT EXISTS builds_visible ON builds (hidden, created);
