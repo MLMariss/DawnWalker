@@ -24,9 +24,14 @@ script exits non-zero on any undocumented difference.
 
 ### The screenshot sweep
 
-A capture of every skill screen is what the registry is transcribed from, and
-it is complete: all 54 perks, all 27 abilities and all 9 ultimates are read
-from the game.
+Captures of the skill screens are what the registry is transcribed from, and it
+took **two passes**. The first covered every one of the 54 perks, 27 abilities
+and 9 ultimates — but *screen* is not *row*: the ability panel's level list
+scrolls, so 25 ability rows and 1 perk row were never reached and kept the Game8
+table's text. An earlier draft of this note called that first pass "complete",
+and the overclaim is what let those rows pass for the game's own text. A second
+pass, scrolled to the bottom of every affected panel, closed the gap; what it
+turned up is in *The second sweep* below.
 
 Three things the screenshots settled that no published source carries:
 
@@ -38,8 +43,9 @@ Three things the screenshots settled that no published source carries:
   up `road shrine`, a gate neither published source lists — it gates the
   entry perk of each branch, 15 perks in all.
 
-Effect text is now verbatim, including the game's own typos (`Craft 2 Items
-items at once.`, `Active Abilites`). They are kept as the game prints them.
+Effect text is verbatim — `text_source` is `game` on every level row in both
+registries — including the game's own typos (`Craft 2 Items items at once.`,
+`Active Abilites`). They are kept as the game prints them.
 
 Two limits worth knowing when reading the data:
 
@@ -47,9 +53,10 @@ Two limits worth knowing when reading the data:
   Those costs are kept from the Game8 cross-check rather than guessed, and are
   listed in the transcription flags. Ownership itself is never recorded — it
   belongs to a save, not to the registry.
-- Long level lists **scroll** in the panel, so a fourth level was sometimes
-  cut off. Where only part of a row was visible the registry text is kept and
-  the fragment noted.
+- Long level lists **scroll** in the panel, so a fourth level was often cut off
+  on the first pass, and a row's last line sometimes clipped even when the row
+  was captured. Both are closed — see *The second sweep* below for what the
+  first pass got wrong and how the verify script now catches each shape.
 
 The saved pages are not committed — they are third-party page dumps of some
 size, and the script reads whatever copy you have locally.
@@ -157,7 +164,7 @@ Game8's *All Abilities List* for the upgrade levels and their costs, and the
 Fextralife *Abilities* table for what each ability costs to use. Re-run
 `tools/extract_abilities.py` against fresh saves to rebuild it.
 
-27 abilities, 107 levels. **The two sources agree on every tree assignment**,
+27 abilities, 108 levels. **The two sources agree on every tree assignment**,
 which is worth noting given that the same wiki misfiled two perks on its perk
 page — its ability table is the better half of that site. Every ability has an
 activation cost recorded.
@@ -192,6 +199,160 @@ every run, so the field cannot drift from the cost it was read from.
 Worth knowing: passive does not mean free of slots. The same text says they work
 "once equipped in the Active Ability panel", so passives compete with actives for
 the slots that Forbidden Sigils, Master Fencer and Vrakhiri Might hand out.
+
+### The second sweep: closing the Game8 gap
+
+The first sweep captured the skill screens, but the ability panel's level list
+**scrolls**, so on a four-level ability only the top rows fit. 25 ability rows
+across 21 abilities and 1 perk row were never re-read and kept the Game8 table's
+text. A second capture, scrolled to the bottom of every affected panel, closed
+that gap. **Every level row in both registries now comes from the game** — 108
+ability rows and 155 perk rows, with the two padlocked story nodes the only
+non-transcribed entries.
+
+Game8 was not merely incomplete. Across those 26 rows it dropped clauses, added
+one that does not exist, got numbers wrong, and missed a level outright:
+
+| | What Game8 had | What the game shows |
+| --- | --- | --- |
+| **Piercing Shriek** | 3 levels | **4** — a Corruption 13 level at 3 pts / 2 segs |
+| **Piercing Shriek** Lv2 | +20 Damage, −15%, Block 10%, 25s | +20**%**, −**20%**, Block **15%**, **35s** |
+| **Dirty Trick** Lv3–4 | "Stun ends after N hits" | "**Stuns in Area.** Ends after N hits" |
+| **Soul Stigma** Lv4 | "**Area** +50% Critical Hit chance" | "+50% Critical Hit chance" — no area at all |
+| **Charge** Lv4 | bleed-duration line absent | "+66% Bleed Duration." |
+| **Walking Fortress** Lv4 | Restores **50%** of Activation Charge | Restores **25%** |
+| **Swiftness** Lv4 | +**15%** Critical Hit chance | +**5%** |
+| **Adrenaline Rush** Lv4 | "+150% Passive Activation Charge" | "+150% passive Activation Charge **Regeneration**" |
+| **Unholy Vitality** Lv4 | "Regenerates 25% of Health over 10 seconds" | "Regenerates 25% Health." |
+| **Voracious Bite** Lv4 | +25 Claw Damage | +25**%** Claw Damage |
+| **Scarlet Shield** Lv4 | Corruption 14 | Corruption **13** |
+| **Death From Above** Lv4 | 3 pts / 2 segs | **2 pts / 1 seg** |
+| **Mesmerise** | no note | "Can't be used on Bosses." |
+
+Soul Stigma is the one worth dwelling on: Game8 does not only drop clauses, it
+**adds** them. Its Lv4 "Area" prefix has no counterpart in the game, so the
+table had been promising an area effect that the ability never gains.
+
+Death From Above's Lv4 is the only four-level ability in the game that does not
+end at 3 points and 2 segments. That is read from the panel, not a typo.
+
+#### One row the first sweep clipped
+
+**Soul Stigma Lv3** was marked as read from the game and was still wrong: the
+capture cut "Duration 30s." off the bottom of the row. Being transcribed is not
+the same as being transcribed *whole*. `verify_perks.py` now flags a level that
+states no Duration or Cooldown while the levels **both above and below** it do —
+a first level lacking what later ones gain is ordinary progression, but a gap in
+the middle is a clipped capture.
+
+#### Damage figures, the level they belong to, and the growth model
+
+Damage scales with the character. Splice a figure read at one level beside a
+figure read at another and an upgrade reads as a *downgrade* — which is how this
+was found, with Blood Surge running 320 → 400 → 480 → **311**.
+
+The registry is anchored at **character level 20**, and a second capture at
+**level 9** turns that anchor into a model. The ratio between the two levels is
+measured on rows captured at both:
+
+| Tree | Level 9 → 20 | Measured on | Growth per level |
+| --- | --- | --- | --- |
+| Vampirism | **131/62 = 2.112903** — exact | Blood Surge Lv1–4 (both figures) and Death From Above Lv3 — seven pairs, every one reducing to 131/62 | 10.1% of the level 9 figure |
+| Witchcraft | 2.1227 | Burning Blood Lv2–4 | 10.2% |
+| Swordmastery | 2.0000 | Dirty Trick Lv2 | 9.1% |
+
+Vampirism is not an estimate. All seven pairs — 655/310, 786/372, 917/434,
+2227/1054, 2620/1240, 3013/1426, 1834/868 — reduce to the same fraction, so the
+underlying stat is an integer: **62 at level 9, 131 at level 20**.
+
+To restate a figure at level L, with `hi` = 20 and `lo` = 9:
+
+```
+figure x (1 + (1/ratio - 1) x (hi - L) / (hi - lo))
+```
+
+Exact at both anchors, interpolation between them, extrapolation outside — and
+the planner's card says which, with a **Level N** badge that turns red beyond
+9–20. A slider in the header restates every figure live.
+
+**Why linear rather than compounding.** Both models fit the two anchors exactly
+and diverge by up to 6.7% midway, so the anchors alone cannot separate them. The
+tie-breaker is the *first* capture, whose level was never recorded: solving for it
+under each model gives
+
+| Model | Witchcraft | Swordmastery | Vampirism | Spread |
+| --- | --- | --- | --- | --- |
+| **Linear** | 12.3 | **12.0** | 11.9 | 0.4 |
+| Geometric | 13.2 | 12.8 | 12.7 | 0.5 |
+
+Linear lands on an integer level in all three trees and Swordmastery to within
+0.01. `scaling.model` records the choice, so a capture at a third known level can
+overturn it by changing one field.
+
+**That first capture was never one character level.** Its three trees imply 11.9,
+12.0 and 12.3 — it straddled a level-up mid-session. That is why its ratios never
+agreed with each other, and why the anchor moved to level 20.
+
+#### The game truncates, and figures are a unit value times a character stat
+
+Vampirism's ratios are exact because the underlying quantity is an integer. The
+character's power reads **62 at level 9, 80 at the first capture, 131 at level
+20**, and every displayed figure is a per-level unit value times that power:
+
+| Ability | Unit values | At 62 | At 80 | At 131 |
+| --- | --- | --- | --- | --- |
+| Blood Surge, area | 4, 5, 6, 7 | 248, 310, 372, 434 | 320, 400, 480, 560 | 524, 655, 786, 917 |
+| Blood Surge, bosses | 14, 17, 20, 23 | 868, 1054, 1240, 1426 | 1120, 1360, 1600, 1840 | 1834, 2227, 2620, 3013 |
+| Death From Above | 13, 15, 17, 19 | 806, 930, 1054, 1178 | 1040, 1200, 1360, 1520 | 1703, 1965, 2227, 2489 |
+| Voracious Bite | 2.8, 3.4, 4.0, 4.6 | 173, 210, 248, 285 | 224, 272, 320, 368 | 366, 445, 524, 602 |
+| Shred Lv4 | 2 | 124 | 160 | 262 |
+
+Every bolded value in those rows was read off a panel, and the model reproduces
+all of them.
+
+Voracious Bite settles the rounding question: 4.6 × 131 = 602.6 and the panel
+reads **602**, not 603. **The game truncates.** So a stored figure `d` stands
+for a true value in `[d, d+1)`, and restating it means carrying `d + 0.5` across
+and truncating. That reproduces all 24 captured figures; rounding `d` instead
+misses one (Voracious Bite Lv2 comes out 211 against the panel's 210).
+
+#### The model has to keep fitting
+
+`scaling.observations` stores what the level 9 panels showed, figure by figure.
+`verify_perks.py` restates every `scales` entry down to level 9 and fails if it
+does not come back to the captured number. **All 24 round-trip**, including
+every figure the model derived rather than read — Dirty Trick Lv1 restates to
+exactly 121, Death From Above to 806 and 930, Blood Surge Lv1 to 248, which is
+what the clipped `2??` in that capture reads. Break a ratio and the check
+reports it.
+
+Three figures had no level 9 capture and were carrying ±1 from the first one.
+All three now have one, and one of them was not ±1 at all:
+
+| | Was | Now | |
+| --- | --- | --- | --- |
+| **Shred** Lv4 | 262 ± 1 | **262** | confirmed exact — 124/62 = 2, and 2 × 131 = 262 |
+| **Voracious Bite** Lv1 | 367 | **366** | truncation, not rounding, of 2.8 × 131 = 366.8 |
+| **Witchcraft Mastery** Lv2, Lv4 | 244 | **257** | was 13 low |
+
+Witchcraft Mastery is the instructive one. Its old figure of 154 implies a ratio
+of 154/121 against the level 9 panel, where Burning Blood in the *same* capture
+implies 96/72 — so that perk was shot at a lower character level than the
+abilities beside it. It is the sharpest evidence that the first capture was never
+one character level, and the only figure in the registry the re-anchor moved by
+more than two.
+
+#### Re-reading a row
+
+Capture an ability's **whole** level list from a **single save**, and **note the
+character level** — scroll to the bottom, and check the last line of each row is
+not cut off. A figure read at one level beside a figure read at another is the
+fault above, not a fix; a figure whose level is unrecorded cannot be placed at
+all, which is what went wrong the first time.
+
+To sharpen the growth model, capture any ability with flat damage at a **third**
+known character level and add it to `scaling.observations`. That settles linear
+against geometric, which the two current anchors cannot.
 
 ### Story grants
 

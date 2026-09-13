@@ -449,4 +449,32 @@ result, and the three places the sources contradicted each other.
   spot a mismatch, fix `data/perks.json` and the page follows.
 - Stinging Blade's level 4 cost is the one number still worth a second look; see
   VERIFICATION.md.
+- **Every level row is the game's own text**, across both registries. It took two
+  capture passes: the ability panel's level list scrolls, so the first pass never
+  reached the bottom rows of 21 abilities and they kept the Game8 table's text.
+  That table turned out to drop clauses (Dirty Trick *stuns in Area* at levels 3
+  and 4; Charge keeps *+66% Bleed Duration* at level 4), **invent** one (Soul
+  Stigma never becomes an area effect, whatever the table says), get numbers
+  wrong (Walking Fortress restores 25% at level 4, not 50%), and miss a level
+  outright (Piercing Shriek has four, not three). VERIFICATION.md lists all of
+  it.
+- **Damage figures state the character level they belong to, and follow yours.**
+  Damage scales with the character, so a figure is meaningless without a level —
+  splice two levels together and an upgrade reads as a downgrade, which is how a
+  whole class of errors was found. Every figure is what the game shows at
+  **character level 20**, and a second capture at level 9 fixes the growth per
+  level: exactly 131/62 for Vampirism, measured on seven pairs that all reduce to
+  the same fraction. The header's **Char. level** slider restates every figure
+  live, and the card marks each restated row.
+- **The figures have a structure.** A displayed figure is a per-level unit value
+  times the character's power, and that power is an integer — 62 at level 9, 131
+  at level 20. Blood Surge's units are 4/5/6/7, Death From Above's 13/15/17/19.
+  The game **truncates** rather than rounds (Voracious Bite reads 602 where
+  rounding gives 603), so a stored figure stands for a value in `[d, d+1)` and is
+  restated from its midpoint. Nine figures are computed rather than read and say
+  so.
+- `tools/verify_perks.py` replays the level 9 captures through the model and
+  fails if a figure no longer comes back to what the panel showed. It also fails
+  on any level whose figure drops below the one beneath it, and on any row
+  missing a Duration that its neighbours both state.
 - Fan-made and unofficial. Not affiliated with Rebel Wolves.

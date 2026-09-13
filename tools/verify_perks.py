@@ -22,6 +22,7 @@ Requires: beautifulsoup4 and lxml, but only to read a source page. The internal
 checks run without them.
 """
 import json
+import math
 import pathlib
 import re
 import sys
@@ -223,7 +224,204 @@ def ability_checks(abilities, perk_ids):
                     findings.append(f"{where} Lv{level['level']}: unknown gate {gate!r}")
                 if level["skill_points"] < 1:
                     findings.append(f"{where} Lv{level['level']}: costs no skill points")
+                src = level.get("text_source")
+                if src not in ("game", "game8"):
+                    findings.append(f"{where} Lv{level['level']}: text_source is {src!r}; "
+                                    "every level row records where its text came from")
+            findings += figure_checks(where, ability["levels"])
+            findings += scale_checks(where, ability["levels"])
+            findings += clipped_checks(where, ability["levels"])
     return findings
+
+
+def scale_checks(where, levels):
+    """Damage figures scale with the save, so a row read from one capture and a
+    row left on the Game8 table are not comparable — splice them together and a
+    final level reads as weaker than the one below it. Every such row is already
+    flagged `scale_mismatch` in the registry; this catches a *new* one, and an
+    old one whose flag was dropped without the number being fixed."""
+    findings = []
+    columns = [_magnitudes(l["effect"]) for l in levels]
+    width = min((len(c) for c in columns), default=0)
+    for i in range(width):
+        column = [c[i] for c in columns]
+        for a, b, lo, hi in zip(column, column[1:], levels, levels[1:]):
+            if b >= a or lo.get("scale_mismatch") or hi.get("scale_mismatch"):
+                continue
+            findings.append(f"{where} Lv{hi['level']}: {b:g} is below Lv{lo['level']}'s "
+                            f"{a:g} in the same position — a level reading as a downgrade "
+                            "is how a spliced source shows up")
+    for level in levels:
+        if level.get("scale_mismatch") and level.get("text_source") != "game8":
+            findings.append(f"{where} Lv{level['level']}: scale_mismatch on a row that "
+                            "is not from Game8 — clear the flag once the row is re-read")
+    return findings
+
+
+def fmt_figure(v):
+    return f"{v:,}" if v >= 1000 else str(v)
+
+
+def figure_checks(where, levels):
+    """`scales` and `effect_template` are what lets a figure be restated at
+    another character level. They are only trustworthy while the template still
+    rebuilds the row's own text exactly, so that is checked rather than assumed."""
+    findings = []
+    for level in levels:
+        fig, scales = level.get("figure_source"), level.get("scales")
+        tmpl = level.get("effect_template")
+        at = f"{where} Lv{level['level']}"
+        if fig is None and scales is None and tmpl is None:
+            continue
+        if fig not in ("read", "scaled"):
+            findings.append(f"{at}: figure_source is {fig!r}; it is 'read' or 'scaled'")
+        if fig == "scaled" and not level.get("figure_note"):
+            findings.append(f"{at}: a scaled figure with no figure_note cannot be checked "
+                            "back against the capture it came from")
+        if not isinstance(scales, list) or not scales or tmpl is None:
+            findings.append(f"{at}: a row carrying figures needs both scales and effect_template")
+            continue
+        try:
+            rebuilt = tmpl.format(*[fmt_figure(v) for v in scales])
+        except (IndexError, KeyError):
+            findings.append(f"{at}: effect_template slots do not match its {len(scales)} scales")
+            continue
+        if rebuilt != level["effect"]:
+            findings.append(f"{at}: effect_template does not rebuild the row - "
+                            f"{rebuilt!r} != {level['effect']!r}")
+    return findings
+
+
+# Levels gain clauses as they rise, so a first level missing what later ones
+# state is ordinary progression. A level missing what the levels *both above and
+# below* it state is not: that is a row clipped off the bottom of the panel.
+# Soul Stigma Lv3 lost "Duration 30s." exactly that way and still read as
+# transcribed, because its neighbours were both intact.
+def clipped_checks(where, levels):
+    findings = []
+    for key in ("Duration", "Cooldown"):
+        has = [key in l["effect"] for l in levels]
+        for i, (level, here) in enumerate(zip(levels, has)):
+            if not here and any(has[:i]) and any(has[i + 1:]):
+                findings.append(f"{where} Lv{level['level']}: the levels above and below state a {key} "
+                                "and this one does not — check the capture was not clipped")
+    return findings
+
+
+# A percentage, a duration and a hit count all restate the same value at every
+# level or count upward in ones; only flat magnitudes carry the save's scaling,
+# so those are the ones worth comparing between levels.
+_NOT_A_MAGNITUDE = re.compile(r"\s*(?:%|s\b|m\b|hits?\b|seconds?\b)")
+
+
+def _magnitudes(text):
+    out = []
+    for match in re.finditer(r"\d[\d,]*(?:\.\d+)?", text):
+        if _NOT_A_MAGNITUDE.match(text, match.end()):
+            continue
+        out.append(float(match.group().replace(",", "")))
+    return out
+
+
+SCALING_KEYS = {"anchor_level", "low_anchor_level", "model", "trees", "note", "model_note",
+                "scaled_rows", "first_capture", "observations", "observations_note",
+                "rounding", "rounding_note"}
+
+
+def restate(block, tree, value, level):
+    """A figure at `anchor_level`, restated at another character level.
+
+    The game truncates, so a stored figure d stands for a true value anywhere in
+    [d, d+1); carrying its midpoint across and truncating reproduces every
+    captured panel, where rounding d does not."""
+    hi, lo = block["anchor_level"], block["low_anchor_level"]
+    ratio = block["trees"][tree]["ratio"]
+    return math.floor((value + 0.5) * (1 + (1 / ratio - 1) * (hi - level) / (hi - lo)))
+
+
+def observation_checks(abilities, registry=None):
+    """The growth model exists to restate a figure at another character level.
+    That is only worth trusting while it still reproduces the panels actually
+    captured at those levels, so every stored observation is replayed."""
+    findings = []
+    if abilities is None:
+        return findings
+    block = abilities.get("scaling") or {}
+    obs = block.get("observations") or {}
+    if not obs:
+        return ["abilities.json: scaling.observations is empty, so the growth model "
+                "is fitted to nothing that can contradict it"]
+    index = {}
+    for doc in (abilities, registry):
+        for tree_name, tree in (doc or {}).get("trees", {}).items():
+            for group in ("abilities", "perks", "ultimates"):
+                for entry in tree.get(group, []):
+                    if "levels" in entry:
+                        index.setdefault(entry["name"], (tree_name, entry))
+    for level_key, per_ability in obs.items():
+        level = int(level_key)
+        for name, per_level in per_ability.items():
+            if name not in index:
+                findings.append(f"scaling.observations[{level_key}]: nothing named {name!r}")
+                continue
+            tree_name, ability = index[name]
+            for lv_key, seen in per_level.items():
+                level_row = next((l for l in ability["levels"] if l["level"] == int(lv_key)), None)
+                if level_row is None or "scales" not in level_row:
+                    findings.append(f"scaling.observations[{level_key}] {name} Lv{lv_key}: "
+                                    "no such level, or it carries no scales")
+                    continue
+                got = [restate(block, tree_name, v, level) for v in level_row["scales"]]
+                if len(got) != len(seen):
+                    findings.append(f"{name} Lv{lv_key}: {len(seen)} figures observed at level "
+                                    f"{level} against {len(got)} in scales")
+                    continue
+                for i, (want, have) in enumerate(zip(seen, got)):
+                    if want is not None and want != have:
+                        findings.append(f"{name} Lv{lv_key} figure {i}: the model restates "
+                                        f"{level_row['scales'][i]} at level {level} as {have}, but the "
+                                        f"panel showed {want} — the growth model no longer fits")
+    return findings
+
+
+def scaling_checks(registry, abilities):
+    """The `scaling` block says which character level every figure belongs to.
+    Without it a figure is a number with no scale, which is the fault that put a
+    level 4 below its level 3 in the first place."""
+    findings = []
+    for name, doc in (("perks.json", registry), ("abilities.json", abilities)):
+        if doc is None:
+            continue
+        block = doc.get("scaling")
+        if not block:
+            findings.append(f"{name}: no `scaling` block, so its figures state no character level")
+            continue
+        if set(block) != SCALING_KEYS:
+            findings.append(f"{name}: scaling keys are {sorted(block)}, expected {sorted(SCALING_KEYS)}")
+        for field in ("anchor_level", "low_anchor_level"):
+            if not isinstance(block.get(field), int):
+                findings.append(f"{name}: scaling.{field} must be a character level")
+        if block.get("model") not in ("linear", "geometric"):
+            findings.append(f"{name}: scaling.model is {block.get('model')!r}; "
+                            "the two the restatement understands are linear and geometric")
+        for tree, spec in (block.get("trees") or {}).items():
+            ratio = spec.get("ratio")
+            if not (isinstance(ratio, (int, float)) and ratio > 0):
+                findings.append(f"{name}: scaling.trees.{tree}.ratio is {ratio!r}; "
+                                "it is the anchor figure over the low-anchor figure")
+            if not spec.get("measured_from"):
+                findings.append(f"{name}: scaling.trees.{tree} does not say which rows its "
+                                "ratio was measured on")
+        missing = set(registry.get("trees", {})) - set(block.get("trees") or {})
+        if missing:
+            findings.append(f"{name}: no scaling ratio for {', '.join(sorted(missing))}")
+    if registry is not None and abilities is not None:
+        a, b = registry.get("scaling") or {}, abilities.get("scaling") or {}
+        if a.get("anchor_level") != b.get("anchor_level"):
+            findings.append("perks.json and abilities.json state different anchor_levels; "
+                            "their figures would not be comparable")
+    return findings
+
 
 def internal_checks(registry):
     """Checks that need no external source: the graph and level bookkeeping."""
@@ -392,7 +590,9 @@ def main():
 
     perk_ids = {p["node_id"] for t in registry["trees"].values() for p in t["perks"]}
     findings = (internal_checks(registry) + ability_checks(abilities, perk_ids)
-                + mechanics_checks(registry, abilities))
+                + mechanics_checks(registry, abilities)
+                + scaling_checks(registry, abilities)
+                + observation_checks(abilities, registry))
     label = "internal consistency"
 
     expected = []
