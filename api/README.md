@@ -116,6 +116,11 @@ makes abuse cheap. Three things push back, none of them unbeatable:
   key dedupes on it, so one visitor is one vote per build. The user agent is in
   the hash so an office behind one address is not one single voter; the cost is
   that a browser update reads as a new voter, which is the direction to err in.
+  The same fingerprint is what `DELETE /builds/:id/vote` matches on, so a voter
+  can take back their own vote and no one else's. When it matches nothing the
+  answer is `absent: true` rather than an error — that is the honest reply both
+  to a second un-vote and to a fingerprint that has since drifted, and it leaves
+  the caller free to vote again.
 - **A daily cap** of five published builds per fingerprint.
 - **Turnstile**, when configured.
 

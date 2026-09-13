@@ -293,54 +293,78 @@ overturn it by changing one field.
 12.0 and 12.3 — it straddled a level-up mid-session. That is why its ratios never
 agreed with each other, and why the anchor moved to level 20.
 
-#### The game truncates, and figures are a unit value times a character stat
+#### The formula, solved
 
-Vampirism's ratios are exact because the underlying quantity is an integer. The
-character's power reads **62 at level 9, 80 at the first capture, 131 at level
-20**, and every displayed figure is a per-level unit value times that power:
+Captures of all nine scaling entries at character levels **9, 15 and 20** — 105
+figures — settle the model outright:
 
-| Ability | Unit values | At 62 | At 80 | At 131 |
-| --- | --- | --- | --- | --- |
-| Blood Surge, area | 4, 5, 6, 7 | 248, 310, 372, 434 | 320, 400, 480, 560 | 524, 655, 786, 917 |
-| Blood Surge, bosses | 14, 17, 20, 23 | 868, 1054, 1240, 1426 | 1120, 1360, 1600, 1840 | 1834, 2227, 2620, 3013 |
-| Death From Above | 13, 15, 17, 19 | 806, 930, 1054, 1178 | 1040, 1200, 1360, 1520 | 1703, 1965, 2227, 2489 |
-| Voracious Bite | 2.8, 3.4, 4.0, 4.6 | 173, 210, 248, 285 | 224, 272, 320, 368 | 366, 445, 524, 602 |
-| Shred Lv4 | 2 | 124 | 160 | 262 |
+```
+displayed = floor(units x power)
+```
 
-Every bolded value in those rows was read off a panel, and the model reproduces
-all of them.
+`units` belongs to the ability level and never changes. `power` belongs to the
+character. **All 105 figures are reproduced exactly**, with no exceptions and
+nothing rounded to fit.
 
-Voracious Bite settles the rounding question: 4.6 × 131 = 602.6 and the panel
-reads **602**, not 603. **The game truncates.** So a stored figure `d` stands
-for a true value in `[d, d+1)`, and restating it means carrying `d + 0.5` across
-and truncating. That reproduces all 24 captured figures; rounding `d` instead
-misses one (Voracious Bite Lv2 comes out 211 against the panel's 210).
+| Tree | Units |
+| --- | --- |
+| Blood Surge, area | 20, 25, 30, 35 |
+| Blood Surge, bosses | 70, 85, 100, 115 |
+| Death From Above | 65, 75, 85, 95 |
+| Voracious Bite | 14, 17, 20, 23 |
+| Shred Lv4 | 10 |
+| Dirty Trick | 4, 5, 6, 7 |
+| Witchcraft Mastery Lv2, Lv4 | 4 |
+| Burning Blood | 158, 164, 169, 189 |
+| Soul Reaping | 96, 114, 132, 149 |
+| Ravenous Flock | 263, 289, 316, 342 |
+
+| Tree | power @ 9 | power @ 15 | power @ 20 |
+| --- | --- | --- | --- |
+| Vampirism | 12.4 | 19.7 | 26.2 |
+| Swordmastery | 30.25 | 46.75 | 60.5 |
+| Witchcraft | 0.4603 | 0.746 | 1.075 |
+
+The game **truncates**: Voracious Bite Lv4 is 4.6 x 131 = 602.6 and the panel
+reads 602, not 603.
+
+#### Swordmastery has a closed form
+
+Its power is **exactly `11 x (level + 2) / 4`** at all three anchors, so Dirty
+Trick level 1 is `11 x (level + 2)` on the nose — 121 at level 9, 187 at 15, 242
+at 20. All twelve Dirty Trick figures fall out of that one expression.
+
+The other two trees are **not** linear in character level. A straight line through
+levels 9 and 20 misses the measured level 15 by 1.15% for Vampirism and 6.63% for
+Witchcraft, well outside the windows the figures pin down. Three anchors cannot
+settle a curve's shape, so those two are interpolated between the measured points
+rather than given a formula. `scaling.model` records that choice.
+
+#### Witchcraft Mastery follows the wrong tree
+
+Its flat damage is **identical to Dirty Trick level 1 at all three character
+levels** — 121 / 187 / 242. Held against the other Witchcraft rows its ratio
+drifts 17% across the three captures; held against Swordmastery it is exact. So
+that perk's figure tracks the Swordmastery stat despite sitting in the Witchcraft
+tree, and the registry records this as `scale_tree` on the row. It also corrects
+the value: the earlier two-anchor model had put it at 257, and it is 242.
+
+#### Witchcraft is not a function of character level alone
+
+Two captures at **the same character level 20** differ by about 11% — Burning
+Blood reads 159/163/183 in one and 176/181/203 in the other. Astral Communion and
+Witchcraft Mastery both add percentage damage, and places of power are exorcised
+as the world is played, so a Witchcraft figure carries build and world progress
+that the planner cannot know. Its numbers are indicative; Vampirism's and
+Swordmastery's are not — Vampirism was byte-identical across both level 20
+captures and across two level 9 captures at different Corruption.
 
 #### The model has to keep fitting
 
-`scaling.observations` stores what the level 9 panels showed, figure by figure.
-`verify_perks.py` restates every `scales` entry down to level 9 and fails if it
-does not come back to the captured number. **All 24 round-trip**, including
-every figure the model derived rather than read — Dirty Trick Lv1 restates to
-exactly 121, Death From Above to 806 and 930, Blood Surge Lv1 to 248, which is
-what the clipped `2??` in that capture reads. Break a ratio and the check
-reports it.
-
-Three figures had no level 9 capture and were carrying ±1 from the first one.
-All three now have one, and one of them was not ±1 at all:
-
-| | Was | Now | |
-| --- | --- | --- | --- |
-| **Shred** Lv4 | 262 ± 1 | **262** | confirmed exact — 124/62 = 2, and 2 × 131 = 262 |
-| **Voracious Bite** Lv1 | 367 | **366** | truncation, not rounding, of 2.8 × 131 = 366.8 |
-| **Witchcraft Mastery** Lv2, Lv4 | 244 | **257** | was 13 low |
-
-Witchcraft Mastery is the instructive one. Its old figure of 154 implies a ratio
-of 154/121 against the level 9 panel, where Burning Blood in the *same* capture
-implies 96/72 — so that perk was shot at a lower character level than the
-abilities beside it. It is the sharpest evidence that the first capture was never
-one character level, and the only figure in the registry the re-anchor moved by
-more than two.
+`scaling.observations` stores all 105 readings by character level.
+`verify_perks.py` restates every row at every captured level and fails if a figure
+stops matching its panel. Breaking one power value or one unit was tested: both
+are caught.
 
 #### Re-reading a row
 

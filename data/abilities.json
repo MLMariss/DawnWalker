@@ -15,7 +15,7 @@
     "`kind` is active or passive, decided by use_cost: anything that pays an activation charge or health is active. Passive abilities still take an ability slot - they work once equipped in the Active Ability panel.",
     "`story_granted` marks an ability whose first level the story hands you: it costs no skill points and no time segments to learn. Upgrades past level 1 are paid for normally.",
     "`text_source` records where each level row's text came from: `game` (read from the in-game panel), `game8` (still the Game8 table, never re-read from the game), or `placeholder` (a padlocked story node that prints no effect line).",
-    "`scales` lists a level row's absolute damage figures and `effect_template` is the row with each of them replaced by a positional slot, so the text can be restated at another character level without re-parsing it. See `scaling`."
+    "`units` is a level row's damage in units of character power, which does not change with character level; `effect_template` is the row with each figure replaced by a slot. Multiply and truncate to get the figure at any level. See `scaling`."
   ],
   "trees": {
     "Witchcraft": {
@@ -86,55 +86,50 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Deals 153 Damage per second. Duration 10s.",
+              "effect": "Deals 169 Damage per second. Duration 10s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual",
               "text_source": "game",
               "effect_template": "Deals {0} Damage per second. Duration 10s.",
-              "scales": [
-                153
-              ],
-              "figure_source": "scaled",
-              "figure_note": "Level 9 panel reads 72; x2.122735 (Witchcraft, level 9 -> 20) = 152.8. Rounding on figures this small leaves +/-1."
+              "units": [
+                158
+              ]
             },
             {
               "level": 2,
-              "effect": "Deals 159 Damage per second. Duration 12s.",
+              "effect": "Deals 176 Damage per second. Duration 12s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual",
               "text_source": "game",
               "effect_template": "Deals {0} Damage per second. Duration 12s.",
-              "scales": [
-                159
-              ],
-              "figure_source": "read"
+              "units": [
+                164
+              ]
             },
             {
               "level": 3,
-              "effect": "Deals 163 Damage per second. On Death, effect transfers to different enemy. Duration 14s.",
+              "effect": "Deals 181 Damage per second. On Death, effect transfers to different enemy. Duration 14s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual",
               "text_source": "game",
               "effect_template": "Deals {0} Damage per second. On Death, effect transfers to different enemy. Duration 14s.",
-              "scales": [
-                163
-              ],
-              "figure_source": "read"
+              "units": [
+                169
+              ]
             },
             {
               "level": 4,
-              "effect": "Deals 183 Damage per second. On Death, effect transfers to different enemy. Duration 16s.",
+              "effect": "Deals 203 Damage per second. On Death, effect transfers to different enemy. Duration 16s.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
               "text_source": "game",
-              "figure_source": "read",
               "effect_template": "Deals {0} Damage per second. On Death, effect transfers to different enemy. Duration 16s.",
-              "scales": [
-                183
+              "units": [
+                189
               ]
             }
           ],
@@ -350,56 +345,50 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Area Damage 257. Ravenous Flock cancels after 1 hit. 100% Critical Hits on target. Duration 20s.",
+              "effect": "Area Damage 282. Ravenous Flock cancels after 1 hit. 100% Critical Hits on target. Duration 20s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual",
               "text_source": "game",
               "effect_template": "Area Damage {0}. Ravenous Flock cancels after 1 hit. 100% Critical Hits on target. Duration 20s.",
-              "scales": [
-                257
-              ],
-              "figure_source": "scaled",
-              "figure_note": "Level 9 panel reads 121; x2.122735 (Witchcraft, level 9 -> 20) = 256.9."
+              "units": [
+                263
+              ]
             },
             {
               "level": 2,
-              "effect": "Area Damage 282. Ravenous Flock cancels after 2 hits. 100% Critical Hits on target. Duration 20s.",
+              "effect": "Area Damage 310. Ravenous Flock cancels after 2 hits. 100% Critical Hits on target. Duration 20s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual",
               "text_source": "game",
               "effect_template": "Area Damage {0}. Ravenous Flock cancels after 2 hits. 100% Critical Hits on target. Duration 20s.",
-              "scales": [
-                282
-              ],
-              "figure_source": "scaled",
-              "figure_note": "Level 9 panel reads 133; x2.122735 (Witchcraft, level 9 -> 20) = 282.3."
+              "units": [
+                289
+              ]
             },
             {
               "level": 3,
-              "effect": "Area Damage 305. Ravenous Flock cancels after 3 hits. 100% Critical Hits on target. Duration 20s.",
+              "effect": "Area Damage 339. Ravenous Flock cancels after 3 hits. 100% Critical Hits on target. Duration 20s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual",
               "text_source": "game",
-              "figure_source": "read",
               "effect_template": "Area Damage {0}. Ravenous Flock cancels after 3 hits. 100% Critical Hits on target. Duration 20s.",
-              "scales": [
-                305
+              "units": [
+                316
               ]
             },
             {
               "level": 4,
-              "effect": "Area Damage 331. Ravenous Flock cancels after 4 hits. 100% Critical Hits on target. Duration 20s.",
+              "effect": "Area Damage 367. Ravenous Flock cancels after 4 hits. 100% Critical Hits on target. Duration 20s.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
               "text_source": "game",
-              "figure_source": "read",
               "effect_template": "Area Damage {0}. Ravenous Flock cancels after 4 hits. 100% Critical Hits on target. Duration 20s.",
-              "scales": [
-                331
+              "units": [
+                342
               ]
             }
           ],
@@ -420,55 +409,50 @@
           "levels": [
             {
               "level": 1,
-              "effect": "93 Lifesteal per second. Duration 18s.",
+              "effect": "103 Lifesteal per second. Duration 18s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual",
               "text_source": "game",
               "effect_template": "{0} Lifesteal per second. Duration 18s.",
-              "scales": [
-                93
-              ],
-              "figure_source": "scaled",
-              "figure_note": "The level 20 ladder steps by exactly 17 (93, 110, 127, 144), so level 1 is 110 - 17. The older capture agrees at 59 x ~1.58."
+              "units": [
+                96
+              ]
             },
             {
               "level": 2,
-              "effect": "110 Lifesteal per second. Duration 24s.",
+              "effect": "122 Lifesteal per second. Duration 24s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual",
               "text_source": "game",
               "effect_template": "{0} Lifesteal per second. Duration 24s.",
-              "scales": [
-                110
-              ],
-              "figure_source": "read"
+              "units": [
+                114
+              ]
             },
             {
               "level": 3,
-              "effect": "127 Lifesteal per second. 20% Damage you receive transfers to the target. Duration 30s.",
+              "effect": "141 Lifesteal per second. 20% Damage you receive transfers to the target. Duration 30s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual",
               "text_source": "game",
               "effect_template": "{0} Lifesteal per second. 20% Damage you receive transfers to the target. Duration 30s.",
-              "scales": [
-                127
-              ],
-              "figure_source": "read"
+              "units": [
+                132
+              ]
             },
             {
               "level": 4,
-              "effect": "144 Lifesteal per second. 40% Damage you receive transfers to the target. 500 Heal on target's Death. Duration 36s.",
+              "effect": "160 Lifesteal per second. 40% Damage you receive transfers to the target. 500 Heal on target's Death. Duration 36s.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
               "text_source": "game",
-              "figure_source": "read",
               "effect_template": "{0} Lifesteal per second. 40% Damage you receive transfers to the target. 500 Heal on target's Death. Duration 36s.",
-              "scales": [
-                144
+              "units": [
+                149
               ]
             }
           ],
@@ -790,11 +774,9 @@
               "gate": "manual",
               "text_source": "game",
               "effect_template": "Stun ends after 3 hits. Deals {0} Damage. +10% Damage from Active Abilities. Duration 15s.",
-              "scales": [
-                242
-              ],
-              "figure_source": "scaled",
-              "figure_note": "Level 9 panel reads 121; x2 (Swordmastery, level 9 -> 20) = 242 exactly."
+              "units": [
+                4
+              ]
             },
             {
               "level": 2,
@@ -804,10 +786,9 @@
               "gate": "manual",
               "text_source": "game",
               "effect_template": "Stun ends after 4 hits. Deals {0} Damage. +20% Damage from Active Abilities. Duration 20s.",
-              "scales": [
-                302
-              ],
-              "figure_source": "read"
+              "units": [
+                5
+              ]
             },
             {
               "level": 3,
@@ -816,10 +797,9 @@
               "time_segments": 1,
               "gate": "manual",
               "text_source": "game",
-              "figure_source": "read",
               "effect_template": "Stuns in Area. Ends after 5 hits. Deals {0} Damage. +30% Damage from Active Abilities. Duration 25s.",
-              "scales": [
-                363
+              "units": [
+                6
               ]
             },
             {
@@ -829,10 +809,9 @@
               "time_segments": 2,
               "gate": "manual",
               "text_source": "game",
-              "figure_source": "read",
               "effect_template": "Stuns in Area. Ends after 6 hits. Deals {0} Damage. +50% Damage from Active Abilities. Duration 30s. -1 Activation Charge cost for Active Abilities used on Stunned enemies (minimum 1).",
-              "scales": [
-                423
+              "units": [
+                7
               ]
             }
           ],
@@ -960,12 +939,10 @@
               "gate": "vrakhir blood",
               "text_source": "game",
               "effect_template": "Area Damage {0} in 3m radius after Explosion. {1} Damage to Bosses.",
-              "scales": [
-                524,
-                1834
-              ],
-              "figure_source": "scaled",
-              "figure_note": "Boss figure read at level 20. Area figure: the level 9 panel's 1,054/868 rows fix the ratio at 131/62 exactly, and 248 x 131/62 = 524."
+              "units": [
+                20,
+                70
+              ]
             },
             {
               "level": 2,
@@ -975,11 +952,10 @@
               "gate": "corruption 10",
               "text_source": "game",
               "effect_template": "Area Damage {0} in 4m radius after Explosion. {1} Damage to Bosses.",
-              "scales": [
-                655,
-                2227
-              ],
-              "figure_source": "read"
+              "units": [
+                25,
+                85
+              ]
             },
             {
               "level": 3,
@@ -989,11 +965,10 @@
               "gate": "corruption 12",
               "text_source": "game",
               "effect_template": "Area Damage {0} in 5m radius after Explosion. {1} Damage to Bosses.",
-              "scales": [
-                786,
-                2620
-              ],
-              "figure_source": "read"
+              "units": [
+                30,
+                100
+              ]
             },
             {
               "level": 4,
@@ -1002,11 +977,10 @@
               "time_segments": 2,
               "gate": "corruption 14",
               "text_source": "game",
-              "figure_source": "read",
               "effect_template": "Area Damage {0} in 6m radius after Explosion. {1} Damage to Bosses.",
-              "scales": [
-                917,
-                3013
+              "units": [
+                35,
+                115
               ]
             }
           ],
@@ -1081,11 +1055,9 @@
               "gate": "corruption 3",
               "text_source": "game",
               "effect_template": "{0} Damage to Bosses and Tough enemies.",
-              "scales": [
-                1703
-              ],
-              "figure_source": "scaled",
-              "figure_note": "Level 9 panel reads 806; x131/62 (Vampirism, level 9 -> 20) = 1,703 exactly."
+              "units": [
+                65
+              ]
             },
             {
               "level": 2,
@@ -1095,11 +1067,9 @@
               "gate": "corruption 7",
               "text_source": "game",
               "effect_template": "{0} Damage to Bosses and Tough enemies. +20% Attack Damage for 15s.",
-              "scales": [
-                1965
-              ],
-              "figure_source": "scaled",
-              "figure_note": "Level 9 panel reads 930; x131/62 (Vampirism, level 9 -> 20) = 1,965 exactly."
+              "units": [
+                75
+              ]
             },
             {
               "level": 3,
@@ -1109,10 +1079,9 @@
               "gate": "corruption 10",
               "text_source": "game",
               "effect_template": "{0} Damage to Bosses and Tough enemies. +40% Attack Damage for 15s.",
-              "scales": [
-                2227
-              ],
-              "figure_source": "read"
+              "units": [
+                85
+              ]
             },
             {
               "level": 4,
@@ -1121,10 +1090,9 @@
               "time_segments": 1,
               "gate": "corruption 13",
               "text_source": "game",
-              "figure_source": "read",
               "effect_template": "{0} Damage to Bosses and Tough enemies. +60% Attack Damage for 15s. Restores 1 Activation Charge.",
-              "scales": [
-                2489
+              "units": [
+                95
               ]
             }
           ],
@@ -1419,11 +1387,9 @@
               "gate": "corruption 13",
               "text_source": "game",
               "effect_template": "35% Bleed chance. +100% Bleed Damage. {0} Damage when Bleed is reapplied.",
-              "scales": [
-                262
-              ],
-              "figure_source": "read",
-              "figure_note": "Level 9 panel reads 124. Vampirism's power is 62 at level 9 and 131 at level 20, so this ability's unit value is 124/62 = 2 exactly, and 2 x 131 = 262 exactly. No longer an estimate."
+              "units": [
+                10
+              ]
             }
           ],
           "active_time": "NIGHT ONLY",
@@ -1450,11 +1416,9 @@
               "gate": "none",
               "text_source": "game",
               "effect_template": "Restores 60% of Health Segment. {0} Damage to target.",
-              "scales": [
-                366
-              ],
-              "figure_source": "scaled",
-              "figure_note": "Level 9 panel reads 173. Voracious Bite's unit values are 2.8, 3.4, 4.0, 4.6 — they reproduce 224/272/320 at the first capture and 173/210/248 at level 9, both exactly. 2.8 x 131 = 366.8, and the game truncates, so 366."
+              "units": [
+                14
+              ]
             },
             {
               "level": 2,
@@ -1464,10 +1428,9 @@
               "gate": "corruption 3",
               "text_source": "game",
               "effect_template": "Restores 80% of Health Segment. {0} Damage to target.",
-              "scales": [
-                445
-              ],
-              "figure_source": "read"
+              "units": [
+                17
+              ]
             },
             {
               "level": 3,
@@ -1477,10 +1440,9 @@
               "gate": "corruption 8",
               "text_source": "game",
               "effect_template": "Restores 100% of Health Segment. {0} Damage to target. +10% Claw Damage for 30s.",
-              "scales": [
-                524
-              ],
-              "figure_source": "read"
+              "units": [
+                20
+              ]
             },
             {
               "level": 4,
@@ -1489,10 +1451,9 @@
               "time_segments": 2,
               "gate": "corruption 14",
               "text_source": "game",
-              "figure_source": "read",
               "effect_template": "Restores 120% of Health Segment. {0} Damage to target. +25% Claw Damage for 60s. No Cooldown if you kill the target.",
-              "scales": [
-                602
+              "units": [
+                23
               ]
             }
           ],
@@ -1506,67 +1467,41 @@
   },
   "scaling": {
     "anchor_level": 20,
-    "low_anchor_level": 9,
-    "model": "linear",
-    "trees": {
-      "Witchcraft": {
-        "ratio": 2.122735,
-        "per_level_of_low_anchor": 0.1018,
-        "measured_from": "Burning Blood levels 2-4 (75/159, 77/163, 86/183)",
-        "exact": false
+    "anchor_levels": [
+      9,
+      15,
+      20
+    ],
+    "model": "piecewise-linear",
+    "rounding": "truncate",
+    "power": {
+      "Vampirism": {
+        "9": 12.4,
+        "15": 19.7,
+        "20": 26.2
       },
       "Swordmastery": {
-        "ratio": 2.0,
-        "per_level_of_low_anchor": 0.0909,
-        "measured_from": "Dirty Trick level 2 (151/302)",
-        "exact": false
+        "9": 30.25,
+        "15": 46.75,
+        "20": 60.5
       },
-      "Vampirism": {
-        "ratio": 2.1129032258064515,
-        "per_level_of_low_anchor": 0.1012,
-        "measured_from": "Blood Surge levels 1-4, both figures, and Death From Above level 3 — seven pairs, every one reducing to 131/62",
-        "exact": true
+      "Witchcraft": {
+        "9": 0.4603,
+        "15": 0.746,
+        "20": 1.075
       }
     },
-    "note": "Every figure in `scales` is what the in-game panel shows a character at `anchor_level`. Damage scales with the character, so figures read at different levels are not comparable - splice two and an upgrade reads as a downgrade. `ratio` is a tree's figure at `anchor_level` divided by the same figure at `low_anchor_level`, measured on rows captured at both. The game truncates rather than rounds, so a stored figure d stands for a true value in [d, d+1). To restate it at level L: floor((d + 0.5) * (1 + (1/ratio - 1) * (anchor_level - L) / (anchor_level - low_anchor_level))). That is exact at both anchors and interpolates between them; outside 9-20 it is extrapolation.",
-    "model_note": "`linear` is a straight line between the two anchors, not compounding growth. Both models fit the anchors exactly and diverge by up to 6.7% midway between them, so the data cannot yet separate them - a capture at a third known level would. Linear is preferred because it places the first, unknown-level capture at level 11.9-12.3 in all three trees, against 12.7-13.2 and a wider spread for geometric. Per-level growth under this model is `per_level_of_low_anchor` of the level 9 figure, each level: about 9.1% for Swordmastery and 10.1-10.2% for the other two.",
-    "scaled_rows": "Rows marked figure_source: scaled were not read at anchor_level; figure_note records the arithmetic. Rows marked read were.",
-    "first_capture": "The registry's original capture was at no single level: its three trees imply levels 11.9, 12.0 and 12.3, so it straddled a level-up. That is why its figures could not be reconciled and why level 20 is the anchor.",
+    "closed_form": {
+      "Swordmastery": "11 * (level + 2) / 4"
+    },
+    "note": "A displayed damage figure is floor(units x power). `units` belongs to the ability level and never changes; `power` belongs to the character and is measured here at levels 9, 15 and 20. To restate a row at level L, interpolate power between the two nearest anchors and truncate - the game truncates rather than rounds. A row's `scale_tree`, when present, names the stat it follows instead of the tree it sits in.",
+    "closed_form_note": "Swordmastery's power is exactly 11*(level+2)/4 at all three measured levels, so Dirty Trick level 1 is 11*(level+2) on the nose. The other two trees are not linear in character level and three anchors cannot settle their shape, so they are interpolated rather than given a formula.",
+    "witchcraft_caveat": "Witchcraft's power is not a function of character level alone. Two captures at level 20 differ by about 11%, so a perk or world-progress multiplier is folded into these figures - Astral Communion and Witchcraft Mastery both add percentage damage. Witchcraft numbers are therefore indicative rather than exact for a given character.",
     "observations": {
       "9": {
-        "Burning Blood": {
-          "1": [
-            72
-          ],
-          "2": [
-            75
-          ],
-          "3": [
-            77
-          ],
-          "4": [
-            86
-          ]
-        },
-        "Ravenous Flock": {
-          "1": [
-            121
-          ],
-          "2": [
-            133
-          ]
-        },
-        "Dirty Trick": {
-          "1": [
-            121
-          ],
-          "2": [
-            151
-          ]
-        },
         "Blood Surge": {
           "1": [
-            null,
+            248,
             868
           ],
           "2": [
@@ -1591,11 +1526,9 @@
           ],
           "3": [
             1054
-          ]
-        },
-        "Shred": {
+          ],
           "4": [
-            124
+            1178
           ]
         },
         "Voracious Bite": {
@@ -1607,6 +1540,28 @@
           ],
           "3": [
             248
+          ],
+          "4": [
+            285
+          ]
+        },
+        "Shred": {
+          "4": [
+            124
+          ]
+        },
+        "Dirty Trick": {
+          "1": [
+            121
+          ],
+          "2": [
+            151
+          ],
+          "3": [
+            181
+          ],
+          "4": [
+            211
           ]
         },
         "Witchcraft Mastery": {
@@ -1616,11 +1571,285 @@
           "4": [
             121
           ]
+        },
+        "Burning Blood": {
+          "1": [
+            72
+          ],
+          "2": [
+            75
+          ],
+          "3": [
+            77
+          ],
+          "4": [
+            86
+          ]
+        },
+        "Soul Reaping": {
+          "1": [
+            44
+          ],
+          "2": [
+            52
+          ],
+          "3": [
+            60
+          ],
+          "4": [
+            68
+          ]
+        },
+        "Ravenous Flock": {
+          "1": [
+            121
+          ],
+          "2": [
+            133
+          ],
+          "3": [
+            145
+          ],
+          "4": [
+            157
+          ]
+        }
+      },
+      "15": {
+        "Blood Surge": {
+          "1": [
+            394,
+            1379
+          ],
+          "2": [
+            492,
+            1674
+          ],
+          "3": [
+            591,
+            1970
+          ],
+          "4": [
+            689,
+            2265
+          ]
+        },
+        "Death From Above": {
+          "1": [
+            1280
+          ],
+          "2": [
+            1477
+          ],
+          "3": [
+            1674
+          ],
+          "4": [
+            1871
+          ]
+        },
+        "Voracious Bite": {
+          "1": [
+            275
+          ],
+          "2": [
+            334
+          ],
+          "3": [
+            394
+          ],
+          "4": [
+            453
+          ]
+        },
+        "Shred": {
+          "4": [
+            197
+          ]
+        },
+        "Dirty Trick": {
+          "1": [
+            187
+          ],
+          "2": [
+            233
+          ],
+          "3": [
+            280
+          ],
+          "4": [
+            327
+          ]
+        },
+        "Witchcraft Mastery": {
+          "2": [
+            187
+          ],
+          "4": [
+            187
+          ]
+        },
+        "Burning Blood": {
+          "1": [
+            117
+          ],
+          "2": [
+            122
+          ],
+          "3": [
+            126
+          ],
+          "4": [
+            140
+          ]
+        },
+        "Soul Reaping": {
+          "1": [
+            71
+          ],
+          "2": [
+            85
+          ],
+          "3": [
+            98
+          ],
+          "4": [
+            111
+          ]
+        },
+        "Ravenous Flock": {
+          "1": [
+            196
+          ],
+          "2": [
+            215
+          ],
+          "3": [
+            235
+          ],
+          "4": [
+            255
+          ]
+        }
+      },
+      "20": {
+        "Blood Surge": {
+          "1": [
+            524,
+            1834
+          ],
+          "2": [
+            655,
+            2227
+          ],
+          "3": [
+            786,
+            2620
+          ],
+          "4": [
+            917,
+            3013
+          ]
+        },
+        "Death From Above": {
+          "1": [
+            1703
+          ],
+          "2": [
+            1965
+          ],
+          "3": [
+            2227
+          ],
+          "4": [
+            2489
+          ]
+        },
+        "Voracious Bite": {
+          "1": [
+            366
+          ],
+          "2": [
+            445
+          ],
+          "3": [
+            524
+          ],
+          "4": [
+            602
+          ]
+        },
+        "Shred": {
+          "4": [
+            262
+          ]
+        },
+        "Dirty Trick": {
+          "1": [
+            242
+          ],
+          "2": [
+            302
+          ],
+          "3": [
+            363
+          ],
+          "4": [
+            423
+          ]
+        },
+        "Witchcraft Mastery": {
+          "2": [
+            242
+          ],
+          "4": [
+            242
+          ]
+        },
+        "Burning Blood": {
+          "1": [
+            169
+          ],
+          "2": [
+            176
+          ],
+          "3": [
+            181
+          ],
+          "4": [
+            203
+          ]
+        },
+        "Soul Reaping": {
+          "1": [
+            103
+          ],
+          "2": [
+            122
+          ],
+          "3": [
+            141
+          ],
+          "4": [
+            160
+          ]
+        },
+        "Ravenous Flock": {
+          "1": [
+            282
+          ],
+          "2": [
+            310
+          ],
+          "3": [
+            339
+          ],
+          "4": [
+            367
+          ]
         }
       }
     },
-    "observations_note": "Figures read from a panel at a character level other than `anchor_level`, keyed by that level then by ability or perk name then by its level. verify_perks.py restates each `scales` entry at that level through the model and fails if it does not come back to what the panel showed, so the model cannot drift from its evidence. null marks a figure the capture did not show.",
-    "rounding": "truncate",
-    "rounding_note": "The level 9 panels fix this. Voracious Bite level 4 reads 602 at level 20 where rounding its unit value would give 603, and its level 2 reads 210 at level 9 where rounding the stored 445 gives 211. Truncating (d + 0.5) reproduces all 24 captured figures; rounding d misses one."
+    "observations_note": "Every figure read from a panel, by character level. verify_perks.py restates each row at each level through the model and fails if it does not come back to what the panel showed."
   }
 }
