@@ -599,6 +599,57 @@ a:hover{color:var(--gold-2)}
   border-color:color-mix(in srgb,var(--tier-red) 45%,transparent);
 }
 
+/* The running total an over-time row adds up to, set beside the per-second
+   figure it is derived from rather than replacing it. */
+.lv-total{
+  display:block;margin-top:3px;font-size:12px;font-weight:600;letter-spacing:.02em;
+  color:var(--gold-2);
+}
+
+/* ---------------------------------------------------- theorycraft panel */
+
+.tc-p{margin:0 0 14px;line-height:1.6;color:var(--text-dim);max-width:64ch}
+.tc-p b{color:var(--text)}
+.tc-p.soft{color:var(--text-faint);font-size:13.5px}
+.tc-p code{
+  padding:1px 5px;border-radius:3px;background:rgba(231,179,86,.1);
+  color:var(--gold-2);font-size:12.5px;
+}
+.tc-chart{display:block;width:100%;height:auto;margin:6px 0 18px;overflow:visible}
+.tc-band{fill:rgba(231,179,86,.07)}
+.tc-band-lbl{fill:var(--text-faint);font-size:9px;letter-spacing:.14em}
+.tc-grid{stroke:var(--line);stroke-width:1}
+.tc-grid.on{stroke:var(--line-2)}
+.tc-tick{fill:var(--text-faint);font-size:10.5px}
+.tc-line{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tc-line.dash{stroke-dasharray:4 4;opacity:.55}
+.tc-end{font-size:11.5px;font-weight:700}
+/* One hue per tree, matching the tab marks the board already uses. */
+.tc-s1,.tc-s1.tc-line{stroke:var(--blood-2)} .tc-s1.tc-end,.tc-s1.tc-key{color:var(--blood-2)}
+.tc-s2,.tc-s2.tc-line{stroke:var(--gold)}    .tc-s2.tc-end,.tc-s2.tc-key{color:var(--gold)}
+.tc-s3,.tc-s3.tc-line{stroke:var(--tier-green)} .tc-s3.tc-end,.tc-s3.tc-key{color:var(--tier-green)}
+.tc-end.tc-s1{fill:var(--blood-2);stroke:none}
+.tc-end.tc-s2{fill:var(--gold);stroke:none}
+.tc-end.tc-s3{fill:var(--tier-green);stroke:none}
+.tc-dot{stroke:var(--panel-bg,#141210);stroke-width:1.5}
+.tc-dot.tc-s1{fill:var(--blood-2)} .tc-dot.tc-s2{fill:var(--gold)} .tc-dot.tc-s3{fill:var(--tier-green)}
+.tc-key{
+  display:inline-block;width:11px;height:3px;border-radius:2px;margin-right:8px;
+  background:currentColor;vertical-align:middle;
+}
+.tc-tab{border-collapse:collapse;width:100%;margin:0 0 18px;font-size:13px}
+.tc-tab th,.tc-tab td{
+  padding:7px 10px;text-align:right;border-bottom:1px solid var(--line);
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.tc-tab th{
+  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);
+  font-weight:600;
+}
+.tc-tab th:first-child,.tc-tab td:first-child{text-align:left;font-variant-numeric:normal}
+.tc-tab tbody tr:last-child td{border-bottom:0}
+.tc-tab .soft{color:var(--text-faint)}
+
 .story-tag{
   margin-left:8px;padding:2px 7px;border:1px solid color-mix(in srgb,var(--green) 45%,transparent);
   border-radius:10px;font-size:10.5px;font-weight:700;letter-spacing:.12em;

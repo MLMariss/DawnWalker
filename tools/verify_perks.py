@@ -232,6 +232,7 @@ def ability_checks(abilities, perk_ids):
                                       abilities.get("scaling") or {}, tree_name)
             findings += scale_checks(where, ability["levels"])
             findings += clipped_checks(where, ability["levels"])
+            findings += over_time_checks(where, ability["levels"])
     return findings
 
 
@@ -316,6 +317,41 @@ def figure_checks(where, levels, block, tree):
         if rebuilt != level["effect"]:
             findings.append(f"{at}: units x power at the anchor level does not rebuild the row - "
                             f"{rebuilt!r} != {level['effect']!r}")
+    return findings
+
+
+OVER_TIME_KEYS = {"kind", "per", "count", "figure"}
+
+
+def over_time_checks(where, levels):
+    """An over-time row's total is its figure times `count`. That only means
+    anything while `count` points at a number the row's own text actually
+    states - a duration in seconds, or a hit count."""
+    findings = []
+    for level in levels:
+        ot = level.get("over_time")
+        if ot is None:
+            continue
+        at = f"{where} Lv{level['level']}"
+        if set(ot) != OVER_TIME_KEYS:
+            findings.append(f"{at}: over_time keys are {sorted(ot)}, expected {sorted(OVER_TIME_KEYS)}")
+            continue
+        if ot["per"] not in ("second", "hit"):
+            findings.append(f"{at}: over_time.per is {ot['per']!r}; it is 'second' or 'hit'")
+        if not isinstance(ot["count"], int) or ot["count"] < 1:
+            findings.append(f"{at}: over_time.count is {ot['count']!r}; it is how many times the "
+                            "figure lands")
+            continue
+        units = level.get("units") or []
+        if not isinstance(ot["figure"], int) or not (0 <= ot["figure"] < len(units)):
+            findings.append(f"{at}: over_time.figure {ot['figure']!r} is not one of this row's "
+                            f"{len(units)} figures")
+        # The count has to be a number the row itself prints, or it is invented.
+        want = str(ot["count"])
+        printed = re.findall(r"\d+", level["effect"])
+        if want not in printed:
+            findings.append(f"{at}: over_time.count {ot['count']} appears nowhere in the row's "
+                            f"own text, so the total cannot be checked against it")
     return findings
 
 

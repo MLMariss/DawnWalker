@@ -479,6 +479,17 @@ result, and the three places the sources contradicted each other.
   stat despite sitting in Witchcraft. And Witchcraft as a whole is not a function
   of level alone — two captures at level 20 differ by 11%, because Astral
   Communion and Witchcraft Mastery add percentage damage as the world is played.
+- **Over-time abilities show their total.** A row reading "203 Damage per second.
+  Duration 16s." also prints **3,248 damage in total**, because a per-second
+  figure cannot be read against one that lands all at once until it is multiplied
+  out. Doing that inverts the ranking: Soul Reaping's 160 a second is the smallest
+  figure on any card and the largest output on the board, 5,760 over 36 seconds.
+  `over_time` records the multiplier, and the verifier refuses a count the row's
+  own text does not state.
+- **Theorycraft.** A button in the header opens the model itself: the three power
+  curves drawn out to the level‑50 cap, solid across the levels the game was read
+  at and dashed past them, with the per-tree figures and what is measured against
+  what is arithmetic.
 - `tools/verify_perks.py` replays the level 9 captures through the model and
   fails if a figure no longer comes back to what the panel showed. It also fails
   on any level whose figure drops below the one beneath it, and on any row

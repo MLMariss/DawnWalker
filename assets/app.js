@@ -21,7 +21,7 @@
 
   var el = {};
   ['tabs', 'tree', 'links', 'nodes', 'ults', 'ult-gate', 'panel', 'toast', 'corruption',
-   'corruption-out', 'charlvl', 'charlvl-out', 'charlvl-ctl',
+   'corruption-out', 'charlvl', 'charlvl-out', 'charlvl-ctl', 'theory',
    'manuals', 'synergy', 'm-sp', 'm-ts', 'm-bk', 'boardscroll',
    'ov-body', 'ov-note', 'ovdrawer', 'abils', 'abil-note', 'abildrawer', 'ultdrawer',
    'side', 'hint-key', 'modal', 'modal-title', 'modal-body', 'loadedbar'].forEach(function (id) {
@@ -208,6 +208,35 @@
     return l.effect_template.replace(/\{(\d+)\}/g, function (_, i) {
       return groupDigits(Math.max(1, Math.floor(l.units[+i] * q)));
     });
+  }
+
+  /* A row that reads "203 Damage per second. Duration 16s." is not comparable with
+     one that deals its damage at once until you multiply it out. `over_time` says
+     by how much, so the card can print the total the ability actually delivers. */
+  function figuresAt(p, l) {
+    if (!l.units) return null;
+    var tree = scaleTreeOf(p, l);
+    var q = (SCALING && state.charlvl != null && tree && SCALING.power && SCALING.power[tree])
+      ? powerAt(tree, state.charlvl) : null;
+    if (q == null) {
+      // Fall back on the figures already written into the row's own text.
+      var found = (l.effect.match(/\d[\d,]*/g) || []).map(function (n) { return +n.replace(/,/g, ''); });
+      return l.units.map(function (_, i) { return found[i] || 0; });
+    }
+    return l.units.map(function (u) { return Math.max(1, Math.floor(u * q)); });
+  }
+  function overTimeTotal(p, l) {
+    var ot = l.over_time;
+    if (!ot || ot.count <= 1) return null;
+    var figs = figuresAt(p, l);
+    if (!figs) return null;
+    var each = figs[ot.figure || 0];
+    return {
+      total: each * ot.count,
+      each: each,
+      text: groupDigits(each * ot.count) + ' ' + ot.kind + ' in total',
+      why: groupDigits(each) + ' x ' + ot.count + ' ' + ot.per + (ot.count === 1 ? '' : 's')
+    };
   }
 
   /* The badge says which character level the row is showing, and turns red once
@@ -1122,7 +1151,11 @@
       var owned = i < n, isNext = i === n;
       var blocked = !owned && (!gateOk(l.gate) || (isNext ? !learnable.ok : true));
       return '<li class="' + (owned ? 'on ' : '') + (isNext ? 'next ' : '') + (blocked ? 'blocked' : '') + '">' +
-        '<span class="lp"></span><span class="lv-text">' + esc(effectAt(p, l)) + '</span>' +
+        '<span class="lp"></span><span class="lv-text">' + esc(effectAt(p, l)) +
+          (function () {
+            var t = overTimeTotal(p, l);
+            return t ? '<b class="lv-total" title="' + esc(t.why) + '">' + esc(t.text) + '</b>' : '';
+          }()) + '</span>' +
         '<span class="lv-meta"><span class="lv-costs">' +
           (isFree(p, i) ? '<span class="free-tag">Story — free</span>'
                         : costHTML(l.skill_points, l.time_segments, true)) + '</span>' +
@@ -1349,6 +1382,9 @@
         el.charlvlOut.textContent = state.charlvl;
         renderPanel();
       });
+    }
+    if (el.theory) {
+      el.theory.addEventListener('click', function () { openModal('theory'); });
     }
     el.manuals.addEventListener('change', function () {
       state.manuals = el.manuals.checked; dropInvalid(); renderAll();
@@ -1840,7 +1876,125 @@
 
   function renderModal() {
     if (modalMode === 'save') renderSave();
+    else if (modalMode === 'theory') renderTheory();
     else renderBuilds();
+  }
+
+  /* ------------------------------------------------------------- theorycraft */
+
+  /* The model the damage figures come out of, drawn. Three curves, not one per
+     ability: units are fixed, so inside a tree every ability is the same curve
+     times a constant. Solid across the levels the game was actually read at,
+     dashed past them, because past them this is arithmetic rather than evidence. */
+  var THEORY_MAX = 50;
+
+  function powerCurveSVG() {
+    if (!SCALING || !SCALING.power) return '';
+    var trees = Object.keys(SCALING.power);
+    var anchors = (SCALING.anchor_levels || []).slice().sort(function (a, b) { return a - b; });
+    var lo = anchors[0], hi = anchors[anchors.length - 1];
+    var W = 640, H = 300, ml = 44, mr = 104, mt = 16, mb = 34;
+    var x0 = ml, x1 = W - mr, y0 = H - mb, y1 = mt;
+    var top = 0;
+    trees.forEach(function (t) {
+      top = Math.max(top, powerAt(t, THEORY_MAX) / powerAt(t, lo));
+    });
+    top = Math.ceil(top);
+    var X = function (L) { return x0 + (L - 1) / (THEORY_MAX - 1) * (x1 - x0); };
+    var Y = function (v) { return y0 - v / top * (y0 - y1); };
+    var out = [];
+    out.push('<rect x="' + X(lo) + '" y="' + y1 + '" width="' + (X(hi) - X(lo)) +
+             '" height="' + (y0 - y1) + '" class="tc-band"/>');
+    out.push('<text x="' + ((X(lo) + X(hi)) / 2) + '" y="' + (y1 + 12) +
+             '" class="tc-band-lbl" text-anchor="middle">READ IN GAME</text>');
+    for (var v = 0; v <= top; v++) {
+      out.push('<line x1="' + x0 + '" x2="' + x1 + '" y1="' + Y(v) + '" y2="' + Y(v) +
+               '" class="tc-grid' + (v === 1 ? ' on' : '') + '"/>');
+      out.push('<text x="' + (x0 - 8) + '" y="' + (Y(v) + 4) + '" class="tc-tick" ' +
+               'text-anchor="end">' + v + '\u00d7</text>');
+    }
+    [1, 10, 20, 30, 40, 50].forEach(function (L) {
+      out.push('<text x="' + X(L) + '" y="' + (y0 + 19) + '" class="tc-tick" ' +
+               'text-anchor="middle">' + L + '</text>');
+    });
+    var ends = [];
+    trees.forEach(function (t, i) {
+      var base = powerAt(t, lo), a = [], b = [], L;
+      for (L = 1; L <= THEORY_MAX; L++) {
+        var pt = X(L).toFixed(1) + ',' + Y(powerAt(t, L) / base).toFixed(1);
+        if (L <= lo) a.push(pt);
+        if (L >= lo && L <= hi) b.push(pt);
+      }
+      var c = [];
+      for (L = hi; L <= THEORY_MAX; L++) c.push(X(L).toFixed(1) + ',' + Y(powerAt(t, L) / base).toFixed(1));
+      var cls = 'tc-s' + (i + 1);
+      out.push('<polyline points="' + a.join(' ') + '" class="tc-line dash ' + cls + '"/>');
+      out.push('<polyline points="' + c.join(' ') + '" class="tc-line dash ' + cls + '"/>');
+      out.push('<polyline points="' + b.join(' ') + '" class="tc-line ' + cls + '"/>');
+      anchors.forEach(function (L2) {
+        out.push('<circle cx="' + X(L2) + '" cy="' + Y(powerAt(t, L2) / base) +
+                 '" r="3.6" class="tc-dot ' + cls + '"/>');
+      });
+      ends.push({ t: t, cls: cls, y: Y(powerAt(t, THEORY_MAX) / base),
+                  v: powerAt(t, THEORY_MAX) / base });
+    });
+    ends.sort(function (a, b) { return a.y - b.y; });
+    for (var k = 1; k < ends.length; k++) {
+      if (ends[k].y - ends[k - 1].y < 30) ends[k].y = ends[k - 1].y + 30;
+    }
+    ends.forEach(function (e) {
+      out.push('<text x="' + (x1 + 10) + '" y="' + (e.y + 1) + '" class="tc-end ' + e.cls + '">' +
+               esc(e.t) + '</text>');
+      out.push('<text x="' + (x1 + 10) + '" y="' + (e.y + 15) + '" class="tc-tick">' +
+               e.v.toFixed(2) + '\u00d7</text>');
+    });
+    out.push('<text x="' + ((x0 + x1) / 2) + '" y="' + (H - 2) +
+             '" class="tc-tick" text-anchor="middle">character level</text>');
+    return '<svg class="tc-chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" ' +
+      'aria-label="Character power against character level, one curve per tree">' +
+      out.join('') + '</svg>';
+  }
+
+  function renderTheory() {
+    el.modalTitle.textContent = 'Theorycraft';
+    if (!SCALING || !SCALING.power) {
+      el.modalBody.innerHTML = '<p class="tc-p">The registry carries no scaling model.</p>';
+      return;
+    }
+    var anchors = (SCALING.anchor_levels || []).slice().sort(function (a, b) { return a - b; });
+    var lo = anchors[0], hi = anchors[anchors.length - 1];
+    var trees = Object.keys(SCALING.power);
+    var rows = trees.map(function (t, i) {
+      var base = powerAt(t, lo);
+      return '<tr><td><i class="tc-key tc-s' + (i + 1) + '"></i>' + esc(t) + '</td>' +
+        anchors.map(function (L) {
+          return '<td>' + (powerAt(t, L) / base).toFixed(2) + '\u00d7</td>';
+        }).join('') +
+        '<td class="soft">' + (powerAt(t, THEORY_MAX) / base).toFixed(2) + '\u00d7</td></tr>';
+    }).join('');
+    var cf = (SCALING.closed_form && SCALING.closed_form.Swordmastery) || null;
+    el.modalBody.innerHTML =
+      '<p class="tc-p">Every damage figure in the game is <code>floor(units \u00d7 power)</code>. ' +
+      '<b>Units belong to the ability level and never change</b> \u2014 so inside a tree every ' +
+      'ability rides the same curve, just multiplied by a different constant. Nine scaling ' +
+      'abilities, three curves.</p>' +
+      powerCurveSVG() +
+      '<table class="tc-tab"><thead><tr><th>Tree</th>' +
+      anchors.map(function (L) { return '<th>Lv ' + L + '</th>'; }).join('') +
+      '<th class="soft">Lv ' + THEORY_MAX + '</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<p class="tc-p"><b>Witchcraft starts slowest and finishes strongest; Swordmastery is flat ' +
+      'at both ends.</b> Power was read off the game at levels ' + anchors.join(', ') +
+      ' \u2014 105 figures, every one reproduced exactly. Between those levels the curve is ' +
+      'interpolated. Past level ' + hi + ' it is the last segment continued, which is why the ' +
+      'lines go dashed: that stretch is arithmetic, not evidence.</p>' +
+      (cf ? '<p class="tc-p">Swordmastery is the one tree with a closed form \u2014 its power is ' +
+        'exactly <code>' + esc(cf) + '</code> at all three anchors, so Dirty Trick level 1 is ' +
+        '<code>11 \u00d7 (level + 2)</code> on the nose.</p>' : '') +
+      (SCALING.witchcraft_caveat
+        ? '<p class="tc-p soft">' + esc(SCALING.witchcraft_caveat) + '</p>' : '') +
+      '<p class="tc-p soft">An ability that damages or heals over time shows its total on the ' +
+      'card as well as its per-second figure, so it can be read against one that lands all at ' +
+      'once \u2014 Burning Blood\u2019s 203 a second runs for 16 seconds.</p>';
   }
 
   function statLine(s) {
