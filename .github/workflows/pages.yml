@@ -1,5 +1,6 @@
-# Publish the planner to GitHub Pages, with the asset URLs stamped so a deploy
-# is actually visible to anyone who has been to the site before.
+# Publish the planner to GitHub Pages, with the community build list baked in
+# and the asset URLs stamped so a deploy is actually visible to anyone who has
+# been to the site before.
 #
 # This replaces Pages' "deploy from a branch" setting, which served index.html's
 # asset references verbatim: assets/app.js never changed name, so a returning
@@ -8,16 +9,29 @@
 # committed file, so the repo stays buildless — `python3 -m http.server` from a
 # clone still works, unstamped and unaffected.
 #
+# The build list is baked the same way, for the same reason: data/builds.json is
+# generated into the deploy artifact and never committed, so there are no bot
+# commits in the history and no second workflow to keep in step. That is also
+# why the schedule is here rather than on a job of its own — 👍 reactions fire no
+# webhook, so the only way an upvote reaches the site is a deploy.
+#
 # NOTE: this needs Settings -> Pages -> Source set to "GitHub Actions".
 name: Deploy to Pages
 
 on:
   push:
     branches: [main]
+  # A build published or moderated on the tracker should reach the site without
+  # waiting for the next tick.
+  issues:
+    types: [opened, edited, deleted, closed, reopened, labeled, unlabeled]
+  schedule:
+    - cron: '17,47 * * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
+  issues: read
   pages: write
   id-token: write
 
@@ -32,6 +46,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Fatal on an API failure by design: publishing a short list would empty
+      # the community tab silently. Failing here leaves the last good deploy up.
+      - name: Bake the community build list from the issue tracker
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 tools/bake_builds.py
 
       - name: Stamp asset URLs with the commit SHA
         run: python3 tools/stamp_assets.py "${GITHUB_SHA:0:8}"

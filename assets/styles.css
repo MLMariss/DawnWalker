@@ -766,4 +766,168 @@ a:hover{color:var(--gold-2)}
 }
 .legal-body em{font-style:italic}
 
+/* -------------------------------------------------- saved & shared builds */
+
+.btn-sm{padding:5px 10px;font-size:11px;letter-spacing:.08em}
+.btn-ghost.danger:hover{color:#f0bcbc;background:rgba(164,38,44,.18)}
+
+/* The bar under the top bar, naming the community build on the board. It is
+   hidden until there is one, so it costs no height on an ordinary visit. */
+.loadedbar{
+  flex:none;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:8px 20px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(40,30,18,.9),rgba(18,14,10,.9));
+}
+.loadedbar[hidden]{display:none}
+.loaded-name{font-size:14px;font-weight:600;color:var(--gold-2)}
+.loaded-by{font-size:13px;color:var(--text-dim)}
+.loaded-tag{
+  font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text-faint);margin-right:auto
+}
+.loaded-x{
+  border:0;background:none;cursor:pointer;color:var(--text-faint);
+  font-size:20px;line-height:1;padding:0 4px
+}
+.loaded-x:hover{color:var(--text)}
+
+/* The vote control. `off` is the same shape with the button taken away: an
+   edited build still shows what the original scored, because hiding the count
+   would read as the build having lost its votes. */
+.votebtn{
+  display:inline-flex;align-items:center;gap:7px;flex:none;
+  padding:5px 11px;border:1px solid var(--line-2);border-radius:3px;
+  background:linear-gradient(180deg,rgba(231,179,86,.16),rgba(231,179,86,.04));
+  color:var(--gold-2);font:inherit;font-size:11px;font-weight:600;
+  letter-spacing:.09em;text-transform:uppercase;cursor:pointer;transition:.15s
+}
+.votebtn:hover:not(:disabled):not(.off){border-color:var(--gold-dim);
+  background:linear-gradient(180deg,rgba(231,179,86,.3),rgba(231,179,86,.1))}
+.votebtn b{font-size:15px;font-weight:700;line-height:1}
+.votebtn:disabled,.votebtn.off{cursor:default;opacity:.55}
+.votebtn.voted{color:var(--green);border-color:rgba(143,192,110,.4);opacity:.85}
+.vote-caret{
+  width:0;height:0;flex:none;
+  border-left:5px solid transparent;border-right:5px solid transparent;
+  border-bottom:7px solid currentColor
+}
+/* In a list the vote sits in its own column to the left of the build. */
+.votebtn.col{flex-direction:column;gap:2px;padding:7px 10px;min-width:52px;align-self:flex-start}
+
+/* ------------------------------------------------------------ the dialog */
+
+.modal{
+  width:min(720px,calc(100vw - 32px));max-height:min(84vh,820px);
+  padding:0;border:1px solid var(--line-2);border-radius:8px;
+  background:var(--panel-2);color:var(--text);box-shadow:var(--shadow);
+  overflow:hidden
+}
+.modal::backdrop{background:rgba(4,3,2,.72)}
+.modal-head{
+  display:flex;align-items:center;gap:12px;padding:14px 18px;
+  border-bottom:1px solid var(--line);background:rgba(0,0,0,.22)
+}
+.modal-title{
+  margin:0;flex:1;font-size:13px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold-2)
+}
+.modal-x{
+  border:0;background:none;cursor:pointer;color:var(--text-faint);
+  font-size:24px;line-height:1;padding:0 4px
+}
+.modal-x:hover{color:var(--text)}
+.modal-body{padding:16px 18px 20px;overflow:auto;max-height:calc(84vh - 52px)}
+.modal-rule{border:0;border-top:1px solid var(--line);margin:18px 0 14px}
+.modal-acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.modal-fine{margin:12px 0 0;font-size:12px;line-height:1.6;color:var(--text-faint)}
+.modal-fine b{color:var(--text-dim);font-weight:600}
+
+.fld{display:block;margin-top:14px}
+.fld>span{
+  display:block;margin-bottom:5px;font-size:11px;font-weight:700;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--text-dim)
+}
+.fld>span i{font-style:normal;font-weight:400;letter-spacing:.06em;
+  text-transform:none;color:var(--text-faint);margin-left:6px}
+.fld input,.fld textarea{
+  width:100%;box-sizing:border-box;padding:9px 11px;
+  border:1px solid var(--line);border-radius:3px;background:rgba(0,0,0,.3);
+  color:var(--text);font:inherit;font-size:14px;line-height:1.5;resize:vertical
+}
+.fld textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+.fld input:focus,.fld textarea:focus{outline:0;border-color:var(--gold-dim)}
+.fld textarea[readonly]{color:var(--text-dim)}
+
+.sv-stats{padding-bottom:4px}
+
+/* ------------------------------------------------------------- the lists */
+
+.mtabs{display:flex;gap:8px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.mtab{
+  border:0;border-bottom:2px solid transparent;background:none;cursor:pointer;
+  padding:7px 4px;margin-bottom:-1px;color:var(--text-faint);font:inherit;
+  font-size:12px;font-weight:700;letter-spacing:.11em;text-transform:uppercase
+}
+.mtab:hover{color:var(--text-dim)}
+.mtab[aria-selected=true]{color:var(--gold-2);border-bottom-color:var(--accent)}
+.mtab b{font-weight:700;color:var(--text-faint);margin-left:3px}
+.mtab[aria-selected=true] b{color:var(--gold-dim)}
+
+.msort{display:flex;gap:14px;padding:10px 2px 4px}
+.msort-b{
+  border:0;background:none;cursor:pointer;padding:0;font:inherit;font-size:12px;
+  color:var(--text-faint);letter-spacing:.06em
+}
+.msort-b:hover{color:var(--text-dim)}
+.msort-b[aria-selected=true]{color:var(--gold-2);font-weight:600}
+
+.mempty{margin:18px 2px;font-size:13px;line-height:1.65;color:var(--text-faint)}
+.mempty b{color:var(--text-dim);font-weight:600}
+
+.brow{
+  display:flex;align-items:flex-start;gap:13px;
+  padding:13px 2px;border-bottom:1px solid rgba(58,48,42,.45)
+}
+.brow:last-of-type{border-bottom:0}
+.brow.current{background:linear-gradient(90deg,rgba(231,179,86,.09),transparent 70%)}
+.brow-main{flex:1;min-width:0}
+.brow-main h3{
+  margin:0;display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+  font-size:14px;font-weight:600;color:var(--text)
+}
+.brow-now{
+  font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold-2);border:1px solid var(--gold-dim);border-radius:2px;padding:1px 5px
+}
+.brow-meta{margin:3px 0 0;font-size:12px;color:var(--text-faint)}
+.brow-meta .sep{margin:0 5px}
+.brow-notes{margin:6px 0 0;font-size:13px;line-height:1.55;color:var(--text-dim)}
+.brow-acts{display:flex;flex-direction:column;gap:6px;flex:none;align-items:stretch}
+.brow-acts .btn{text-align:center;text-decoration:none;display:block}
+
+/* The one-line cost readout, shared by both lists and the save dialog. */
+.bstat{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:7px;
+  font-size:12px;color:var(--text-dim)
+}
+.bstat .sep{color:var(--text-faint)}
+.bstat .dot{
+  width:8px;height:8px;border-radius:50%;background:var(--accent);
+  display:inline-block;margin-right:2px
+}
+
+.mpaste{margin-top:16px;padding-top:6px;border-top:1px solid var(--line)}
+.mpaste-row{display:flex;gap:8px;align-items:center}
+.mpaste-row input{flex:1}
+
+@media (max-width:640px){
+  .modal{width:calc(100vw - 16px);max-height:92vh}
+  .modal-body{max-height:calc(92vh - 52px);padding:14px}
+  .brow{flex-wrap:wrap}
+  .brow-acts{flex-direction:row;width:100%}
+  .brow-acts .btn{flex:1}
+  .loadedbar{padding:8px 14px;gap:9px}
+  .loaded-tag{width:100%;margin-right:0;order:9}
+}
+
 @media (prefers-reduced-motion:reduce){ *{transition:none!important} }

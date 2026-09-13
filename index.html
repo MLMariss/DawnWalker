@@ -53,10 +53,14 @@
       <input type="checkbox" id="synergy" checked>
       <span>Synergies</span>
     </label>
-    <button class="btn" id="share" type="button">Copy link</button>
+    <button class="btn" id="save" type="button">Save</button>
+    <button class="btn" id="builds" type="button">Builds</button>
+    <button class="btn btn-ghost" id="share" type="button">Copy link</button>
     <button class="btn btn-ghost" id="reset" type="button">Reset</button>
   </div>
 </header>
+
+<div class="loadedbar" id="loadedbar" hidden></div>
 
 <main class="stage">
   <section class="board">
@@ -136,6 +140,17 @@
 </main>
 
 <div class="toast" id="toast" role="status"></div>
+
+<!-- A <dialog> rather than a div: Escape, the backdrop and the focus trap are
+     the browser's job, and this is the only part of the planner that takes
+     typing, so losing focus into the tree behind it would be a real bug. -->
+<dialog class="modal" id="modal" aria-labelledby="modal-title">
+  <header class="modal-head">
+    <h2 class="modal-title" id="modal-title"></h2>
+    <form method="dialog"><button class="modal-x" type="submit" aria-label="Close">&times;</button></form>
+  </header>
+  <div class="modal-body" id="modal-body"></div>
+</dialog>
 
 <script src="assets/marks.js"></script>
 <script src="assets/icons.js"></script>

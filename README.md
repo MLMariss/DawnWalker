@@ -65,9 +65,18 @@ Pages and it works as the site index.
   from 75%, **red** from 50%. Below 50% is not marked at all. The key is one line
   under the board. Nothing about synergy goes in the side panel — that space
   belongs to the perk you selected. Toggleable.
-- **Shareable builds.** The URL hash carries the whole build; "Copy build link" puts
-  it on the clipboard. Lowering Corruption or switching Manuals off peels back any
-  level that is no longer legal rather than leaving an impossible build on screen.
+- **Shareable builds.** The URL hash carries the whole build; "Copy link" puts it on
+  the clipboard. Lowering Corruption or switching Manuals off peels back any level
+  that is no longer legal rather than leaving an impossible build on screen.
+- **Saved and published builds.** One string — the same one the address bar carries
+  after `#b=` — *is* the build, so a link, a save and a published build are the same
+  thing wearing different hats. **Save** keeps it in this browser under a name, or
+  publishes it to the community list; **Builds** is that list plus everything saved
+  here, each row showing what the build costs before you load it. Upvotes are 👍
+  reactions on GitHub, and the vote button only appears while the board still *is*
+  the published build: edit one node and it steps aside for "Back to original", so
+  an upvote always means the build it is attached to. See
+  [Community builds](#community-builds) for where the list lives.
 
 Controls: **click** a node to learn its next level, **right-click** to refund,
 **Backspace** refunds the focused node, and the side panel has explicit Learn/Refund
@@ -149,10 +158,12 @@ icons-src/                     the source icons the masks are built from
 data/perks.json                the perk registry — single source of truth
 data/abilities.json            the ability registry, generated from two saved pages
 data/mechanics.json            the synergy graph — systems, causal edges, per-node mapping
+data/builds.json               the community list — generated into the deploy, empty in the repo
 tools/verify_perks.py          checks all three registries, and perks against a source page
 tools/extract_abilities.py     rebuilds data/abilities.json from saved ability pages
 tools/build_mechanics.py       rebuilds data/mechanics.json
 tools/build_marks.py           rebuilds assets/marks/ from icons-src/
+tools/bake_builds.py           turns the build issues into data/builds.json at deploy time
 tools/extract_ability_icons.py cuts ability marks out of skill-screen shots
 VERIFICATION.md                what was checked, and where the sources disagreed
 ```
@@ -171,7 +182,48 @@ python3 -m http.server
 # then open http://localhost:8000
 ```
 
-For GitHub Pages: Settings → Pages → deploy from branch, root folder. No build step.
+For GitHub Pages: Settings → Pages → Source → **GitHub Actions**. There is still no
+build step — `.github/workflows/pages.yml` only bakes the community list and stamps
+the asset URLs before publishing the folder as-is.
+
+Served locally, the community tab is empty and says so: `data/builds.json` is
+generated into the deploy and committed empty. Saving, loading and links all work.
+
+## Community builds
+
+The planner is a static site, so it has nowhere to keep shared state. The issue
+tracker is the database instead:
+
+- **Publishing** opens a prefilled issue from `.github/ISSUE_TEMPLATE/build.yml`.
+  The player presses Submit; nothing is posted on their behalf.
+- **Upvoting** is a 👍 reaction on that issue — one per GitHub account, no login
+  flow to build and no vote-stuffing logic to get wrong. The planner remembers
+  locally that you voted so the button can flip, which is a convenience, not a
+  count: the number comes from GitHub.
+- **Baking.** `tools/bake_builds.py` writes `data/builds.json` into the deploy
+  artifact — never a commit, so there are no bot commits in the history. An issue
+  counts as a build if it carries the `build` label *or* its body parses as the
+  form, so the feature does not depend on that label existing: an issue form drops
+  a label the repository does not have, silently, which would have swallowed the
+  first build anyone published. Visitors read a flat file from our own origin: no
+  API key, nothing to rate-limit, nothing to pay for.
+- **Moderation** is the tracker's. Close an issue, or label it `rejected`, `spam`,
+  `invalid` or `duplicate`, and it leaves the list at the next bake.
+
+The cost of all this is staleness. Reactions fire no webhook, so an upvote reaches
+the site only on the next deploy, and the workflow is on a half-hourly schedule for
+that reason. A published build appears sooner — the `issues` trigger deploys on
+submission. Half an hour of lag is the whole price of having no backend.
+
+Nothing needs setting up beyond Pages itself. Creating a `build` label makes the
+tracker easier to filter by hand, and the form will then apply it, but the list
+works without one.
+
+A code that does not survive the planner's own rules — an ultimate its points no
+longer pay for, a perk a patch removed — is not rejected; it loads as much of
+itself as is legal. Builds are matched by what they decode to rather than by
+string, so such a build still keeps its identity, and its upvote, after the rules
+move under it.
 
 ## Data format
 
