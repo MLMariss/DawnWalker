@@ -1422,8 +1422,8 @@
               "scales": [
                 262
               ],
-              "figure_source": "scaled",
-              "figure_note": "No level 9 capture. 160 x 131/80 = 262 exactly, the ratio the Vampirism figures fix between the first capture and level 20."
+              "figure_source": "read",
+              "figure_note": "Level 9 panel reads 124. Vampirism's power is 62 at level 9 and 131 at level 20, so this ability's unit value is 124/62 = 2 exactly, and 2 x 131 = 262 exactly. No longer an estimate."
             }
           ],
           "active_time": "NIGHT ONLY",
@@ -1444,17 +1444,17 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Restores 60% of Health Segment. 367 Damage to target.",
+              "effect": "Restores 60% of Health Segment. 366 Damage to target.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none",
               "text_source": "game",
               "effect_template": "Restores 60% of Health Segment. {0} Damage to target.",
               "scales": [
-                367
+                366
               ],
               "figure_source": "scaled",
-              "figure_note": "No level 9 capture. 224 x 131/80 = 366.8; the level 20 ladder steps by ~78.5, which also lands here. +/-1."
+              "figure_note": "Level 9 panel reads 173. Voracious Bite's unit values are 2.8, 3.4, 4.0, 4.6 — they reproduce 224/272/320 at the first capture and 173/210/248 at level 9, both exactly. 2.8 x 131 = 366.8, and the game truncates, so 366."
             },
             {
               "level": 2,
@@ -1528,7 +1528,7 @@
         "exact": true
       }
     },
-    "note": "Every figure in `scales` is what the in-game panel shows a character at `anchor_level`. Damage scales with the character, so figures read at different levels are not comparable - splice two and an upgrade reads as a downgrade. `ratio` is a tree's figure at `anchor_level` divided by the same figure at `low_anchor_level`, measured on rows captured at both. To restate a figure at level L: multiply by 1 + (1/ratio - 1) * (anchor_level - L) / (anchor_level - low_anchor_level). That is exact at both anchors and interpolates between them; outside 9-20 it is extrapolation.",
+    "note": "Every figure in `scales` is what the in-game panel shows a character at `anchor_level`. Damage scales with the character, so figures read at different levels are not comparable - splice two and an upgrade reads as a downgrade. `ratio` is a tree's figure at `anchor_level` divided by the same figure at `low_anchor_level`, measured on rows captured at both. The game truncates rather than rounds, so a stored figure d stands for a true value in [d, d+1). To restate it at level L: floor((d + 0.5) * (1 + (1/ratio - 1) * (anchor_level - L) / (anchor_level - low_anchor_level))). That is exact at both anchors and interpolates between them; outside 9-20 it is extrapolation.",
     "model_note": "`linear` is a straight line between the two anchors, not compounding growth. Both models fit the anchors exactly and diverge by up to 6.7% midway between them, so the data cannot yet separate them - a capture at a third known level would. Linear is preferred because it places the first, unknown-level capture at level 11.9-12.3 in all three trees, against 12.7-13.2 and a wider spread for geometric. Per-level growth under this model is `per_level_of_low_anchor` of the level 9 figure, each level: about 9.1% for Swordmastery and 10.1-10.2% for the other two.",
     "scaled_rows": "Rows marked figure_source: scaled were not read at anchor_level; figure_note records the arithmetic. Rows marked read were.",
     "first_capture": "The registry's original capture was at no single level: its three trees imply levels 11.9, 12.0 and 12.3, so it straddled a level-up. That is why its figures could not be reconciled and why level 20 is the anchor.",
@@ -1592,9 +1592,35 @@
           "3": [
             1054
           ]
+        },
+        "Shred": {
+          "4": [
+            124
+          ]
+        },
+        "Voracious Bite": {
+          "1": [
+            173
+          ],
+          "2": [
+            210
+          ],
+          "3": [
+            248
+          ]
+        },
+        "Witchcraft Mastery": {
+          "2": [
+            121
+          ],
+          "4": [
+            121
+          ]
         }
       }
     },
-    "observations_note": "Figures read from a panel at a character level other than `anchor_level`, keyed by that level then by ability then by ability level. verify_perks.py restates each `scales` entry at that level through the model and fails if it does not come back to what the panel showed, so the model cannot drift from its evidence. null marks a figure the capture did not show."
+    "observations_note": "Figures read from a panel at a character level other than `anchor_level`, keyed by that level then by ability or perk name then by its level. verify_perks.py restates each `scales` entry at that level through the model and fails if it does not come back to what the panel showed, so the model cannot drift from its evidence. null marks a figure the capture did not show.",
+    "rounding": "truncate",
+    "rounding_note": "The level 9 panels fix this. Voracious Bite level 4 reads 602 at level 20 where rounding its unit value would give 603, and its level 2 reads 210 at level 9 where rounding the stored 445 gives 211. Truncating (d + 0.5) reproduces all 24 captured figures; rounding d misses one."
   }
 }

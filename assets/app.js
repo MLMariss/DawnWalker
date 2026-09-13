@@ -183,12 +183,17 @@
   function groupDigits(n) {
     return n >= 1000 ? String(n).replace(/\B(?=(\d{3})+$)/g, ',') : String(n);
   }
+  /* The game truncates rather than rounds — Voracious Bite reads 602 where
+     rounding its own upgrade step would give 603. So a stored figure d is a true
+     value somewhere in [d, d+1), and restating means carrying its midpoint
+     across and truncating. That reproduces every captured panel; rounding d
+     misses one. */
   function effectAt(p, l) {
     var tree = TREE_OF[p.node_id];
     if (!l.scales || !l.effect_template || !tree || !atCharLevel(tree)) return l.effect;
     var f = levelFactor(tree);
     return l.effect_template.replace(/\{(\d+)\}/g, function (_, i) {
-      return groupDigits(Math.max(1, Math.round(l.scales[+i] * f)));
+      return groupDigits(Math.max(1, Math.floor((l.scales[+i] + 0.5) * f)));
     });
   }
 

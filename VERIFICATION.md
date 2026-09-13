@@ -293,20 +293,54 @@ overturn it by changing one field.
 12.0 and 12.3 — it straddled a level-up mid-session. That is why its ratios never
 agreed with each other, and why the anchor moved to level 20.
 
+#### The game truncates, and figures are a unit value times a character stat
+
+Vampirism's ratios are exact because the underlying quantity is an integer. The
+character's power reads **62 at level 9, 80 at the first capture, 131 at level
+20**, and every displayed figure is a per-level unit value times that power:
+
+| Ability | Unit values | At 62 | At 80 | At 131 |
+| --- | --- | --- | --- | --- |
+| Blood Surge, area | 4, 5, 6, 7 | 248, 310, 372, 434 | 320, 400, 480, 560 | 524, 655, 786, 917 |
+| Blood Surge, bosses | 14, 17, 20, 23 | 868, 1054, 1240, 1426 | 1120, 1360, 1600, 1840 | 1834, 2227, 2620, 3013 |
+| Death From Above | 13, 15, 17, 19 | 806, 930, 1054, 1178 | 1040, 1200, 1360, 1520 | 1703, 1965, 2227, 2489 |
+| Voracious Bite | 2.8, 3.4, 4.0, 4.6 | 173, 210, 248, 285 | 224, 272, 320, 368 | 366, 445, 524, 602 |
+| Shred Lv4 | 2 | 124 | 160 | 262 |
+
+Every bolded value in those rows was read off a panel, and the model reproduces
+all of them.
+
+Voracious Bite settles the rounding question: 4.6 × 131 = 602.6 and the panel
+reads **602**, not 603. **The game truncates.** So a stored figure `d` stands
+for a true value in `[d, d+1)`, and restating it means carrying `d + 0.5` across
+and truncating. That reproduces all 24 captured figures; rounding `d` instead
+misses one (Voracious Bite Lv2 comes out 211 against the panel's 210).
+
 #### The model has to keep fitting
 
-`scaling.observations` stores what the level 9 panels actually showed, figure by
-figure. `verify_perks.py` restates every `scales` entry down to level 9 through
-the model and fails if it does not come back to the captured number. All 15
-observations round-trip, **including the six figures the model derived** — Dirty
-Trick Lv1 restates to exactly 121, Death From Above to 806 and 930, Blood Surge
-Lv1 to 248, which is what the clipped `2??` in that capture reads. Break a ratio
-and the check reports it.
+`scaling.observations` stores what the level 9 panels showed, figure by figure.
+`verify_perks.py` restates every `scales` entry down to level 9 and fails if it
+does not come back to the captured number. **All 24 round-trip**, including
+every figure the model derived rather than read — Dirty Trick Lv1 restates to
+exactly 121, Death From Above to 806 and 930, Blood Surge Lv1 to 248, which is
+what the clipped `2??` in that capture reads. Break a ratio and the check
+reports it.
 
-Nine figures are computed rather than read, each carrying `figure_source:
-"scaled"` and a `figure_note` with its arithmetic. Six now come from level 9;
-three (Shred Lv4, Voracious Bite Lv1, Witchcraft Mastery Lv2/Lv4) have no level 9
-capture and still come from the first one, so they carry ±1.
+Three figures had no level 9 capture and were carrying ±1 from the first one.
+All three now have one, and one of them was not ±1 at all:
+
+| | Was | Now | |
+| --- | --- | --- | --- |
+| **Shred** Lv4 | 262 ± 1 | **262** | confirmed exact — 124/62 = 2, and 2 × 131 = 262 |
+| **Voracious Bite** Lv1 | 367 | **366** | truncation, not rounding, of 2.8 × 131 = 366.8 |
+| **Witchcraft Mastery** Lv2, Lv4 | 244 | **257** | was 13 low |
+
+Witchcraft Mastery is the instructive one. Its old figure of 154 implies a ratio
+of 154/121 against the level 9 panel, where Burning Blood in the *same* capture
+implies 96/72 — so that perk was shot at a lower character level than the
+abilities beside it. It is the sharpest evidence that the first capture was never
+one character level, and the only figure in the registry the re-anchor moved by
+more than two.
 
 #### Re-reading a row
 

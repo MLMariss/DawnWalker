@@ -22,6 +22,7 @@ Requires: beautifulsoup4 and lxml, but only to read a source page. The internal
 checks run without them.
 """
 import json
+import math
 import pathlib
 import re
 import sys
@@ -323,17 +324,22 @@ def _magnitudes(text):
 
 
 SCALING_KEYS = {"anchor_level", "low_anchor_level", "model", "trees", "note", "model_note",
-                "scaled_rows", "first_capture", "observations", "observations_note"}
+                "scaled_rows", "first_capture", "observations", "observations_note",
+                "rounding", "rounding_note"}
 
 
 def restate(block, tree, value, level):
-    """A figure at `anchor_level`, restated at another character level."""
+    """A figure at `anchor_level`, restated at another character level.
+
+    The game truncates, so a stored figure d stands for a true value anywhere in
+    [d, d+1); carrying its midpoint across and truncating reproduces every
+    captured panel, where rounding d does not."""
     hi, lo = block["anchor_level"], block["low_anchor_level"]
     ratio = block["trees"][tree]["ratio"]
-    return round(value * (1 + (1 / ratio - 1) * (hi - level) / (hi - lo)))
+    return math.floor((value + 0.5) * (1 + (1 / ratio - 1) * (hi - level) / (hi - lo)))
 
 
-def observation_checks(abilities):
+def observation_checks(abilities, registry=None):
     """The growth model exists to restate a figure at another character level.
     That is only worth trusting while it still reproduces the panels actually
     captured at those levels, so every stored observation is replayed."""
@@ -346,14 +352,17 @@ def observation_checks(abilities):
         return ["abilities.json: scaling.observations is empty, so the growth model "
                 "is fitted to nothing that can contradict it"]
     index = {}
-    for tree_name, tree in abilities.get("trees", {}).items():
-        for ability in tree.get("abilities", []):
-            index[ability["name"]] = (tree_name, ability)
+    for doc in (abilities, registry):
+        for tree_name, tree in (doc or {}).get("trees", {}).items():
+            for group in ("abilities", "perks", "ultimates"):
+                for entry in tree.get(group, []):
+                    if "levels" in entry:
+                        index.setdefault(entry["name"], (tree_name, entry))
     for level_key, per_ability in obs.items():
         level = int(level_key)
         for name, per_level in per_ability.items():
             if name not in index:
-                findings.append(f"scaling.observations[{level_key}]: no ability named {name!r}")
+                findings.append(f"scaling.observations[{level_key}]: nothing named {name!r}")
                 continue
             tree_name, ability = index[name]
             for lv_key, seen in per_level.items():
@@ -583,7 +592,7 @@ def main():
     findings = (internal_checks(registry) + ability_checks(abilities, perk_ids)
                 + mechanics_checks(registry, abilities)
                 + scaling_checks(registry, abilities)
-                + observation_checks(abilities))
+                + observation_checks(abilities, registry))
     label = "internal consistency"
 
     expected = []
