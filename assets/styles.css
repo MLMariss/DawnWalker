@@ -586,9 +586,9 @@ a:hover{color:var(--gold-2)}
 /* Given by the story, not bought. Marked in green because the useful fact is
    that it costs nothing, and priced rows are read in red and gold. */
 .free-tag{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--green)}
-/* A level row still carrying the Game8 table rather than the game's own panel.
-   Muted where the table only flattens the wording, red where its damage figure
-   is on a different scale from the rows above and the number is plainly wrong. */
+/* Muted: a damage figure converted to the registry's scale rather than read at
+   it — right size, computed rather than transcribed. Red: a row still carrying
+   the Game8 table rather than the game's own panel. */
 .src-tag{
   padding:2px 6px;border:1px solid color-mix(in srgb,var(--text-faint) 45%,transparent);
   border-radius:9px;font-size:10px;font-weight:700;letter-spacing:.09em;

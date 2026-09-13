@@ -5,6 +5,7 @@
   'use strict';
 
   var DATA = null;
+  var SCALING = null;
   var TREES = [];
   var BY_ID = {};
   var TREE_OF = {};
@@ -15,12 +16,13 @@
   var state = {
     tab: null, sel: null,
     levels: {}, ults: {}, quests: {},
-    corruption: 15, manuals: true, synergy: true
+    corruption: 15, manuals: true, synergy: true, charlvl: null
   };
 
   var el = {};
   ['tabs', 'tree', 'links', 'nodes', 'ults', 'ult-gate', 'panel', 'toast', 'corruption',
-   'corruption-out', 'manuals', 'synergy', 'm-sp', 'm-ts', 'm-bk', 'boardscroll',
+   'corruption-out', 'charlvl', 'charlvl-out', 'charlvl-ctl',
+   'manuals', 'synergy', 'm-sp', 'm-ts', 'm-bk', 'boardscroll',
    'ov-body', 'ov-note', 'ovdrawer', 'abils', 'abil-note', 'abildrawer', 'ultdrawer',
    'side', 'hint-key', 'modal', 'modal-title', 'modal-body', 'loadedbar'].forEach(function (id) {
     el[id.replace(/-(\w)/g, function (_, c) { return c.toUpperCase(); })] = document.getElementById(id);
@@ -46,6 +48,8 @@
 
   function boot(json, abilities, mechanics) {
     DATA = json;
+    SCALING = abilities.scaling || null;
+    if (SCALING) state.charlvl = SCALING.anchor_level;
     buildMechanics(mechanics);
     Object.keys(DATA.trees).forEach(function (name) {
       var t = DATA.trees[name];
@@ -159,22 +163,60 @@
     return c === null ? gate : 'Needs Corruption ' + c + ' or higher';
   }
 
-  /* A level row the screenshot sweep never reached still carries the Game8
-     table's text. That is not a footnote: where the game upgrades a level and
-     the table flattens it, the row is missing the upgrade — Dirty Trick stuns
-     in Area at levels 3 and 4 and the table does not say so. Worse, the damage
-     figures on those rows are on the table's own scale, so a final level can
-     read as weaker than the one below it. Mark the rows rather than let the
-     gap pass for transcription. */
-  function srcTag(l) {
-    if (!l || l.text_source !== 'game8') return '';
-    var why = l.scale_mismatch
-      ? 'Not read from the game — this row is still the Game8 table, and its damage ' +
-        'figure is on a different scale from the levels above it, so the number is wrong here.'
-      : 'Not read from the game — this row is still the Game8 table, which flattens ' +
-        'wording the game spells out.';
-    return '<span class="src-tag' + (l.scale_mismatch ? ' bad' : '') +
-      '" title="' + esc(why) + '">Unverified</span>';
+  /* Damage figures are what the game prints for a character at the registry's
+     anchor level. `scales` holds those figures and `effect_template` is the row
+     with each of them punched out, so a row can be restated at another level
+     without re-reading the prose. The model is a straight line between the two
+     captured levels: exact at both, interpolation between, and plainly
+     extrapolation outside — which the card says rather than hides. */
+  function levelFactor(tree) {
+    if (!SCALING || state.charlvl == null) return 1;
+    var spec = SCALING.trees && SCALING.trees[tree.name];
+    if (!spec) return 1;
+    var hi = SCALING.anchor_level, lo = SCALING.low_anchor_level;
+    return 1 + (1 / spec.ratio - 1) * (hi - state.charlvl) / (hi - lo);
+  }
+  function atCharLevel(tree) {
+    return !!(SCALING && state.charlvl != null && state.charlvl !== SCALING.anchor_level &&
+              SCALING.trees && SCALING.trees[tree.name]);
+  }
+  function groupDigits(n) {
+    return n >= 1000 ? String(n).replace(/\B(?=(\d{3})+$)/g, ',') : String(n);
+  }
+  function effectAt(p, l) {
+    var tree = TREE_OF[p.node_id];
+    if (!l.scales || !l.effect_template || !tree || !atCharLevel(tree)) return l.effect;
+    var f = levelFactor(tree);
+    return l.effect_template.replace(/\{(\d+)\}/g, function (_, i) {
+      return groupDigits(Math.max(1, Math.round(l.scales[+i] * f)));
+    });
+  }
+
+  /* Damage scales with the save, so a figure read from a stronger one cannot sit
+     beside figures read from a weaker one — splice them and a final level reads
+     as weaker than the one below it. Nine figures were divided back to the
+     registry's own scale rather than left wrong or dropped, and the row says so:
+     the number is the right size, but it was computed, not read. */
+  function srcTag(p, l) {
+    if (!l) return '';
+    if (l.text_source === 'game8') {
+      return '<span class="src-tag bad" title="Not read from the game — this row is still the ' +
+        'Game8 table, which flattens wording the game spells out.">Unverified</span>';
+    }
+    var tree = TREE_OF[p.node_id];
+    if (l.scales && tree && atCharLevel(tree)) {
+      var lo = SCALING.low_anchor_level, hi = SCALING.anchor_level;
+      var out = state.charlvl < lo || state.charlvl > hi;
+      return '<span class="src-tag' + (out ? ' bad' : '') + '" title="' +
+        esc('Restated for character level ' + state.charlvl + '. The game was read at levels ' +
+            lo + ' and ' + hi + '; ' + (out ? 'outside that range this is extrapolation.'
+                                            : 'between them the figure is interpolated.')) +
+        '">Level ' + state.charlvl + '</span>';
+    }
+    if (l.figure_source === 'scaled') {
+      return '<span class="src-tag" title="' + esc(l.figure_note || '') + '">Scaled</span>';
+    }
+    return '';
   }
 
   function gateTag(gate, owned) {
@@ -455,16 +497,19 @@
           // The story's own level is not a manual to go and find.
           if (!isFree(p, i) && l.gate === 'manual') manuals.push(p.name + ' — level ' + l.level);
           if (!isFree(p, i) && l.gate === 'vrakhir blood') phials.push(p.name + ' — level ' + l.level);
-          var r = readEffect(l.effect);
+          // The overview quotes the same figures the card does, so it follows
+          // the character level rather than always reading the anchor's.
+          var text = effectAt(p, l);
+          var r = readEffect(text);
           if (!r) {
             /* An ability's level text is a complete restatement of the ability —
                Artery Strike at level 3 IS the ability, 560% and 680% are gone —
                so only the level you hold is listed. A perk's levels are riders
                that stack, and two different riders are both still true, so they
                both stand; only a restatement of the same rider collapses. */
-            if (p.is_ability) cond = [l.effect];
-            else if (byShape[shapeOf(l.effect)] != null) cond[byShape[shapeOf(l.effect)]] = l.effect;
-            else { byShape[shapeOf(l.effect)] = cond.length; cond.push(l.effect); }
+            if (p.is_ability) cond = [text];
+            else if (byShape[shapeOf(text)] != null) cond[byShape[shapeOf(text)]] = text;
+            else { byShape[shapeOf(text)] = cond.length; cond.push(text); }
             continue;
           }
           var label = scopedLabel(p, r.label);
@@ -1062,11 +1107,11 @@
       var owned = i < n, isNext = i === n;
       var blocked = !owned && (!gateOk(l.gate) || (isNext ? !learnable.ok : true));
       return '<li class="' + (owned ? 'on ' : '') + (isNext ? 'next ' : '') + (blocked ? 'blocked' : '') + '">' +
-        '<span class="lp"></span><span class="lv-text">' + esc(l.effect) + '</span>' +
+        '<span class="lp"></span><span class="lv-text">' + esc(effectAt(p, l)) + '</span>' +
         '<span class="lv-meta"><span class="lv-costs">' +
           (isFree(p, i) ? '<span class="free-tag">Story — free</span>'
                         : costHTML(l.skill_points, l.time_segments, true)) + '</span>' +
-          srcTag(l) + (owned ? '' : gateTag(l.gate, false)) + '</span></li>';
+          srcTag(p, l) + (owned ? '' : gateTag(l.gate, false)) + '</span></li>';
     }).join('');
 
     var btn = nl ? 'Learn level ' + nl.level : 'Fully learned';
@@ -1283,6 +1328,13 @@
       el.corruptionOut.textContent = state.corruption;
       dropInvalid(); renderAll();
     });
+    if (el.charlvl) {
+      el.charlvl.addEventListener('input', function () {
+        state.charlvl = +el.charlvl.value;
+        el.charlvlOut.textContent = state.charlvl;
+        renderPanel();
+      });
+    }
     el.manuals.addEventListener('change', function () {
       state.manuals = el.manuals.checked; dropInvalid(); renderAll();
     });
@@ -1337,6 +1389,13 @@
 
     el.corruption.value = state.corruption;
     el.corruptionOut.textContent = state.corruption;
+    if (el.charlvlCtl) {
+      el.charlvlCtl.hidden = !SCALING;
+      if (SCALING) {
+        el.charlvl.value = state.charlvl;
+        el.charlvlOut.textContent = state.charlvl;
+      }
+    }
     el.manuals.checked = state.manuals;
     el.synergy.checked = state.synergy;
   }

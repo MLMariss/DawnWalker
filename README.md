@@ -449,14 +449,26 @@ result, and the three places the sources contradicted each other.
   spot a mismatch, fix `data/perks.json` and the page follows.
 - Stinging Blade's level 4 cost is the one number still worth a second look; see
   VERIFICATION.md.
-- **25 ability level rows are not the game's own text.** The ability panel's level
-  list scrolls, so the screenshot sweep never reached the bottom rows of 21
-  abilities; those rows still carry the Game8 table. Two things go wrong there.
-  The table flattens wording the game spells out — Dirty Trick *stuns in Area* at
-  levels 3 and 4, and the table does not say so — and its damage figures are on a
-  different scale from the rows above, so seven abilities show a final level
-  weaker than the one below it. Every such row is marked **Unverified** on the
-  card, carries `text_source: "game8"` in `data/abilities.json`, and is listed by
-  name in VERIFICATION.md. The perk registry is nearly clean: 154 of its 157 rows
-  are the game's.
+- **Every level row is the game's own text**, across both registries. It took two
+  capture passes: the ability panel's level list scrolls, so the first pass never
+  reached the bottom rows of 21 abilities and they kept the Game8 table's text.
+  That table turned out to drop clauses (Dirty Trick *stuns in Area* at levels 3
+  and 4; Charge keeps *+66% Bleed Duration* at level 4), **invent** one (Soul
+  Stigma never becomes an area effect, whatever the table says), get numbers
+  wrong (Walking Fortress restores 25% at level 4, not 50%), and miss a level
+  outright (Piercing Shriek has four, not three). VERIFICATION.md lists all of
+  it.
+- **Damage figures state the character level they belong to, and follow yours.**
+  Damage scales with the character, so a figure is meaningless without a level —
+  splice two levels together and an upgrade reads as a downgrade, which is how a
+  whole class of errors was found. Every figure is what the game shows at
+  **character level 20**, and a second capture at level 9 fixes the growth per
+  level: exactly 131/62 for Vampirism, measured on seven pairs that all reduce to
+  the same fraction. The header's **Char. level** slider restates every figure
+  live, and the card marks each restated row. Nine figures are computed rather
+  than read and say so.
+- `tools/verify_perks.py` replays the level 9 captures through the model and
+  fails if a figure no longer comes back to what the panel showed. It also fails
+  on any level whose figure drops below the one beneath it, and on any row
+  missing a Duration that its neighbours both state.
 - Fan-made and unofficial. Not affiliated with Rebel Wolves.

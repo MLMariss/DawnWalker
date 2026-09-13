@@ -15,7 +15,7 @@
     "`kind` is active or passive, decided by use_cost: anything that pays an activation charge or health is active. Passive abilities still take an ability slot - they work once equipped in the Active Ability panel.",
     "`story_granted` marks an ability whose first level the story hands you: it costs no skill points and no time segments to learn. Upgrades past level 1 are paid for normally.",
     "`text_source` records where each level row's text came from: `game` (read from the in-game panel), `game8` (still the Game8 table, never re-read from the game), or `placeholder` (a padlocked story node that prints no effect line).",
-    "`scale_mismatch` marks a `game8` row whose damage figure is on Game8's scale while the rows above it are on the capture's, so the level reads as a downgrade. Damage figures scale with the save, so a whole ability must be re-read from one save to be consistent."
+    "`scales` lists a level row's absolute damage figures and `effect_template` is the row with each of them replaced by a positional slot, so the text can be restated at another character level without re-parsing it. See `scaling`."
   ],
   "trees": {
     "Witchcraft": {
@@ -60,11 +60,11 @@
             },
             {
               "level": 4,
-              "effect": "+1.6% permanent Witchcraft Ability Damage for each place of power exorcised",
+              "effect": "+1.6% permanent Witchcraft Ability Damage for each place of power exorcised.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "none",
-              "text_source": "game8"
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY",
@@ -86,36 +86,56 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Deals 96 Damage per second. Duration 10s.",
+              "effect": "Deals 153 Damage per second. Duration 10s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "Deals {0} Damage per second. Duration 10s.",
+              "scales": [
+                153
+              ],
+              "figure_source": "scaled",
+              "figure_note": "Level 9 panel reads 72; x2.122735 (Witchcraft, level 9 -> 20) = 152.8. Rounding on figures this small leaves +/-1."
             },
             {
               "level": 2,
-              "effect": "Deals 100 Damage per second. Duration 12s.",
+              "effect": "Deals 159 Damage per second. Duration 12s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "Deals {0} Damage per second. Duration 12s.",
+              "scales": [
+                159
+              ],
+              "figure_source": "read"
             },
             {
               "level": 3,
-              "effect": "Deals 103 Damage per second. On Death, effect transfers to different enemy. Duration 14s.",
+              "effect": "Deals 163 Damage per second. On Death, effect transfers to different enemy. Duration 14s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "Deals {0} Damage per second. On Death, effect transfers to different enemy. Duration 14s.",
+              "scales": [
+                163
+              ],
+              "figure_source": "read"
             },
             {
               "level": 4,
-              "effect": "Deal 63 Damage per second. Duration 16s. On Death, effect transfers to a different enemy",
+              "effect": "Deals 183 Damage per second. On Death, effect transfers to different enemy. Duration 16s.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
-              "text_source": "game8",
-              "scale_mismatch": true
+              "text_source": "game",
+              "figure_source": "read",
+              "effect_template": "Deals {0} Damage per second. On Death, effect transfers to different enemy. Duration 16s.",
+              "scales": [
+                183
+              ]
             }
           ],
           "active_time": "DAY ONLY",
@@ -160,11 +180,11 @@
             },
             {
               "level": 4,
-              "effect": "-2% permanent Witchcraft Ability Cooldown for each soul compelled",
+              "effect": "-2% permanent Witchcraft Ability Cooldown for each soul compelled.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "none",
-              "text_source": "game8"
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY",
@@ -209,11 +229,11 @@
             },
             {
               "level": 4,
-              "effect": "Extends Duration of Witchcraft Abilities by 3s. Critical Hits extend Duration of Witchcraft Abilities by 5s. +10% Witchcraft Ability Damage for each enemy currently affected by Witchcraft Abilities",
+              "effect": "Extends Duration of Witchcraft Abilities by 3s. Critical Hits extend Duration of Witchcraft Abilities by 5s. +10% Witchcraft Ability Damage for each enemy currently affected by Witchcraft Abilities.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
-              "text_source": "game8"
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY",
@@ -257,11 +277,11 @@
             },
             {
               "level": 4,
-              "effect": "Reflects 200% of Damage. Blocks 4 instances of Damage. Duration 90s",
+              "effect": "Reflects 200% of Damage. Blocks 4 instances of Damage. Duration 90s.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
-              "text_source": "game8"
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY",
@@ -330,37 +350,57 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Area Damage 161. Ravenous Flock cancels after 1 hit. 100% Critical Hits on target. Duration 20s.",
+              "effect": "Area Damage 257. Ravenous Flock cancels after 1 hit. 100% Critical Hits on target. Duration 20s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "Area Damage {0}. Ravenous Flock cancels after 1 hit. 100% Critical Hits on target. Duration 20s.",
+              "scales": [
+                257
+              ],
+              "figure_source": "scaled",
+              "figure_note": "Level 9 panel reads 121; x2.122735 (Witchcraft, level 9 -> 20) = 256.9."
             },
             {
               "level": 2,
-              "effect": "Area Damage 177. Ravenous Flock cancels after 2 hits. 100% Critical Hits on target. Duration 20s.",
+              "effect": "Area Damage 282. Ravenous Flock cancels after 2 hits. 100% Critical Hits on target. Duration 20s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "Area Damage {0}. Ravenous Flock cancels after 2 hits. 100% Critical Hits on target. Duration 20s.",
+              "scales": [
+                282
+              ],
+              "figure_source": "scaled",
+              "figure_note": "Level 9 panel reads 133; x2.122735 (Witchcraft, level 9 -> 20) = 282.3."
             },
             {
               "level": 3,
-              "effect": "Area Damage 105. Ravenous Flock cancels after 3 hits. 100% Critical Hits on target. Duration 20s",
+              "effect": "Area Damage 305. Ravenous Flock cancels after 3 hits. 100% Critical Hits on target. Duration 20s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual",
-              "text_source": "game8",
-              "scale_mismatch": true
+              "text_source": "game",
+              "figure_source": "read",
+              "effect_template": "Area Damage {0}. Ravenous Flock cancels after 3 hits. 100% Critical Hits on target. Duration 20s.",
+              "scales": [
+                305
+              ]
             },
             {
               "level": 4,
-              "effect": "Area Damage 114. Ravenous Flock cancels after 4 hits. 100% Critical Hits on target. Duration 20s",
+              "effect": "Area Damage 331. Ravenous Flock cancels after 4 hits. 100% Critical Hits on target. Duration 20s.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
-              "text_source": "game8",
-              "scale_mismatch": true
+              "text_source": "game",
+              "figure_source": "read",
+              "effect_template": "Area Damage {0}. Ravenous Flock cancels after 4 hits. 100% Critical Hits on target. Duration 20s.",
+              "scales": [
+                331
+              ]
             }
           ],
           "active_time": "DAY ONLY",
@@ -380,36 +420,56 @@
           "levels": [
             {
               "level": 1,
-              "effect": "59 Lifesteal per second. Duration 18s.",
+              "effect": "93 Lifesteal per second. Duration 18s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "{0} Lifesteal per second. Duration 18s.",
+              "scales": [
+                93
+              ],
+              "figure_source": "scaled",
+              "figure_note": "The level 20 ladder steps by exactly 17 (93, 110, 127, 144), so level 1 is 110 - 17. The older capture agrees at 59 x ~1.58."
             },
             {
               "level": 2,
-              "effect": "70 Lifesteal per second. Duration 24s.",
+              "effect": "110 Lifesteal per second. Duration 24s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "{0} Lifesteal per second. Duration 24s.",
+              "scales": [
+                110
+              ],
+              "figure_source": "read"
             },
             {
               "level": 3,
-              "effect": "80 Lifesteal per second. 20% Damage you receive transfers to the target. Duration 30s.",
+              "effect": "127 Lifesteal per second. 20% Damage you receive transfers to the target. Duration 30s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "{0} Lifesteal per second. 20% Damage you receive transfers to the target. Duration 30s.",
+              "scales": [
+                127
+              ],
+              "figure_source": "read"
             },
             {
               "level": 4,
-              "effect": "49 Lifesteal per second. 40% Damage you receive transfers to the target. 500 Heal on target's Death. Duration 36s",
+              "effect": "144 Lifesteal per second. 40% Damage you receive transfers to the target. 500 Heal on target's Death. Duration 36s.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
-              "text_source": "game8",
-              "scale_mismatch": true
+              "text_source": "game",
+              "figure_source": "read",
+              "effect_template": "{0} Lifesteal per second. 40% Damage you receive transfers to the target. 500 Heal on target's Death. Duration 36s.",
+              "scales": [
+                144
+              ]
             }
           ],
           "active_time": "DAY ONLY",
@@ -445,7 +505,7 @@
             },
             {
               "level": 3,
-              "effect": "+45% Critical Hit chance. +30% Critical Damage. On Death, effect transfers to different enemy.",
+              "effect": "+45% Critical Hit chance. +30% Critical Damage. On Death, effect transfers to different enemy. Duration 30s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual",
@@ -453,11 +513,11 @@
             },
             {
               "level": 4,
-              "effect": "Area +50% Critical Hit chance. +40% Critical Damage. On Death, effect transfers to a different enemy and Stuns him. Duration 35s",
+              "effect": "+50% Critical Hit chance. +40% Critical Damage. On Death, effect transfers to different enemy and Stuns him. Duration 35s.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
-              "text_source": "game8"
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY",
@@ -501,11 +561,11 @@
             },
             {
               "level": 4,
-              "effect": "Regenerates 25% of Health over 10 seconds. Heal 40% of dealt Damage from Critical Hits on enemies affected by Witchcraft Abilities. No health cost for using Witchcraft Abilities when Health is below 30%",
+              "effect": "Regenerates 25% Health. Heal 40% of dealt Damage from Critical Hits on enemies affected by Witchcraft Abilities. No Health cost for using Witchcraft Abilities when Health is below 30%.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
-              "text_source": "game8"
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY",
@@ -554,11 +614,11 @@
             },
             {
               "level": 4,
-              "effect": "+50% Attack Damage. +150% Passive Activation Charge. Attacks restore 10% of Activation Charge. Duration 6s",
+              "effect": "+50% Attack Damage. +150% passive Activation Charge Regeneration. Attacks restore 10% of Activation Charge. Duration 6s.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
-              "text_source": "game8"
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME",
@@ -602,11 +662,11 @@
             },
             {
               "level": 4,
-              "effect": "Deals 800% Weapon Damage. Decapitation: 50% chance. Decapitation chance ×2 on bleeding enemies",
+              "effect": "Deals 800% Weapon Damage. Decapitation : 50% chance. Decapitation chance x2 on Bleeding enemies.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
-              "text_source": "game8"
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME",
@@ -691,19 +751,19 @@
             },
             {
               "level": 3,
-              "effect": "Deals 300% Attack Damage. Stun Duration 2s. Bleed on target: 100% chance. +66% Bleed Duration",
+              "effect": "Deals 300% Attack Damage. Stun Duration 2s. Bleed on target: 100% chance. +66% Bleed Duration.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual",
-              "text_source": "game8"
+              "text_source": "game"
             },
             {
               "level": 4,
-              "effect": "Deals 350% Attack Damage. Stun Duration 2s. Bleed on target: 100% chance. 1 Activation Charge restore on kill",
+              "effect": "Deals 350% Attack Damage. Stun Duration 2s. Bleed on target: 100% chance. +66% Bleed Duration. 1 Activation Charge restore on kill.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
-              "text_source": "game8"
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME",
@@ -724,39 +784,56 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Stun ends after 3 hits. Deals 154 Damage. +10% Damage from Active Abilities. Duration 15s.",
+              "effect": "Stun ends after 3 hits. Deals 242 Damage. +10% Damage from Active Abilities. Duration 15s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "Stun ends after 3 hits. Deals {0} Damage. +10% Damage from Active Abilities. Duration 15s.",
+              "scales": [
+                242
+              ],
+              "figure_source": "scaled",
+              "figure_note": "Level 9 panel reads 121; x2 (Swordmastery, level 9 -> 20) = 242 exactly."
             },
             {
               "level": 2,
-              "effect": "Stun ends after 4 hits. Deals 192 Damage. +20% Damage from Active Abilities. Duration 20s.",
+              "effect": "Stun ends after 4 hits. Deals 302 Damage. +20% Damage from Active Abilities. Duration 20s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "manual",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "Stun ends after 4 hits. Deals {0} Damage. +20% Damage from Active Abilities. Duration 20s.",
+              "scales": [
+                302
+              ],
+              "figure_source": "read"
             },
             {
               "level": 3,
-              "effect": "Stuns in Area. Ends after 5 hits. Deals 66 Damage. +30% Damage from Active Abilities. Duration 25s.",
+              "effect": "Stuns in Area. Ends after 5 hits. Deals 363 Damage. +30% Damage from Active Abilities. Duration 25s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "manual",
-              "text_source": "game8",
-              "scale_mismatch": true,
-              "text_note": "Wording read from the in-game panel: levels 3 and 4 upgrade the stun to an Area stun. The damage figure is still Game8's and is on a different scale from levels 1-2."
+              "text_source": "game",
+              "figure_source": "read",
+              "effect_template": "Stuns in Area. Ends after 5 hits. Deals {0} Damage. +30% Damage from Active Abilities. Duration 25s.",
+              "scales": [
+                363
+              ]
             },
             {
               "level": 4,
-              "effect": "Stuns in Area. Ends after 6 hits. Deals 77 Damage. +50% Damage from Active Abilities. Duration 30s. -1 Activation Charge cost for Active Abilities used on Stunned enemies (minimum 1)",
+              "effect": "Stuns in Area. Ends after 6 hits. Deals 423 Damage. +50% Damage from Active Abilities. Duration 30s. -1 Activation Charge cost for Active Abilities used on Stunned enemies (minimum 1).",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
-              "text_source": "game8",
-              "scale_mismatch": true,
-              "text_note": "Wording read from the in-game panel: levels 3 and 4 upgrade the stun to an Area stun. The damage figure is still Game8's and is on a different scale from levels 1-2."
+              "text_source": "game",
+              "figure_source": "read",
+              "effect_template": "Stuns in Area. Ends after 6 hits. Deals {0} Damage. +50% Damage from Active Abilities. Duration 30s. -1 Activation Charge cost for Active Abilities used on Stunned enemies (minimum 1).",
+              "scales": [
+                423
+              ]
             }
           ],
           "active_time": "ANYTIME",
@@ -800,11 +877,11 @@
             },
             {
               "level": 4,
-              "effect": "+30% Attack Speed. +15% Critical Hit chance. Critical Hits cost no Stamina. Duration 12s",
+              "effect": "+30% Attack Speed. +5% Critical Hit chance. Critical Hits cost no Stamina. Duration 12s.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
-              "text_source": "game8"
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME",
@@ -848,11 +925,11 @@
             },
             {
               "level": 4,
-              "effect": "Restores 50% of Activation Charge. -2s Cooldowns of Active Abilities after Directional Block or Perfect Block. -1 Activation Charge cost for the next Active Ability if used within 5s after a Perfect Block (minimum 1)",
+              "effect": "Restores 25% of Activation Charge. -2s Cooldowns of Active Abilites after a Directional Block or a Perfect Block. -1 Activation Charge cost for the next Active Ability if used within 5s after a Perfect Block (minimum 1).",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "manual",
-              "text_source": "game8"
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME",
@@ -877,36 +954,60 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Area Damage 320 in 3m radius after Explosion. 1,120 Damage to Bosses.",
+              "effect": "Area Damage 524 in 3m radius after Explosion. 1,834 Damage to Bosses.",
               "skill_points": 1,
               "time_segments": 0,
               "gate": "vrakhir blood",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "Area Damage {0} in 3m radius after Explosion. {1} Damage to Bosses.",
+              "scales": [
+                524,
+                1834
+              ],
+              "figure_source": "scaled",
+              "figure_note": "Boss figure read at level 20. Area figure: the level 9 panel's 1,054/868 rows fix the ratio at 131/62 exactly, and 248 x 131/62 = 524."
             },
             {
               "level": 2,
-              "effect": "Area Damage 400 in 4m radius after Explosion. 1,360 Damage to Bosses.",
+              "effect": "Area Damage 655 in 4m radius after Explosion. 2,227 Damage to Bosses.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 10",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "Area Damage {0} in 4m radius after Explosion. {1} Damage to Bosses.",
+              "scales": [
+                655,
+                2227
+              ],
+              "figure_source": "read"
             },
             {
               "level": 3,
-              "effect": "Area Damage 480 in 5m radius after Explosion. 1,600 Damage to Bosses.",
+              "effect": "Area Damage 786 in 5m radius after Explosion. 2,620 Damage to Bosses.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 12",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "Area Damage {0} in 5m radius after Explosion. {1} Damage to Bosses.",
+              "scales": [
+                786,
+                2620
+              ],
+              "figure_source": "read"
             },
             {
               "level": 4,
-              "effect": "Area Damage 311 in 6m radius after Explosion. 1023 Damage to Bosses",
+              "effect": "Area Damage 917 in 6m radius after Explosion. 3,013 Damage to Bosses.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "corruption 14",
-              "text_source": "game8",
-              "scale_mismatch": true
+              "text_source": "game",
+              "figure_source": "read",
+              "effect_template": "Area Damage {0} in 6m radius after Explosion. {1} Damage to Bosses.",
+              "scales": [
+                917,
+                3013
+              ]
             }
           ],
           "active_time": "NIGHT ONLY",
@@ -974,36 +1075,57 @@
           "levels": [
             {
               "level": 1,
-              "effect": "1,040 Damage to Bosses and Tough enemies.",
+              "effect": "1,703 Damage to Bosses and Tough enemies.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 3",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "{0} Damage to Bosses and Tough enemies.",
+              "scales": [
+                1703
+              ],
+              "figure_source": "scaled",
+              "figure_note": "Level 9 panel reads 806; x131/62 (Vampirism, level 9 -> 20) = 1,703 exactly."
             },
             {
               "level": 2,
-              "effect": "1,200 Damage to Bosses and Tough enemies. +20% Attack Damage for 15s.",
+              "effect": "1,965 Damage to Bosses and Tough enemies. +20% Attack Damage for 15s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 7",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "{0} Damage to Bosses and Tough enemies. +20% Attack Damage for 15s.",
+              "scales": [
+                1965
+              ],
+              "figure_source": "scaled",
+              "figure_note": "Level 9 panel reads 930; x131/62 (Vampirism, level 9 -> 20) = 1,965 exactly."
             },
             {
               "level": 3,
-              "effect": "1,360 Damage to Bosses and Tough enemies. +40% Attack Damage for 15s.",
+              "effect": "2,227 Damage to Bosses and Tough enemies. +40% Attack Damage for 15s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 10",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "{0} Damage to Bosses and Tough enemies. +40% Attack Damage for 15s.",
+              "scales": [
+                2227
+              ],
+              "figure_source": "read"
             },
             {
               "level": 4,
-              "effect": "845 Damage to bosses and Tough enemies. +60% Attack Damage for 15s. Restores 1 Activation Charge",
-              "skill_points": 3,
-              "time_segments": 2,
+              "effect": "2,489 Damage to Bosses and Tough enemies. +60% Attack Damage for 15s. Restores 1 Activation Charge.",
+              "skill_points": 2,
+              "time_segments": 1,
               "gate": "corruption 13",
-              "text_source": "game8",
-              "scale_mismatch": true
+              "text_source": "game",
+              "figure_source": "read",
+              "effect_template": "{0} Damage to Bosses and Tough enemies. +60% Attack Damage for 15s. Restores 1 Activation Charge.",
+              "scales": [
+                2489
+              ]
             }
           ],
           "active_time": "NIGHT ONLY",
@@ -1048,22 +1170,23 @@
             },
             {
               "level": 4,
-              "effect": "Duration 60s. +75% to target's Damage. Target's Attacks restore 20% of Activation Charge",
+              "effect": "+75% to target's Damage. Target's Attacks restore 20% of Activation Charge. Duration 60s.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "corruption 14",
-              "text_source": "game8"
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY",
-          "cooldown": "45s"
+          "cooldown": "45s",
+          "note": "Can't be used on Bosses."
         },
         {
           "node_id": "AV5",
           "name": "Piercing Shriek",
           "effect": "Stuns all enemies in front of you, Weakens their Defence and Attack Damage. Blocking their attacks reflects Damage back at them.",
           "kind": "active",
-          "max_level": 3,
+          "max_level": 4,
           "use_cost": {
             "text": "1 Activation Charge 20% Health",
             "charges": 1,
@@ -1080,19 +1203,27 @@
             },
             {
               "level": 2,
-              "effect": "Stun duration 3s. +20 Damage to targets and -15% Damage dealt by targets. Block reflects 10% of Damage back to the attacker. Perfect Block reflects 60%. Duration 25s",
+              "effect": "Stun Duration 3s. +20% Damage to targets and -20% Damage dealt by targets. Block reflects 15% of Damage back to the attacker. Perfect Block reflects 60%. Duration 35s.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 7",
-              "text_source": "game8"
+              "text_source": "game"
             },
             {
               "level": 3,
-              "effect": "Stun duration 4s. +25 Damage to targets and -25% Damage dealt by targets. Block reflects 20% of Damage back to the attacker. Perfect Block reflects 80%. Duration 45s",
+              "effect": "Stun Duration 4s. +25% Damage to targets and -25% Damage dealt by targets. Block reflects 20% of Damage back to the attacker. Perfect Block reflects 80%. Duration 45s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 11",
-              "text_source": "game8"
+              "text_source": "game"
+            },
+            {
+              "level": 4,
+              "effect": "Stun Duration 5s. +30% Damage to targets and -30% Damage dealt by targets. Block reflects 25% of Damage back to the attacker. Perfect Block reflects 100%. Extends the Duration of effects on attackers by 100%. Duration 60s.",
+              "skill_points": 3,
+              "time_segments": 2,
+              "gate": "corruption 13",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY",
@@ -1128,18 +1259,18 @@
             },
             {
               "level": 3,
-              "effect": "25% of Health Segment after Perfect Block. 20% chance to also trigger after Directional Block and 20% after Omniblock. Attack after Perfect Block heals you for 10% of dealt Damage",
+              "effect": "Restore 25% of Health Segment after Perfect Block. 20% chance to also trigger after Directional Block and 20% chance after Omniblock. Attack after Perfect Block heals you for 10% of dealt Damage.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 10",
-              "text_source": "game8"
+              "text_source": "game"
             },
             {
               "level": 4,
               "effect": "Restore 30% of Health Segment after Perfect Block. 30% chance to also trigger after Directional Block and 25% chance after Omniblock. Attack after Perfect Block heals you for 10% of dealt Damage. 25% chance for any Block to become Perfect Block.",
               "skill_points": 3,
               "time_segments": 2,
-              "gate": "corruption 14",
+              "gate": "corruption 13",
               "text_source": "game"
             }
           ],
@@ -1282,11 +1413,17 @@
             },
             {
               "level": 4,
-              "effect": "35% Bleed chance. +100% Bleed Damage. 160 Damage when Bleed is reapplied.",
+              "effect": "35% Bleed chance. +100% Bleed Damage. 262 Damage when Bleed is reapplied.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "corruption 13",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "35% Bleed chance. +100% Bleed Damage. {0} Damage when Bleed is reapplied.",
+              "scales": [
+                262
+              ],
+              "figure_source": "scaled",
+              "figure_note": "No level 9 capture. 160 x 131/80 = 262 exactly, the ratio the Vampirism figures fix between the first capture and level 20."
             }
           ],
           "active_time": "NIGHT ONLY",
@@ -1307,36 +1444,56 @@
           "levels": [
             {
               "level": 1,
-              "effect": "Restores 60% of Health Segment. 224 Damage to target.",
+              "effect": "Restores 60% of Health Segment. 367 Damage to target.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "none",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "Restores 60% of Health Segment. {0} Damage to target.",
+              "scales": [
+                367
+              ],
+              "figure_source": "scaled",
+              "figure_note": "No level 9 capture. 224 x 131/80 = 366.8; the level 20 ladder steps by ~78.5, which also lands here. +/-1."
             },
             {
               "level": 2,
-              "effect": "Restores 80% of Health Segment. 272 Damage to target.",
+              "effect": "Restores 80% of Health Segment. 445 Damage to target.",
               "skill_points": 1,
               "time_segments": 1,
               "gate": "corruption 3",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "Restores 80% of Health Segment. {0} Damage to target.",
+              "scales": [
+                445
+              ],
+              "figure_source": "read"
             },
             {
               "level": 3,
-              "effect": "Restores 100% of Health Segment. 320 Damage to target. +10% Claw Damage for 30s.",
+              "effect": "Restores 100% of Health Segment. 524 Damage to target. +10% Claw Damage for 30s.",
               "skill_points": 2,
               "time_segments": 1,
               "gate": "corruption 8",
-              "text_source": "game"
+              "text_source": "game",
+              "effect_template": "Restores 100% of Health Segment. {0} Damage to target. +10% Claw Damage for 30s.",
+              "scales": [
+                524
+              ],
+              "figure_source": "read"
             },
             {
               "level": 4,
-              "effect": "Restores 120% of Health Segment. 204 Damage to target. +25 Claw Damage for 60s. No Cooldown if you kill the target",
+              "effect": "Restores 120% of Health Segment. 602 Damage to target. +25% Claw Damage for 60s. No Cooldown if you kill the target.",
               "skill_points": 3,
               "time_segments": 2,
               "gate": "corruption 14",
-              "text_source": "game8",
-              "scale_mismatch": true
+              "text_source": "game",
+              "figure_source": "read",
+              "effect_template": "Restores 120% of Health Segment. {0} Damage to target. +25% Claw Damage for 60s. No Cooldown if you kill the target.",
+              "scales": [
+                602
+              ]
             }
           ],
           "active_time": "NIGHT ONLY",
@@ -1346,5 +1503,98 @@
         }
       ]
     }
+  },
+  "scaling": {
+    "anchor_level": 20,
+    "low_anchor_level": 9,
+    "model": "linear",
+    "trees": {
+      "Witchcraft": {
+        "ratio": 2.122735,
+        "per_level_of_low_anchor": 0.1018,
+        "measured_from": "Burning Blood levels 2-4 (75/159, 77/163, 86/183)",
+        "exact": false
+      },
+      "Swordmastery": {
+        "ratio": 2.0,
+        "per_level_of_low_anchor": 0.0909,
+        "measured_from": "Dirty Trick level 2 (151/302)",
+        "exact": false
+      },
+      "Vampirism": {
+        "ratio": 2.1129032258064515,
+        "per_level_of_low_anchor": 0.1012,
+        "measured_from": "Blood Surge levels 1-4, both figures, and Death From Above level 3 — seven pairs, every one reducing to 131/62",
+        "exact": true
+      }
+    },
+    "note": "Every figure in `scales` is what the in-game panel shows a character at `anchor_level`. Damage scales with the character, so figures read at different levels are not comparable - splice two and an upgrade reads as a downgrade. `ratio` is a tree's figure at `anchor_level` divided by the same figure at `low_anchor_level`, measured on rows captured at both. To restate a figure at level L: multiply by 1 + (1/ratio - 1) * (anchor_level - L) / (anchor_level - low_anchor_level). That is exact at both anchors and interpolates between them; outside 9-20 it is extrapolation.",
+    "model_note": "`linear` is a straight line between the two anchors, not compounding growth. Both models fit the anchors exactly and diverge by up to 6.7% midway between them, so the data cannot yet separate them - a capture at a third known level would. Linear is preferred because it places the first, unknown-level capture at level 11.9-12.3 in all three trees, against 12.7-13.2 and a wider spread for geometric. Per-level growth under this model is `per_level_of_low_anchor` of the level 9 figure, each level: about 9.1% for Swordmastery and 10.1-10.2% for the other two.",
+    "scaled_rows": "Rows marked figure_source: scaled were not read at anchor_level; figure_note records the arithmetic. Rows marked read were.",
+    "first_capture": "The registry's original capture was at no single level: its three trees imply levels 11.9, 12.0 and 12.3, so it straddled a level-up. That is why its figures could not be reconciled and why level 20 is the anchor.",
+    "observations": {
+      "9": {
+        "Burning Blood": {
+          "1": [
+            72
+          ],
+          "2": [
+            75
+          ],
+          "3": [
+            77
+          ],
+          "4": [
+            86
+          ]
+        },
+        "Ravenous Flock": {
+          "1": [
+            121
+          ],
+          "2": [
+            133
+          ]
+        },
+        "Dirty Trick": {
+          "1": [
+            121
+          ],
+          "2": [
+            151
+          ]
+        },
+        "Blood Surge": {
+          "1": [
+            null,
+            868
+          ],
+          "2": [
+            310,
+            1054
+          ],
+          "3": [
+            372,
+            1240
+          ],
+          "4": [
+            434,
+            1426
+          ]
+        },
+        "Death From Above": {
+          "1": [
+            806
+          ],
+          "2": [
+            930
+          ],
+          "3": [
+            1054
+          ]
+        }
+      }
+    },
+    "observations_note": "Figures read from a panel at a character level other than `anchor_level`, keyed by that level then by ability then by ability level. verify_perks.py restates each `scales` entry at that level through the model and fails if it does not come back to what the panel showed, so the model cannot drift from its evidence. null marks a figure the capture did not show."
   }
 }
