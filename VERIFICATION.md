@@ -24,9 +24,13 @@ script exits non-zero on any undocumented difference.
 
 ### The screenshot sweep
 
-A capture of every skill screen is what the registry is transcribed from, and
-it is complete: all 54 perks, all 27 abilities and all 9 ultimates are read
-from the game.
+A capture of every skill screen is what the registry is transcribed from. Every
+one of the 54 perks, 27 abilities and 9 ultimates appears in it — but *screen*
+is not *row*: the ability panel's level list scrolls, so 25 ability rows and 1
+perk row were never re-read and still carry the Game8 table. An earlier draft of
+this note called the sweep "complete", and that overclaim is what let those rows
+pass for the game's own text. They are now named individually below, and marked
+in the data.
 
 Three things the screenshots settled that no published source carries:
 
@@ -38,8 +42,9 @@ Three things the screenshots settled that no published source carries:
   up `road shrine`, a gate neither published source lists — it gates the
   entry perk of each branch, 15 perks in all.
 
-Effect text is now verbatim, including the game's own typos (`Craft 2 Items
-items at once.`, `Active Abilites`). They are kept as the game prints them.
+Effect text is verbatim wherever `text_source` is `game`, including the game's
+own typos (`Craft 2 Items items at once.`, `Active Abilites`). They are kept as
+the game prints them.
 
 Two limits worth knowing when reading the data:
 
@@ -47,9 +52,9 @@ Two limits worth knowing when reading the data:
   Those costs are kept from the Game8 cross-check rather than guessed, and are
   listed in the transcription flags. Ownership itself is never recorded — it
   belongs to a save, not to the registry.
-- Long level lists **scroll** in the panel, so a fourth level was sometimes
-  cut off. Where only part of a row was visible the registry text is kept and
-  the fragment noted.
+- Long level lists **scroll** in the panel, so a fourth level was often cut
+  off. Those rows still carry the Game8 table — see *What the screenshot sweep
+  missed* below for every one of them, and for the two faults it caused.
 
 The saved pages are not committed — they are third-party page dumps of some
 size, and the script reads whatever copy you have locally.
@@ -192,6 +197,85 @@ every run, so the field cannot drift from the cost it was read from.
 Worth knowing: passive does not mean free of slots. The same text says they work
 "once equipped in the Active Ability panel", so passives compete with actives for
 the slots that Forbidden Sigils, Master Fencer and Vrakhiri Might hand out.
+
+### What the screenshot sweep missed, and what still leans on Game8
+
+The sweep captured the skill screens, but the ability panel's level list
+**scrolls**: on a four-level ability only the top rows fit. Rows that scrolled
+out were never re-read, so they kept the Game8 text the registry started from.
+That left two faults, and both are the same fault.
+
+**1. Wording the table flattens.** Where the game upgrades what a level *does*
+and the table only restates the numbers, the upgrade vanishes. **Dirty Trick**
+is the case that surfaced it: the in-game panel reads *"Stuns in Area. Ends
+after 5 hits."* at level 3 and *"Stuns in Area. Ends after 6 hits."* at level 4
+— levels 3 and 4 turn a single-target stun into an area stun, which is the
+whole reason to take them. Game8 prints "Stun ends after 5 hits." for every
+level, so the planner showed an ability that never gains its area. The two rows
+are corrected from the in-game panel.
+
+**2. Damage figures spliced across two scales.** Damage scales with the save, so
+a figure read from the capture and a figure left on the Game8 table are not
+comparable. Splice them into one level list and the last level reads as
+*weaker* than the one below it — Blood Surge runs 320 → 400 → 480 → **311**.
+Seven abilities are in that state. Every affected row carries
+`"scale_mismatch": true`, the planner shows the row as **Unverified** in red,
+and `verify_perks.py` fails on any *unflagged* downgrade, so a new splice cannot
+land quietly.
+
+Every level row in both registries now records `text_source`: `game` for a row
+read from the in-game panel, `game8` for a row still on the table,
+`placeholder` for the two padlocked story nodes that print no effect line. The
+counts are **82 of 107 ability rows** and **154 of 157 perk rows** read from the
+game.
+
+#### Ability rows still on Game8 — 25 rows across 21 abilities
+
+| Tree | Ability | Rows on Game8 | Number known wrong |
+| --- | --- | --- | --- |
+| Witchcraft | **Astral Communion** (AW1) | L4 | — |
+| Witchcraft | **Burning Blood** (AW2) | L4 | **L4** — 96 → 100 → 103 → **63** |
+| Witchcraft | **Compel Soul** (AW3) | L4 | — |
+| Witchcraft | **Cycle of Ruin** (AW4) | L4 | — |
+| Witchcraft | **Life Lock** (AW5) | L4 | — |
+| Witchcraft | **Ravenous Flock** (AW7) | L3, L4 | **L3, L4** — 161 → 177 → **105** → **114** |
+| Witchcraft | **Soul Reaping** (AW8) | L4 | **L4** — 59 → 70 → 80 → **49** |
+| Witchcraft | **Soul Stigma** (AW9) | L4 | — |
+| Witchcraft | **Unholy Vitality** (AW10) | L4 | — |
+| Swordmastery | **Adrenaline Rush** (AS1) | L4 | — |
+| Swordmastery | **Artery Strike** (AS2) | L4 | — |
+| Swordmastery | **Charge** (AS4) | L3, L4 | — |
+| Swordmastery | **Dirty Trick** (AS5) | L3, L4 | **L3, L4** — 154 → 192 → **66** → **77** |
+| Swordmastery | **Swiftness** (AS6) | L4 | — |
+| Swordmastery | **Walking Fortress** (AS7) | L4 | — |
+| Vampirism | **Blood Surge** (AV1) | L4 | **L4** — 320 → 400 → 480 → **311** |
+| Vampirism | **Death From Above** (AV3) | L4 | **L4** — 1,040 → 1,200 → 1,360 → **845** |
+| Vampirism | **Mesmerise** (AV4) | L4 | — |
+| Vampirism | **Piercing Shriek** (AV5, 3 levels) | L2, L3 | — |
+| Vampirism | **Scarlet Shield** (AV6) | L3 | — |
+| Vampirism | **Voracious Bite** (AV10) | L4 | **L4** — 224 → 272 → 320 → **204** |
+
+Dirty Trick's wording is fixed; its damage figures are not, and the row says so.
+
+#### Perk rows still on Game8 — 1 row
+
+| Tree | Perk | Row |
+| --- | --- | --- |
+| Swordmastery | **Fleet of Foot** | L2 — *"Dodging an Attack at the last moment restores a portion of Activation Charge"* |
+
+The perk registry came through the sweep almost intact: 154 of its 157 rows are
+the game's. The other two rows are **Font of Life** (Witchcraft) and **Mandrake
+Ward** (Vampirism), the padlocked story nodes, whose single row is a placeholder
+line rather than transcribed text — the game prints no effect line for them.
+
+#### Re-reading a row
+
+One rule matters: **capture an ability's whole level list from a single save.**
+A figure read from one save and a figure read from another are the fault above,
+not a fix. Scroll the panel so all four rows are in the capture, then clear
+`scale_mismatch` and set `text_source` to `game` on the rows you replace;
+`python3 tools/verify_perks.py` fails if a downgrade is left unflagged or a flag
+is left on a row marked as read from the game.
 
 ### Story grants
 

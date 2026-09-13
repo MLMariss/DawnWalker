@@ -449,4 +449,14 @@ result, and the three places the sources contradicted each other.
   spot a mismatch, fix `data/perks.json` and the page follows.
 - Stinging Blade's level 4 cost is the one number still worth a second look; see
   VERIFICATION.md.
+- **25 ability level rows are not the game's own text.** The ability panel's level
+  list scrolls, so the screenshot sweep never reached the bottom rows of 21
+  abilities; those rows still carry the Game8 table. Two things go wrong there.
+  The table flattens wording the game spells out — Dirty Trick *stuns in Area* at
+  levels 3 and 4, and the table does not say so — and its damage figures are on a
+  different scale from the rows above, so seven abilities show a final level
+  weaker than the one below it. Every such row is marked **Unverified** on the
+  card, carries `text_source: "game8"` in `data/abilities.json`, and is listed by
+  name in VERIFICATION.md. The perk registry is nearly clean: 154 of its 157 rows
+  are the game's.
 - Fan-made and unofficial. Not affiliated with Rebel Wolves.

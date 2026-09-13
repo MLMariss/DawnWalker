@@ -159,6 +159,24 @@
     return c === null ? gate : 'Needs Corruption ' + c + ' or higher';
   }
 
+  /* A level row the screenshot sweep never reached still carries the Game8
+     table's text. That is not a footnote: where the game upgrades a level and
+     the table flattens it, the row is missing the upgrade — Dirty Trick stuns
+     in Area at levels 3 and 4 and the table does not say so. Worse, the damage
+     figures on those rows are on the table's own scale, so a final level can
+     read as weaker than the one below it. Mark the rows rather than let the
+     gap pass for transcription. */
+  function srcTag(l) {
+    if (!l || l.text_source !== 'game8') return '';
+    var why = l.scale_mismatch
+      ? 'Not read from the game — this row is still the Game8 table, and its damage ' +
+        'figure is on a different scale from the levels above it, so the number is wrong here.'
+      : 'Not read from the game — this row is still the Game8 table, which flattens ' +
+        'wording the game spells out.';
+    return '<span class="src-tag' + (l.scale_mismatch ? ' bad' : '') +
+      '" title="' + esc(why) + '">Unverified</span>';
+  }
+
   function gateTag(gate, owned) {
     if (!gate || gate === 'none') return '';
     var ok = owned || gateOk(gate);
@@ -1048,7 +1066,7 @@
         '<span class="lv-meta"><span class="lv-costs">' +
           (isFree(p, i) ? '<span class="free-tag">Story — free</span>'
                         : costHTML(l.skill_points, l.time_segments, true)) + '</span>' +
-          (owned ? '' : gateTag(l.gate, false)) + '</span></li>';
+          srcTag(l) + (owned ? '' : gateTag(l.gate, false)) + '</span></li>';
     }).join('');
 
     var btn = nl ? 'Learn level ' + nl.level : 'Fully learned';

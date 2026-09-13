@@ -12,7 +12,8 @@
     "Some sources list two rows both labelled 'Lv. 3'. The second is Lv. 4; in-game pips confirm four slots on those perks.",
     "Font of Life and Mandrake Ward are padlocked '?' nodes with no skill point or time cost - story or quest unlocks.",
     "Vampirism ultimates are gated by Corruption 15 alone; only Witchcraft and Swordmastery show the 35-point spend counter.",
-    "Where the registry knowingly departs from the Game8 page, source_overrides records the field and the reason."
+    "Where the registry knowingly departs from the Game8 page, source_overrides records the field and the reason.",
+    "`text_source` records where each level row's text came from: `game` (read from the in-game panel), `game8` (still the Game8 table, never re-read from the game), or `placeholder` (a padlocked story node that prints no effect line)."
   ],
   "trees": {
     "Witchcraft": {
@@ -36,14 +37,16 @@
               "effect": "Double Harvest : 50% chance.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "Double Harvest : 100% chance.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -64,21 +67,24 @@
               "effect": "-15% buying Prices.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+15% selling Prices.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "Special offers will be available in some stores.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -101,14 +107,16 @@
               "effect": "+25% Armour.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+50% Armour.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY"
@@ -132,28 +140,32 @@
               "effect": "+15% Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "50% chance to deal additional 154 Damage when using a Witchcraft Ability.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+25% Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 4,
               "effect": "+40% Damage. 100% chance to deal additional 154 Damage when using a Witchcraft Ability.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY"
@@ -179,21 +191,24 @@
               "effect": "+1 time segment to duration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+2 time segments to duration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+3 time segments to duration.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -218,21 +233,24 @@
               "effect": "6 maximum instances in a Quickslot.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "9 maximum instances in a Quickslot.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "12 maximum instances in a Quickslot.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -257,21 +275,24 @@
               "effect": "2 Slots available.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "3 Slots available.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "4 Slots available.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY"
@@ -296,28 +317,32 @@
               "effect": "+10% Duration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+20% Duration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+40% Duration.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 4,
               "effect": "Extends Duration of active Witchcraft Abilities by 20% after using a Witchcraft Ability.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY"
@@ -343,21 +368,24 @@
               "effect": "Restores 40% of the Health cost after defeating an enemy affected by Witchcraft Abilities.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "Restores 80% of the Health cost after defeating an enemy affected by Witchcraft Abilities.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "Restores 120% of the Health cost after defeating an enemy affected by Witchcraft Abilities.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY"
@@ -382,14 +410,16 @@
               "effect": "2 maximum simultaneous Buffs.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "3 maximum simultaneous Buffs.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -414,21 +444,24 @@
               "effect": "-10% Cooldowns.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "-20% Cooldowns.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "-5% Cooldowns on Critical Hit.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY"
@@ -451,14 +484,16 @@
               "effect": "Critical Witchcraft Ability: 10% chance.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "Critical Witchcraft Ability: 20% chance.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY"
@@ -479,7 +514,8 @@
               "effect": "Story or quest unlock - no skill point or time cost listed",
               "skill_points": 0,
               "time_segments": 0,
-              "gate": "quest"
+              "gate": "quest",
+              "text_source": "placeholder"
             }
           ],
           "active_time": "DAY ONLY"
@@ -502,21 +538,24 @@
               "effect": "5% Health to the additional instant Heal.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "10% Health to the additional instant Heal.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "15% Health to the additional instant Heal.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -539,21 +578,24 @@
               "effect": "Craft 2 Items items at once.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "Craft 3 Items items at once.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "At the start of each Day, Craft 1 Item for free from all unlocked Recipes (Excluding Quest Recipes).",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -576,14 +618,16 @@
               "effect": "+10% Witchcraft Abilities Damage per enemy affected by Witchcraft Abilities.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+20% Witchcraft Abilities Damage per enemy affected by Witchcraft Abilities.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY"
@@ -606,14 +650,16 @@
               "effect": "No Health cost: 20% chance.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "No Health cost: 40% chance.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY"
@@ -636,14 +682,16 @@
               "effect": "Activation Charge refund : 20% chance.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "Activation Charge refund : 40% chance.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "DAY ONLY"
@@ -703,28 +751,32 @@
               "effect": "-10% Stamina cost.",
               "skill_points": 1,
               "time_segments": 0,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "-20% Stamina cost.",
               "skill_points": 1,
               "time_segments": 0,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "-30% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 4,
               "effect": "-40% Stamina cost. Directional Block works like Omniblock if wrong direction is chosen.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -747,28 +799,32 @@
               "effect": "+5% Weapon Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+10% Weapon Damage.",
               "skill_points": 1,
               "time_segments": 0,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+15% Weapon Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 4,
               "effect": "+20% Weapon Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -792,28 +848,32 @@
               "effect": "+25% maximum Stamina.",
               "skill_points": 1,
               "time_segments": 0,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+50% maximum Stamina.",
               "skill_points": 1,
               "time_segments": 0,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+75% maximum Stamina.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 4,
               "effect": "+100% maximum Stamina.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -836,28 +896,32 @@
               "effect": "+10% maximum Health.",
               "skill_points": 1,
               "time_segments": 0,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+20% maximum Health.",
               "skill_points": 1,
               "time_segments": 0,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+30% maximum Health.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 4,
               "effect": "+50% maximum Health.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -882,28 +946,32 @@
               "effect": "Unlocks Perfect Riposte.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+10% Damage on Perfect Riposte.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "Perfect Riposte can be performed after Perfect Dodge.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 4,
               "effect": "+20% Damage on Perfect Riposte.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -926,28 +994,32 @@
               "effect": "+30% Stamina Restoration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+50% Activation Charge Restoration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+60% Stamina Restoration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 4,
               "effect": "+100% Activation Charge Restoration.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -972,28 +1044,32 @@
               "effect": "Weapon Critical Hit : 6% chance.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "Weapon Critical Hit : 12% chance.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "Weapon Critical Hit : 18% chance.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 4,
               "effect": "+25% Weapon Critical Damage.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -1016,28 +1092,32 @@
               "effect": "-20% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "Dodging an Attack at the last moment restores a portion of Activation Charge",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game8"
             },
             {
               "level": 3,
               "effect": "-30% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 4,
               "effect": "Killing an enemy Regenerates Stamina.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -1060,21 +1140,24 @@
               "effect": "+30 maximum Carry Weight.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+60 maximum Carry Weight.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+100 maximum Carry Weight. You can run while Encumbered.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -1098,28 +1181,32 @@
               "effect": "2 maximum Activation Charges.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "Start each combat with 1 full Activation Charge.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "3 maximum Activation Charges.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 4,
               "effect": "4 maximum Activation Charges.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -1144,21 +1231,24 @@
               "effect": "-33% Medium Armour penalties.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "-66% Medium Armour penalties.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "-100% Medium Armour penalties.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -1183,21 +1273,24 @@
               "effect": "+10% Damage on Attack after Perfect Block.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+20% Damage on Attack after Perfect Block.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+10% Bleed chance on Attack after Perfect Block.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -1222,21 +1315,24 @@
               "effect": "+10% Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "-30% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+20% Damage.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -1261,21 +1357,24 @@
               "effect": "2 Slots available.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "3 Slots available.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "none"
+              "gate": "none",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "4 Slots available.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -1298,21 +1397,24 @@
               "effect": "+15% Activation Charge passive Restoration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+30% Activation Charge passive Restoration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+50% Activation Charge Restoration from Attacks.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -1335,21 +1437,24 @@
               "effect": "Weak chance 30%. Weak Duration 10s.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "Weak chance 60%. Weak Duration 10s.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "Weak chance 100%. Weak Duration 10s.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -1372,14 +1477,16 @@
               "effect": "+4% Weapon Damage per Attack. Up to +20% Weapon Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "-8% Stamina cost per Weapon Attack. Up to -50% Stamina cost.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -1402,21 +1509,24 @@
               "effect": "-10% Cooldowns.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "-20% Cooldowns.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "-5% Cooldowns on Critical Hits.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -1439,21 +1549,24 @@
               "effect": "-33% Heavy Armour penalties.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "-66% Heavy Armour penalties.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "-100% Heavy Armour penalties.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "manual"
+              "gate": "manual",
+              "text_source": "game"
             }
           ],
           "active_time": "ANYTIME"
@@ -1517,21 +1630,24 @@
               "effect": "+10% Health Restoration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+20% Health Restoration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 3"
+              "gate": "corruption 3",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+40% Health Restoration.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 8"
+              "gate": "corruption 8",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -1554,21 +1670,24 @@
               "effect": "3 maximum Health Segments.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "4 maximum Health Segments.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 5"
+              "gate": "corruption 5",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "5 maximum Health Segments.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 12"
+              "gate": "corruption 12",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -1591,14 +1710,16 @@
               "effect": "11m Shadowstep range.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "14.5m Shadowstep range. -50% Shadowstep Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 11"
+              "gate": "corruption 11",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -1621,28 +1742,32 @@
               "effect": "+5% Claw Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "road shrine"
+              "gate": "road shrine",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+12% Claw Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 4"
+              "gate": "corruption 4",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+20% Claw Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 9"
+              "gate": "corruption 9",
+              "text_source": "game"
             },
             {
               "level": 4,
               "effect": "+100% Activation Charge Restoration from Claw Attacks.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 12"
+              "gate": "corruption 12",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -1665,21 +1790,24 @@
               "effect": "2 Slots available.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 4"
+              "gate": "corruption 4",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "3 Slots available.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 7"
+              "gate": "corruption 7",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "4 Slots available.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 11"
+              "gate": "corruption 11",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -1702,21 +1830,24 @@
               "effect": "+10% Attack Damage.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 2"
+              "gate": "corruption 2",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+15% Armour.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 5"
+              "gate": "corruption 5",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+10% Critical Hit chance.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 10"
+              "gate": "corruption 10",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -1739,21 +1870,24 @@
               "effect": "15% Activation Charge Passive Restoration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 2"
+              "gate": "corruption 2",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "30% Activation Charge Passive Restoration.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 5"
+              "gate": "corruption 5",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+1 filled Activation Charge at combat start.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 10"
+              "gate": "corruption 10",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -1776,21 +1910,24 @@
               "effect": "-45% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 2"
+              "gate": "corruption 2",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "-70% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 6"
+              "gate": "corruption 6",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "-100% Stamina cost.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 13"
+              "gate": "corruption 13",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -1815,21 +1952,24 @@
               "effect": "-15% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 1"
+              "gate": "corruption 1",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "-30% Stamina cost.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 4"
+              "gate": "corruption 4",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "Refund 100% of Stamina spent on Attack, if blocked.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 9"
+              "gate": "corruption 9",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -1854,14 +1994,16 @@
               "effect": "-20% Health cost.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 5"
+              "gate": "corruption 5",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "-40% Health cost.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 10"
+              "gate": "corruption 10",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -1884,21 +2026,24 @@
               "effect": "+30% Corruption filling speed.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 1"
+              "gate": "corruption 1",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "Drink Blood at full Health to Overfeed. Temporary Health Segment and +50% Corruption filling speed while Overfed.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 4"
+              "gate": "corruption 4",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+50% Corruption filling speed. +5% Vampiric Health for each Corruption Level.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 6"
+              "gate": "corruption 6",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -1923,14 +2068,16 @@
               "effect": "+2% Vampiric Health Segment Regeneration per second.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 3"
+              "gate": "corruption 3",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+4% Vampiric Health Segment Regeneration per second.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 6"
+              "gate": "corruption 6",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -1951,7 +2098,8 @@
               "effect": "Story or quest unlock - no skill point or time cost listed",
               "skill_points": 0,
               "time_segments": 0,
-              "gate": "quest"
+              "gate": "quest",
+              "text_source": "placeholder"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -1976,21 +2124,24 @@
               "effect": "Claw Critical Hit : 10% chance.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 2"
+              "gate": "corruption 2",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "Claw Critical Hit : 20% chance.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 7"
+              "gate": "corruption 7",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "+25% Claw Critical Damage.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 13"
+              "gate": "corruption 13",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -2013,14 +2164,16 @@
               "effect": "-20% Cooldowns.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 6"
+              "gate": "corruption 6",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "-4% Cooldowns on Critical Hits.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 12"
+              "gate": "corruption 12",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -2043,21 +2196,24 @@
               "effect": "Unlocks Blood Theft.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 4"
+              "gate": "corruption 4",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "Time window for restoring Recently Lost Vampiric Health lasts longer.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 8"
+              "gate": "corruption 8",
+              "text_source": "game"
             },
             {
               "level": 3,
               "effect": "30% increased effect of Blood Theft.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 11"
+              "gate": "corruption 11",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"
@@ -2080,14 +2236,16 @@
               "effect": "+4% Claw Critical Chance per Attack. Up to +40% Claw Critical Hit chance.",
               "skill_points": 1,
               "time_segments": 1,
-              "gate": "corruption 9"
+              "gate": "corruption 9",
+              "text_source": "game"
             },
             {
               "level": 2,
               "effect": "+8% Claw Critical Chance per Attack. Up to +40% Claw Critical Hit chance.",
               "skill_points": 2,
               "time_segments": 1,
-              "gate": "corruption 14"
+              "gate": "corruption 14",
+              "text_source": "game"
             }
           ],
           "active_time": "NIGHT ONLY"

@@ -223,7 +223,52 @@ def ability_checks(abilities, perk_ids):
                     findings.append(f"{where} Lv{level['level']}: unknown gate {gate!r}")
                 if level["skill_points"] < 1:
                     findings.append(f"{where} Lv{level['level']}: costs no skill points")
+                src = level.get("text_source")
+                if src not in ("game", "game8"):
+                    findings.append(f"{where} Lv{level['level']}: text_source is {src!r}; "
+                                    "every level row records where its text came from")
+            findings += scale_checks(where, ability["levels"])
     return findings
+
+
+def scale_checks(where, levels):
+    """Damage figures scale with the save, so a row read from one capture and a
+    row left on the Game8 table are not comparable — splice them together and a
+    final level reads as weaker than the one below it. Every such row is already
+    flagged `scale_mismatch` in the registry; this catches a *new* one, and an
+    old one whose flag was dropped without the number being fixed."""
+    findings = []
+    columns = [_magnitudes(l["effect"]) for l in levels]
+    width = min((len(c) for c in columns), default=0)
+    for i in range(width):
+        column = [c[i] for c in columns]
+        for a, b, lo, hi in zip(column, column[1:], levels, levels[1:]):
+            if b >= a or lo.get("scale_mismatch") or hi.get("scale_mismatch"):
+                continue
+            findings.append(f"{where} Lv{hi['level']}: {b:g} is below Lv{lo['level']}'s "
+                            f"{a:g} in the same position — a level reading as a downgrade "
+                            "is how a spliced source shows up")
+    for level in levels:
+        if level.get("scale_mismatch") and level.get("text_source") != "game8":
+            findings.append(f"{where} Lv{level['level']}: scale_mismatch on a row that "
+                            "is not from Game8 — clear the flag once the row is re-read")
+    return findings
+
+
+# A percentage, a duration and a hit count all restate the same value at every
+# level or count upward in ones; only flat magnitudes carry the save's scaling,
+# so those are the ones worth comparing between levels.
+_NOT_A_MAGNITUDE = re.compile(r"\s*(?:%|s\b|m\b|hits?\b|seconds?\b)")
+
+
+def _magnitudes(text):
+    out = []
+    for match in re.finditer(r"\d[\d,]*(?:\.\d+)?", text):
+        if _NOT_A_MAGNITUDE.match(text, match.end()):
+            continue
+        out.append(float(match.group().replace(",", "")))
+    return out
+
 
 def internal_checks(registry):
     """Checks that need no external source: the graph and level bookkeeping."""
