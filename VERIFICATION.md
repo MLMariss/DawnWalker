@@ -359,6 +359,28 @@ that the planner cannot know. Its numbers are indicative; Vampirism's and
 Swordmastery's are not — Vampirism was byte-identical across both level 20
 captures and across two level 9 captures at different Corruption.
 
+#### Over-time abilities, totalled
+
+Three rows repeat rather than landing once, and their card figure is per tick:
+
+| Ability | Figure | Repeats | Total at level 20 |
+| --- | --- | --- | --- |
+| **Soul Reaping** Lv4 | 160 lifesteal | × 36 seconds | **5,760** |
+| **Burning Blood** Lv4 | 203 damage | × 16 seconds | **3,248** |
+| **Ravenous Flock** Lv4 | 367 damage | × 4 hits | **1,468** |
+
+`over_time` records the multiplier so the planner can print the total beside the
+per-tick figure. It changes the answer to "which ability hits hardest": on the
+card Blood Surge's 3,013 beats Soul Reaping's 160 by a factor of nineteen;
+totalled, Soul Reaping delivers nearly twice Blood Surge. `verify_perks.py`
+rejects a `count` that does not appear in the row's own text, so the multiplier
+cannot drift from the duration the game states.
+
+The character level cap is **50**, so the planner's slider runs to it — but the
+measured anchors stop at 20 and everything past that is the last segment
+continued. At the cap the three trees project to 4.73× (Swordmastery), 5.26×
+(Vampirism) and 6.62× (Witchcraft) of their level-9 power.
+
 #### The model has to keep fitting
 
 `scaling.observations` stores all 105 readings by character level.

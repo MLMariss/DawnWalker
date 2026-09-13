@@ -15,7 +15,8 @@
     "`kind` is active or passive, decided by use_cost: anything that pays an activation charge or health is active. Passive abilities still take an ability slot - they work once equipped in the Active Ability panel.",
     "`story_granted` marks an ability whose first level the story hands you: it costs no skill points and no time segments to learn. Upgrades past level 1 are paid for normally.",
     "`text_source` records where each level row's text came from: `game` (read from the in-game panel), `game8` (still the Game8 table, never re-read from the game), or `placeholder` (a padlocked story node that prints no effect line).",
-    "`units` is a level row's damage in units of character power, which does not change with character level; `effect_template` is the row with each figure replaced by a slot. Multiply and truncate to get the figure at any level. See `scaling`."
+    "`units` is a level row's damage in units of character power, which does not change with character level; `effect_template` is the row with each figure replaced by a slot. Multiply and truncate to get the figure at any level. See `scaling`.",
+    "`over_time` marks a row whose figure repeats: `count` times `per` second or hit. Its total is that figure multiplied by `count`, which is what makes it comparable with an ability that deals its damage at once."
   ],
   "trees": {
     "Witchcraft": {
@@ -94,7 +95,13 @@
               "effect_template": "Deals {0} Damage per second. Duration 10s.",
               "units": [
                 158
-              ]
+              ],
+              "over_time": {
+                "kind": "damage",
+                "per": "second",
+                "count": 10,
+                "figure": 0
+              }
             },
             {
               "level": 2,
@@ -106,7 +113,13 @@
               "effect_template": "Deals {0} Damage per second. Duration 12s.",
               "units": [
                 164
-              ]
+              ],
+              "over_time": {
+                "kind": "damage",
+                "per": "second",
+                "count": 12,
+                "figure": 0
+              }
             },
             {
               "level": 3,
@@ -118,7 +131,13 @@
               "effect_template": "Deals {0} Damage per second. On Death, effect transfers to different enemy. Duration 14s.",
               "units": [
                 169
-              ]
+              ],
+              "over_time": {
+                "kind": "damage",
+                "per": "second",
+                "count": 14,
+                "figure": 0
+              }
             },
             {
               "level": 4,
@@ -130,7 +149,13 @@
               "effect_template": "Deals {0} Damage per second. On Death, effect transfers to different enemy. Duration 16s.",
               "units": [
                 189
-              ]
+              ],
+              "over_time": {
+                "kind": "damage",
+                "per": "second",
+                "count": 16,
+                "figure": 0
+              }
             }
           ],
           "active_time": "DAY ONLY",
@@ -353,7 +378,13 @@
               "effect_template": "Area Damage {0}. Ravenous Flock cancels after 1 hit. 100% Critical Hits on target. Duration 20s.",
               "units": [
                 263
-              ]
+              ],
+              "over_time": {
+                "kind": "damage",
+                "per": "hit",
+                "count": 1,
+                "figure": 0
+              }
             },
             {
               "level": 2,
@@ -365,7 +396,13 @@
               "effect_template": "Area Damage {0}. Ravenous Flock cancels after 2 hits. 100% Critical Hits on target. Duration 20s.",
               "units": [
                 289
-              ]
+              ],
+              "over_time": {
+                "kind": "damage",
+                "per": "hit",
+                "count": 2,
+                "figure": 0
+              }
             },
             {
               "level": 3,
@@ -377,7 +414,13 @@
               "effect_template": "Area Damage {0}. Ravenous Flock cancels after 3 hits. 100% Critical Hits on target. Duration 20s.",
               "units": [
                 316
-              ]
+              ],
+              "over_time": {
+                "kind": "damage",
+                "per": "hit",
+                "count": 3,
+                "figure": 0
+              }
             },
             {
               "level": 4,
@@ -389,7 +432,13 @@
               "effect_template": "Area Damage {0}. Ravenous Flock cancels after 4 hits. 100% Critical Hits on target. Duration 20s.",
               "units": [
                 342
-              ]
+              ],
+              "over_time": {
+                "kind": "damage",
+                "per": "hit",
+                "count": 4,
+                "figure": 0
+              }
             }
           ],
           "active_time": "DAY ONLY",
@@ -417,7 +466,13 @@
               "effect_template": "{0} Lifesteal per second. Duration 18s.",
               "units": [
                 96
-              ]
+              ],
+              "over_time": {
+                "kind": "lifesteal",
+                "per": "second",
+                "count": 18,
+                "figure": 0
+              }
             },
             {
               "level": 2,
@@ -429,7 +484,13 @@
               "effect_template": "{0} Lifesteal per second. Duration 24s.",
               "units": [
                 114
-              ]
+              ],
+              "over_time": {
+                "kind": "lifesteal",
+                "per": "second",
+                "count": 24,
+                "figure": 0
+              }
             },
             {
               "level": 3,
@@ -441,7 +502,13 @@
               "effect_template": "{0} Lifesteal per second. 20% Damage you receive transfers to the target. Duration 30s.",
               "units": [
                 132
-              ]
+              ],
+              "over_time": {
+                "kind": "lifesteal",
+                "per": "second",
+                "count": 30,
+                "figure": 0
+              }
             },
             {
               "level": 4,
@@ -453,7 +520,13 @@
               "effect_template": "{0} Lifesteal per second. 40% Damage you receive transfers to the target. 500 Heal on target's Death. Duration 36s.",
               "units": [
                 149
-              ]
+              ],
+              "over_time": {
+                "kind": "lifesteal",
+                "per": "second",
+                "count": 36,
+                "figure": 0
+              }
             }
           ],
           "active_time": "DAY ONLY",
