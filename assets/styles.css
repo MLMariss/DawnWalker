@@ -913,6 +913,7 @@ a:hover{color:var(--gold-2)}
 }
 .brow-meta{margin:3px 0 0;font-size:12px;color:var(--text-faint)}
 .brow-meta .sep{margin:0 5px}
+.brow-yours{font-style:normal;color:var(--gold-dim)}
 .brow-notes{margin:6px 0 0;font-size:13px;line-height:1.55;color:var(--text-dim)}
 .brow-acts{display:flex;flex-direction:column;gap:6px;flex:none;align-items:stretch}
 .brow-acts .btn{text-align:center;text-decoration:none;display:block}

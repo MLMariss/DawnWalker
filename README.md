@@ -166,6 +166,7 @@ tools/build_mechanics.py       rebuilds data/mechanics.json
 tools/build_marks.py           rebuilds assets/marks/ from icons-src/
 api/src/index.js               the build list's backend — a Cloudflare Worker over D1
 api/schema.sql                 its three tables
+api/migrations/                one file per schema change, for a database already live
 api/README.md                  how to deploy it, and how to moderate the list
 tools/extract_ability_icons.py cuts ability marks out of skill-screen shots
 VERIFICATION.md                what was checked, and where the sources disagreed
@@ -205,6 +206,15 @@ The point of it is that publishing and upvoting never leave the planner. No
 account, no sign-in, no tab opening somewhere else — which was the whole problem
 with keeping the list on the issue tracker, where a casual upvote cost a round
 trip through GitHub and most people would simply not have bothered.
+
+Whoever publishes a build can also take it down, which needs some proof of
+authorship where there are no accounts. Publishing mints a random delete key,
+hands it back exactly once and keeps only its hash, so the planner can show a
+Delete button on your own builds and on nobody else's — and the database cannot
+give that ability away, even to whoever reads a backup of it. The key lives in
+one browser, so clearing your site data costs you the ability to remove your own
+build; the admin token is the backstop. Deleting hides the row rather than
+dropping it, so a mis-click is one command to undo.
 
 What that buys in convenience it gives back in exposure: an anonymous write
 endpoint is an invitation. Three things push back, and `api/README.md` is honest

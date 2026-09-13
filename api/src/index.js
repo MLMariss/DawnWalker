@@ -18,6 +18,14 @@
  * None of that is unbeatable. It does not need to be: the cost of a spammed
  * fan planner is a maintainer hiding a row, which is why ADMIN_TOKEN exists.
  *
+ * Whoever publishes a build can also take it down again, which needs some proof
+ * of authorship in a system with no accounts. Publishing therefore mints a
+ * random delete key, returns it exactly once, and keeps only its hash — so the
+ * database cannot hand out the ability to delete, and neither can a leaked
+ * backup. The planner stores the key against the build; that is the whole
+ * mechanism, and it is why losing your site data costs you the ability to
+ * delete your own build. ADMIN_TOKEN is the backstop for that too.
+ *
  * Bindings — see wrangler.toml:
  *   DB                 D1 database
  *   ALLOWED_ORIGINS    comma-separated site origins that may POST
@@ -64,7 +72,7 @@ async function route(request, env, url) {
   if (path === '/builds' && request.method === 'POST') return postBuild(request, env);
   if (m && m[2] === '/vote' && request.method === 'POST') return postVote(request, env, +m[1]);
   if (m && m[2] === '/report' && request.method === 'POST') return postReport(request, env, +m[1]);
-  if (m && !m[2] && request.method === 'DELETE') return setHidden(request, env, +m[1], 1);
+  if (m && !m[2] && request.method === 'DELETE') return remove(request, env, +m[1]);
   if (m && !m[2] && request.method === 'PATCH') return setHidden(request, env, +m[1], 0);
   if (path === '/admin/reported' && request.method === 'GET') return reported(request, env);
 
@@ -127,12 +135,38 @@ async function postBuild(request, env) {
   }
 
   const created = new Date().toISOString();
+  const key = newKey();
   const row = await env.DB.prepare(
-    `INSERT INTO builds (name, author, notes, code, created, author_key)
-     VALUES (?, ?, ?, ?, ?, ?) RETURNING id`
-  ).bind(name, author, notes, code, created, who).first();
+    `INSERT INTO builds (name, author, notes, code, created, author_key, owner_hash)
+     VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id`
+  ).bind(name, author, notes, code, created, who, await sha256(key)).first();
 
-  return json({ build: await one(env, row.id) }, 201);
+  // The only time this key is ever readable. It is not in the list, it is not
+  // in the row, and there is no endpoint that will tell anyone what it was.
+  return json({ build: await one(env, row.id), key: key }, 201);
+}
+
+/* Taking a build down. Either the key that publishing handed out, or the admin
+   token — and nothing else, including the fingerprint that published it, which
+   drifts with an address and would hand a build to whoever inherits one. */
+async function remove(request, env, id) {
+  const build = await one(env, id);
+  if (!build) return json({ error: 'No such build.' }, 404);
+
+  if (!admin(request, env)) {
+    if (!originAllowed(request, env)) return json({ error: 'Not allowed from here.' }, 403);
+    const key = request.headers.get('X-Build-Key') || '';
+    const row = await env.DB.prepare('SELECT owner_hash FROM builds WHERE id = ?').bind(id).first();
+    const want = row && row.owner_hash;
+    if (!key || !want || !timingSafe(await sha256(key), want)) {
+      return json({ error: 'That build is not yours to remove.' }, 403);
+    }
+  }
+
+  // Hidden, not deleted: a mis-click costs one PATCH to undo, and the votes
+  // stay attached to what they were cast for.
+  await env.DB.prepare('UPDATE builds SET hidden = 1 WHERE id = ?').bind(id).run();
+  return json({ id: id, hidden: true });
 }
 
 async function postVote(request, env, id) {
@@ -170,7 +204,7 @@ async function postReport(request, env, id) {
 function admin(request, env) {
   const want = env.ADMIN_TOKEN;
   const got = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
-  return !!want && got.length === want.length && timingSafe(got, want);
+  return !!want && timingSafe(got, want);
 }
 
 async function setHidden(request, env, id, hidden) {
@@ -224,7 +258,7 @@ function corsFor(request, env) {
   return {
     'Access-Control-Allow-Origin': allow,
     'Access-Control-Allow-Methods': 'GET,POST,PATCH,DELETE,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-Build-Key',
     'Access-Control-Max-Age': '86400',
     'Vary': 'Origin'
   };
@@ -242,6 +276,18 @@ function originAllowed(request, env) {
    address. The user agent is in there so that an office behind one NAT is not
    one single voter; it also means a browser update reads as a new voter, which
    is the direction to err in. */
+/* 24 random bytes, base64url — long enough that guessing is not a strategy and
+   short enough to paste. */
+function newKey() {
+  const bytes = crypto.getRandomValues(new Uint8Array(24));
+  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function sha256(text) {
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 async function fingerprint(request, env) {
   const ip = request.headers.get('CF-Connecting-IP') || '';
   const ua = request.headers.get('User-Agent') || '';
@@ -265,7 +311,11 @@ async function turnstile(env, token, request) {
   return out.success ? null : 'The human check did not pass — reload and try again.';
 }
 
+/* Compares without returning early on the first differing character. Length is
+   checked first and does leak, which is why both things compared here are
+   fixed-length: a SHA-256 hex digest, or a token whose length is not a secret. */
 function timingSafe(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length || !a) return false;
   let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return diff === 0;
