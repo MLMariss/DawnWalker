@@ -12,6 +12,13 @@
 </head>
 <body>
 
+<!-- One row, and it stays one row. The bar used to be a plain wrapping flex of
+     three groups, so at anything narrower than a very wide desktop it broke into
+     two and then three stacked rows and ate 167px of the board's height. Every
+     group inside is now two lines tall instead of one — the two sliders sit one
+     over the other, the two checkboxes likewise, the buttons in a 3x2 grid — so
+     the bar is one row of double-height groups rather than three rows of
+     single-height ones, and it costs about 70px at every width. -->
 <header class="topbar">
   <div class="brand">
     <span class="brand-mark" aria-hidden="true"></span>
@@ -19,6 +26,38 @@
       <b>The Blood of Dawnwalker</b>
       <i>Skill Tree Planner</i>
     </span>
+  </div>
+
+  <div class="bargroup sliders">
+    <label class="ctl" title="Vampiric perk levels unlock at Corruption levels">
+      <span class="ctl-lbl">Corruption</span>
+      <input type="range" id="corruption" min="0" max="15" step="1" value="15">
+      <output id="corruption-out">15</output>
+    </label>
+    <label class="ctl" id="charlvl-ctl" title="Damage figures are what the game shows at this character level">
+      <span class="ctl-lbl">Char. level</span>
+      <input type="range" id="charlvl" min="1" max="50" step="1" value="20">
+      <output id="charlvl-out">20</output>
+    </label>
+  </div>
+
+  <div class="bargroup checks">
+    <label class="ctl ctl-check" title="Some levels can only be learned from a Manual found in the world">
+      <input type="checkbox" id="manuals" checked>
+      <span>Manuals found</span>
+    </label>
+    <label class="ctl ctl-check" title="Experimental: mark other perks that act on the same systems">
+      <input type="checkbox" id="synergy" checked>
+      <span>Synergies</span>
+    </label>
+  </div>
+
+  <div class="bargroup acts">
+    <button class="btn btn-ghost" id="theory" type="button">Theorycraft</button>
+    <button class="btn" id="save" type="button">Save</button>
+    <button class="btn" id="builds" type="button">Builds</button>
+    <button class="btn btn-ghost" id="share" type="button">Copy link</button>
+    <button class="btn btn-ghost" id="reset" type="button">Reset</button>
   </div>
 
   <div class="meters">
@@ -37,32 +76,6 @@
       <span class="meter-val" id="m-bk">0</span>
       <span class="meter-lbl">Manuals</span>
     </div>
-  </div>
-
-  <div class="controls">
-    <label class="ctl" title="Vampiric perk levels unlock at Corruption levels">
-      <span class="ctl-lbl">Corruption</span>
-      <input type="range" id="corruption" min="0" max="15" step="1" value="15">
-      <output id="corruption-out">15</output>
-    </label>
-    <label class="ctl" id="charlvl-ctl" title="Damage figures are what the game shows at this character level">
-      <span class="ctl-lbl">Char. level</span>
-      <input type="range" id="charlvl" min="1" max="50" step="1" value="20">
-      <output id="charlvl-out">20</output>
-    </label>
-    <label class="ctl ctl-check" title="Some levels can only be learned from a Manual found in the world">
-      <input type="checkbox" id="manuals" checked>
-      <span>Manuals found</span>
-    </label>
-    <label class="ctl ctl-check" title="Experimental: mark other perks that act on the same systems">
-      <input type="checkbox" id="synergy" checked>
-      <span>Synergies</span>
-    </label>
-    <button class="btn btn-ghost" id="theory" type="button">Theorycraft</button>
-    <button class="btn" id="save" type="button">Save</button>
-    <button class="btn" id="builds" type="button">Builds</button>
-    <button class="btn btn-ghost" id="share" type="button">Copy link</button>
-    <button class="btn btn-ghost" id="reset" type="button">Reset</button>
   </div>
 </header>
 

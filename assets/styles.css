@@ -68,10 +68,48 @@
   --m-lock:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 10h12v11H6zM9 10V7a3 3 0 0 1 6 0v3' fill='none' stroke='black' stroke-width='2.2'/></svg>");
 }
 
-/* per-tree accent, matching the ability colours on the real screens */
-.t-wc{--accent:#a98bd4}
-.t-sm{--accent:#9fb4cc}
-.t-vp{--accent:#d9575c}
+/* ------------------------------------------------- the three tree colours
+   The game gives each tree a colour and uses it for everything that tree
+   touches — the hex frame around a perk icon, the ability cards, the panel.
+   Witchcraft is purple, Swordmastery steel grey, Vampirism blood red. The
+   planner used to paint all three gold and keep the tree colour for one tab
+   mark, so the only thing on screen that said which tree you were reading was
+   the word at the top.
+
+   Five tokens per tree, and every tree-scoped rule below is written in terms of
+   them, so switching tab repaints the board, the tabs, the drawers and the side
+   panel together:
+
+     --accent      the tree's own colour: rims, links, learned levels
+     --accent-2    its bright end: hover, maxed, headings on dark
+     --accent-dim  its dark end, the far side of every rim gradient
+     --accent-deep the near-black tint the icon well is filled with
+     --accent-ink  text laid ON the colour, so a filled hex reads at any hue
+
+   Gold stays the app's own colour — the top bar, the brand, the resource
+   meters — so the chrome does not change under you on every tab click. */
+:root{
+  --accent:var(--gold);
+  --accent-2:var(--gold-2);
+  --accent-dim:var(--gold-dim);
+  --accent-deep:#2e2318;
+  --accent-ink:#1a1209;
+}
+.t-wc,.tab.t-wc{
+  --accent:#a878e0;--accent-2:#dcbcff;--accent-dim:#5d3f8c;
+  --accent-deep:#241733;--accent-ink:#150c22;
+}
+.t-sm,.tab.t-sm{
+  --accent:#a9b7c4;--accent-2:#e8f0f7;--accent-dim:#5b6773;
+  --accent-deep:#1f262c;--accent-ink:#0d1115;
+}
+.t-vp,.tab.t-vp{
+  --accent:#d94a45;--accent-2:#ff958b;--accent-dim:#7d2b28;
+  --accent-deep:#2f1210;--accent-ink:#1b0a09;
+}
+/* A colour to glow with, once, rather than a colour-mix repeated in fifteen
+   box-shadows. */
+.t-wc,.t-sm,.t-vp,:root{--accent-glow:color-mix(in srgb,var(--accent) 55%,transparent)}
 
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -106,80 +144,141 @@ a:hover{color:var(--gold-2)}
   background:var(--line-2);border-radius:6px;
   border:2px solid transparent;background-clip:padding-box;
 }
-*::-webkit-scrollbar-thumb:hover{background:var(--gold-dim);background-clip:padding-box}
-*::-webkit-scrollbar-thumb:active{background:var(--gold);background-clip:padding-box}
+*::-webkit-scrollbar-thumb:hover{background:var(--accent-dim);background-clip:padding-box}
+*::-webkit-scrollbar-thumb:active{background:var(--accent);background-clip:padding-box}
 *::-webkit-scrollbar-corner{background:transparent}
 
-/* ------------------------------------------------------------ top bar */
+/* ------------------------------------------------------------ top bar
+   Never more than one row. `flex-wrap:wrap` on five groups of single-height
+   controls is what broke it into three stacked rows and took 167px off the top
+   of the board; the groups are two lines tall each now and the bar does not
+   wrap at all. Everything inside may shrink, and the three things that carry no
+   information on their own — the brand subtitle, the meter words, the button
+   padding — give way in that order as the window narrows. */
 .topbar{
-  flex:none;display:flex;align-items:center;gap:22px;flex-wrap:wrap;
-  padding:12px 20px;border-bottom:1px solid var(--line);
+  flex:none;display:flex;align-items:center;gap:18px;flex-wrap:nowrap;
+  padding:8px 18px;border-bottom:1px solid var(--line);
   background:linear-gradient(180deg,rgba(28,21,16,.96),rgba(13,10,8,.92));
 }
-.brand{display:flex;align-items:center;gap:12px;margin-right:auto}
+.brand{display:flex;align-items:center;gap:11px;min-width:0;flex:0 1 auto}
 .brand-mark{
-  width:32px;height:32px;flex:none;
+  width:30px;height:30px;flex:none;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   background:linear-gradient(150deg,var(--gold),var(--blood));
 }
-.brand-text{display:flex;flex-direction:column;line-height:1.2}
-.brand-text b{font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-2)}
-.brand-text i{font-style:normal;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint)}
+.brand-text{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+.brand-text b{font-size:14px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-text i{font-style:normal;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);
+  white-space:nowrap}
 
-.meters{display:flex;gap:20px;flex-wrap:wrap}
-.meter{display:flex;align-items:center;gap:8px;white-space:nowrap}
-.meter-ico{width:15px;height:15px;flex:none;background:currentColor;
+/* Two lines per group is the whole trick: the bar's height is set by the
+   tallest group, and every group is two rows, so none of them costs anything
+   the others were not already costing. */
+.bargroup{display:grid;row-gap:4px;flex:none;align-content:center}
+/* The one flexible gap in the bar sits here, so the brand stays left and
+   everything that is actually a control packs to the right. */
+.sliders{grid-template-columns:auto;column-gap:0;min-width:0;flex:0 1 auto;margin-left:auto}
+.checks{grid-template-columns:auto}
+.acts{grid-template-columns:repeat(3,auto);column-gap:6px}
+
+.meters{display:grid;grid-template-columns:auto auto;column-gap:16px;row-gap:2px;flex:none;align-content:center}
+/* Three meters over two rows: the two spent totals share the top line and the
+   manual count, which is a thing to go and find rather than a thing you have
+   spent, sits under them across both columns. */
+.meters .meter:last-child{grid-column:1 / -1}
+.meter{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.meter-ico{width:14px;height:14px;flex:none;background:currentColor;
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain}
 .ico-sp{color:var(--blood-2);-webkit-mask-image:var(--m-sp);mask-image:var(--m-sp)}
 .ico-ts{color:var(--gold);-webkit-mask-image:var(--m-ts);mask-image:var(--m-ts)}
 .ico-bk{color:var(--text-dim);-webkit-mask-image:var(--m-bk);mask-image:var(--m-bk)}
-.meter-val{font-size:22px;font-weight:700;color:var(--gold-2);line-height:1}
-.meter-lbl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint)}
+.meter-val{font-size:18px;font-weight:700;color:var(--gold-2);line-height:1.15;min-width:1ch;text-align:right}
+.meter-lbl{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint)}
 
-.controls{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.ctl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-dim)}
-.ctl-lbl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--blood-2)}
-.ctl input[type=range]{width:132px;accent-color:var(--blood)}
-.ctl output{font-size:17px;font-weight:700;color:var(--gold-2);min-width:1.7em;text-align:right}
-.ctl-check{cursor:pointer;user-select:none}
-.ctl-check input{width:16px;height:16px;accent-color:var(--gold-dim)}
+.ctl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-dim);min-width:0}
+.ctl-lbl{flex:none;width:8.2em;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--blood-2)}
+.ctl input[type=range]{flex:1 1 auto;width:auto;min-width:70px;max-width:132px;accent-color:var(--blood);margin:0}
+.ctl output{font-size:15px;font-weight:700;color:var(--gold-2);min-width:2ch;text-align:right}
+.ctl-check{cursor:pointer;user-select:none;font-size:12.5px;white-space:nowrap}
+.ctl-check input{width:15px;height:15px;flex:none;accent-color:var(--gold-dim);margin:0}
 
 .btn{
-  padding:8px 14px;border:1px solid var(--line-2);border-radius:3px;cursor:pointer;
+  padding:7px 12px;border:1px solid var(--line-2);border-radius:3px;cursor:pointer;
   background:linear-gradient(180deg,rgba(231,179,86,.18),rgba(231,179,86,.06));
-  color:var(--gold-2);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
-  transition:.15s;
+  color:var(--gold-2);font-size:11.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  white-space:nowrap;transition:.15s;
 }
 .btn:hover{border-color:var(--gold-dim);background:linear-gradient(180deg,rgba(231,179,86,.3),rgba(231,179,86,.1))}
 .btn-ghost{background:none;color:var(--text-dim)}
 .btn-ghost:hover{color:var(--text);background:rgba(255,255,255,.05)}
 .btn:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.4)}
 
+/* The give-way ladder. Each step drops the least informative thing left, so the
+   row survives down to a phone without ever becoming two rows. */
+@media (max-width:1500px){
+  .topbar{gap:14px}
+  .brand-text i{display:none}
+  .ctl-lbl{width:auto}
+  .ctl input[type=range]{max-width:104px}
+}
+/* The title is 17px too long for a 1280 window at its full tracking, and an
+   ellipsised game title reads as a bug rather than as a fit. */
+@media (max-width:1380px){ .brand-text b{font-size:13px;letter-spacing:.05em} }
+@media (max-width:1240px){
+  .topbar{gap:11px;padding:8px 14px}
+  .meter-lbl{display:none}
+  .meters{column-gap:14px}
+  .btn{padding:6px 9px;letter-spacing:.06em}
+  .ctl input[type=range]{max-width:88px}
+}
+@media (max-width:1080px){
+  .brand-text{display:none}
+  .ctl-check span{font-size:12px}
+}
+
 /* --------------------------------------------------------------- tabs */
 /* The tab strip belongs to the board, not to the page: it is the board's own
    header. Spanning the full width left the whole right-hand third of the row
    empty and pushed the side column down by the height of a row it had no part
    in, so the panel started 48px below the top bar with nothing in between. */
-.tabs{flex:none;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 0 8px}
+/* Nowrap: three tabs breaking into two rows put Vampirism on a line of its own
+   under the other two, which reads as a heading rather than a third choice.
+   They shrink instead, and only a window narrow enough that they genuinely
+   cannot fit gets a sideways scroll. */
+.tabs{flex:none;display:flex;gap:8px;justify-content:center;flex-wrap:nowrap;
+  padding:0 0 8px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{height:0}
 .tab{
-  display:flex;align-items:center;gap:10px;padding:8px 18px;
+  display:flex;align-items:center;gap:9px;padding:7px 15px;flex:none;
   border:1px solid transparent;border-radius:3px;background:none;cursor:pointer;
-  color:var(--text-dim);font-size:14px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
-  transition:.15s;
+  color:var(--text-dim);font-size:13.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;
+  white-space:nowrap;transition:.15s;
 }
-.tab:hover{color:var(--text)}
+/* Each tab carries its own tree's colour, selected or not — the strip is the
+   legend for the three hues as well as the way between them. */
+.tab:hover{color:var(--accent-2);border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
 .tab .tab-mark{
-  width:26px;height:26px;flex:none;display:grid;place-items:center;
+  width:25px;height:25px;flex:none;display:grid;place-items:center;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
-  background:rgba(255,255,255,.06);
+  background:linear-gradient(150deg,color-mix(in srgb,var(--accent) 30%,transparent),rgba(255,255,255,.04));
+  color:var(--accent-2);
 }
 .tab .tab-mark svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7}
-.tab[aria-selected=true]{color:var(--gold-2);border-color:var(--line)}
-.tab[aria-selected=true] .tab-mark{background:linear-gradient(150deg,var(--accent),rgba(0,0,0,.2));color:#120e0b}
+.tab[aria-selected=true]{
+  color:var(--accent-2);
+  border-color:color-mix(in srgb,var(--accent) 55%,transparent);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 16%,transparent),rgba(0,0,0,0));
+}
+.tab[aria-selected=true] .tab-mark{
+  background:linear-gradient(150deg,var(--accent-2),var(--accent-dim));color:var(--accent-ink);
+  box-shadow:0 0 12px color-mix(in srgb,var(--accent) 45%,transparent);
+}
 .tab .tab-stat{
   display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;
   letter-spacing:.02em;text-transform:none;color:var(--text-faint);
 }
+.tab[aria-selected=true] .tab-stat{color:color-mix(in srgb,var(--accent-2) 70%,var(--text-faint))}
 .tab .tab-stat i{width:12px;height:12px;background:currentColor;font-style:normal;
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain}
 .tab .tab-stat .s-sp{-webkit-mask-image:var(--m-sp);mask-image:var(--m-sp)}
@@ -194,8 +293,13 @@ a:hover{color:var(--gold-2)}
   display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
   letter-spacing:.1em;color:var(--text-faint);
 }
-.tab[aria-selected=true] .tab-when{color:var(--gold-dim)}
+.tab[aria-selected=true] .tab-when{color:color-mix(in srgb,var(--accent) 70%,var(--text-dim))}
 .tab .tab-when i{width:12px;height:12px}
+@media (max-width:1400px){
+  .tab{padding:6px 11px;font-size:12.5px;letter-spacing:.07em;gap:7px}
+  .tab .tab-mark{width:22px;height:22px}
+  .tabs{gap:5px}
+}
 
 /* -------------------------------------------------------------- stage */
 /* Past about 2240px neither the board nor the panel has anything left to do with
@@ -226,9 +330,12 @@ a:hover{color:var(--gold-2)}
 .boardscroll{flex:none;min-height:0;overflow-x:auto;overflow-y:hidden}
 .tree{position:relative;margin:0 auto}
 .links{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
-.link{fill:none;stroke:#40352c;stroke-width:2}
-.link.lit{stroke:#8d6f38}
-.link.done{stroke:var(--gold);filter:drop-shadow(0 0 5px rgba(231,179,86,.45))}
+/* The wiring takes the tree's colour too, at three strengths: a dead link is
+   the colour at a whisper, a lit one (parent learned, child not yet) is half,
+   a finished chain is the colour itself. */
+.link{fill:none;stroke:color-mix(in srgb,var(--accent) 20%,#2c251f);stroke-width:2}
+.link.lit{stroke:color-mix(in srgb,var(--accent) 52%,#2c251f)}
+.link.done{stroke:var(--accent);filter:drop-shadow(0 0 5px var(--accent-glow))}
 .nodes{position:absolute;inset:0}
 
 /* --------------------------------------------------------------- node */
@@ -237,16 +344,23 @@ a:hover{color:var(--gold-2)}
   transform:translate(-50%,-50%);
   background:none;border:0;padding:0;cursor:pointer;display:grid;place-items:center;
 }
+/* A hex is a rim and a well. The rim is the 2px the frame shows around its own
+   ::after, and it is where the tree's colour lives — the game rims every node
+   in its tree's hue whether or not you have spent anything on it. The well is
+   near-black with the same hue mixed in, so the icon sits on tinted dark rather
+   than on the same brown in all three trees. */
 .node .frame{
   position:absolute;inset:0;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
-  background:linear-gradient(160deg,#4a3d31,#2a221c);
+  background:linear-gradient(160deg,
+    color-mix(in srgb,var(--accent) 42%,#443a31),
+    color-mix(in srgb,var(--accent-dim) 45%,#241d18));
   transition:.18s;
 }
 .node .frame::after{
   content:"";position:absolute;inset:2px;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
-  background:linear-gradient(160deg,#1c1713,#0e0b09);
+  background:linear-gradient(160deg,color-mix(in srgb,var(--accent-deep) 62%,#171310),#0d0b09);
   transition:.18s;
 }
 .node svg.glyph{
@@ -266,16 +380,16 @@ a:hover{color:var(--gold-2)}
   transition:.18s;
 }
 .node.avail .mark{color:var(--text)}
-.node.taken .mark{color:var(--gold-2)}
-.node.gated .mark{color:#7d6a5c}
+.node.taken .mark{color:var(--accent-2)}
+.node.gated .mark{color:color-mix(in srgb,var(--accent) 22%,#7a6f64)}
 .node.locked .mark{color:#5a5148}
-.node:hover .mark{color:var(--gold-2)}
+.node:hover .mark{color:var(--accent-2)}
 .ult .ult-mark .mark{width:20px;height:20px;color:var(--text-faint)}
 .abil .abil-mark .mark{width:22px;height:22px;color:#8d7f70}
 .abil.avail .abil-mark .mark{color:var(--text)}
-.abil.taken .abil-mark .mark{color:#1a1309}
-.ult.on .ult-mark .mark{color:#150f09}
-.panel-hero .mark{width:40px;height:40px;color:var(--gold-2)}
+.abil.taken .abil-mark .mark{color:var(--accent-ink)}
+.ult.on .ult-mark .mark{color:var(--accent-ink)}
+.panel-hero .mark{width:40px;height:40px;color:var(--accent-2)}
 
 .node .pips{position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);display:flex;gap:5px}
 
@@ -283,9 +397,9 @@ a:hover{color:var(--gold-2)}
    a hollow bright one on the level you can buy next, dark for the rest. Perk
    nodes and ability rows share the rule so the two read the same. */
 .pip{width:8px;height:8px;flex:none;transform:rotate(45deg);
-  background:#2b241e;box-shadow:inset 0 0 0 1px #5d4d3e}
-.pip.on{background:var(--gold);box-shadow:0 0 8px rgba(231,179,86,.7)}
-.pip.next{background:transparent;box-shadow:inset 0 0 0 1.5px var(--gold-2)}
+  background:#2b241e;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 34%,#4e4238)}
+.pip.on{background:var(--accent);box-shadow:0 0 8px var(--accent-glow)}
+.pip.next{background:transparent;box-shadow:inset 0 0 0 1.5px var(--accent-2)}
 .node .badge{position:absolute;right:4px;bottom:16px;width:17px;height:17px;
   background:var(--text-faint);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
   -webkit-mask-size:contain;mask-size:contain;-webkit-mask-image:var(--m-bk);mask-image:var(--m-bk)}
@@ -317,28 +431,37 @@ a:hover{color:var(--gold-2)}
 .node.syn-yellow .syn{background:var(--tier-yellow);
   box-shadow:0 0 9px 2px color-mix(in srgb,var(--tier-yellow) 60%,transparent)}
 
-.node.avail .frame{background:linear-gradient(160deg,#cdb389,#4b3d2e)}
+.node.avail .frame{background:linear-gradient(160deg,
+  color-mix(in srgb,var(--accent-2) 72%,#cfc4b4),color-mix(in srgb,var(--accent-dim) 70%,#403528))}
 .node.avail svg.glyph{stroke:var(--text)}
 .node.avail .name{color:var(--text-dim)}
-.node.taken .frame{background:linear-gradient(160deg,var(--gold),#6d5221)}
-.node.taken .frame::after{background:linear-gradient(160deg,#2e2318,#15100b)}
-.node.taken svg.glyph{stroke:var(--gold-2)}
+/* Steel grey is a quiet colour on a dark board, so learned nodes carry a
+   little of their own light as well as the rim — in every tree, so the three
+   read the same way. */
+.node.taken .frame{background:linear-gradient(160deg,var(--accent),var(--accent-dim));
+  filter:drop-shadow(0 0 7px color-mix(in srgb,var(--accent) 30%,transparent))}
+.node.taken .frame::after{background:linear-gradient(160deg,
+  color-mix(in srgb,var(--accent-deep) 88%,#20180f),#12100c)}
+.node.taken svg.glyph{stroke:var(--accent-2)}
 .node.taken .name{color:var(--text)}
-.node.maxed .frame{background:linear-gradient(160deg,var(--gold-2),var(--gold-dim));
-  filter:drop-shadow(0 0 12px rgba(231,179,86,.35))}
-.node.gated svg.glyph{stroke:#7d6a5c}
+.node.maxed .frame{background:linear-gradient(160deg,var(--accent-2),var(--accent));
+  filter:drop-shadow(0 0 12px color-mix(in srgb,var(--accent) 40%,transparent))}
+.node.gated svg.glyph{stroke:color-mix(in srgb,var(--accent) 22%,#7a6f64)}
 .node.locked{cursor:not-allowed}
-.node.locked .frame{background:linear-gradient(160deg,#2c251f,#15110e)}
+.node.locked .frame{background:linear-gradient(160deg,
+  color-mix(in srgb,var(--accent) 14%,#2b241e),#15110e)}
+.node.locked .frame::after{background:linear-gradient(160deg,#171310,#0d0b09)}
 .node.locked svg.glyph{stroke:#5a5148}
 .node.locked .name{color:#6f665c}
-.node:hover .frame{background:linear-gradient(160deg,var(--gold-2),#7a5c26)}
-.node:hover svg.glyph{stroke:var(--gold-2)}
-.node:hover .name{color:var(--gold-2)}
-.node.selected .frame{background:linear-gradient(160deg,#fff0cf,var(--gold));
-  filter:drop-shadow(0 0 16px rgba(231,179,86,.55))}
-.node.selected .name{color:var(--gold-2)}
+.node:hover .frame{background:linear-gradient(160deg,var(--accent-2),var(--accent))}
+.node:hover svg.glyph{stroke:var(--accent-2)}
+.node:hover .name{color:var(--accent-2)}
+.node.selected .frame{background:linear-gradient(160deg,
+  color-mix(in srgb,var(--accent-2) 55%,#fff),var(--accent));
+  filter:drop-shadow(0 0 16px color-mix(in srgb,var(--accent) 60%,transparent))}
+.node.selected .name{color:var(--accent-2)}
 .node:focus-visible{outline:none}
-.node:focus-visible .frame{background:linear-gradient(160deg,#fff,var(--gold-2))}
+.node:focus-visible .frame{background:linear-gradient(160deg,#fff,var(--accent-2))}
 
 /* ------------------------------------------------------------ drawers */
 .drawer{flex:none;border:1px solid var(--line);border-radius:4px;background:rgba(20,15,11,.72);margin-top:10px}
@@ -348,17 +471,18 @@ a:hover{color:var(--gold-2)}
 }
 .drawer>summary::-webkit-details-marker{display:none}
 .drawer>summary::before{
-  content:"";width:9px;height:9px;flex:none;border-right:2px solid var(--gold);
-  border-bottom:2px solid var(--gold);transform:rotate(-45deg);transition:.18s;margin-right:2px;
+  content:"";width:9px;height:9px;flex:none;border-right:2px solid var(--accent);
+  border-bottom:2px solid var(--accent);transform:rotate(-45deg);transition:.18s;margin-right:2px;
 }
 .drawer[open]>summary::before{transform:rotate(45deg)}
 
 /* Folded, the ultimates drawer is one row of counter. It only asks to be opened
    at the moment the requirement is met and nothing has been chosen yet — before
    that there is nothing to act on, and afterwards the choice is permanent. */
-.drawer.ready{border-color:var(--gold-dim);background:rgba(30,23,14,.8)}
-.drawer.ready>summary::before{border-color:var(--gold-2)}
-.drawer-title{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-2)}
+.drawer.ready{border-color:color-mix(in srgb,var(--accent) 55%,transparent);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 10%,rgba(30,23,14,.8)),rgba(20,15,11,.8))}
+.drawer.ready>summary::before{border-color:var(--accent-2)}
+.drawer-title{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-2)}
 .drawer-note{font-size:12px;color:var(--text-faint);flex:1}
 /* The counter sits on a folded summary, so it never wraps under the title and
    never shrinks away: it is the whole reason the row is readable closed. */
@@ -385,10 +509,11 @@ a:hover{color:var(--gold-2)}
 .ult .ult-eff{display:block;font-size:14px;color:var(--text-dim);margin-top:5px}
 .ult .ult-cost{display:flex;gap:12px;margin-top:7px;font-size:13px}
 .ult.locked{opacity:.45;cursor:not-allowed}
-.ult.on{border-color:var(--gold);background:linear-gradient(180deg,rgba(231,179,86,.18),rgba(21,16,11,.85))}
-.ult.on .ult-mark{background:linear-gradient(150deg,var(--gold),var(--gold-dim))}
-.ult.on .ult-mark svg{stroke:#150f09}
-.ult.on b{color:var(--gold-2)}
+.ult.on{border-color:var(--accent);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 20%,transparent),rgba(21,16,11,.85))}
+.ult.on .ult-mark{background:linear-gradient(150deg,var(--accent-2),var(--accent-dim))}
+.ult.on .ult-mark svg{stroke:var(--accent-ink)}
+.ult.on b{color:var(--accent-2)}
 
 /* ---------------------------------------------------------- abilities */
 .abils{padding:0 14px 14px}
@@ -416,11 +541,12 @@ a:hover{color:var(--gold-2)}
   border:1px solid var(--line);border-radius:3px;cursor:pointer;
   background:linear-gradient(180deg,rgba(33,26,19,.8),rgba(15,12,9,.8));transition:.15s;
 }
-.abil:hover{border-color:var(--gold-dim)}
+.abil:hover{border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
 .abil .abil-mark{
   width:42px;height:42px;flex:none;display:grid;place-items:center;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
-  background:linear-gradient(160deg,#4a3d31,#201914);
+  background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 30%,#453a30),
+    color-mix(in srgb,var(--accent-deep) 55%,#1d1712));
 }
 .abil .abil-mark svg{width:22px;height:22px;stroke:#8d7f70;fill:none;stroke-width:1.5}
 .abil .abil-txt{flex:1;min-width:0}
@@ -431,13 +557,15 @@ a:hover{color:var(--gold-2)}
 .abil .pips{display:flex;gap:5px;align-items:center}
 .abil .abil-next{display:flex;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap}
 .abil .abil-next.done{color:var(--text-faint);font-size:12px}
-.abil.avail{border-color:#6a5540}
-.abil.avail .abil-mark{background:linear-gradient(160deg,#cdb389,#4b3d2e)}
+.abil.avail{border-color:color-mix(in srgb,var(--accent) 38%,#4a3d31)}
+.abil.avail .abil-mark{background:linear-gradient(160deg,
+  color-mix(in srgb,var(--accent-2) 70%,#cfc4b4),color-mix(in srgb,var(--accent-dim) 70%,#403528))}
 .abil.avail .abil-mark svg{stroke:var(--text)}
-.abil.taken .abil-mark{background:linear-gradient(160deg,var(--gold),#6d5221)}
-.abil.taken .abil-mark svg{stroke:#1a1309}
-.abil.maxed{border-color:var(--gold-dim)}
-.abil.selected{border-color:var(--gold);background:linear-gradient(180deg,rgba(231,179,86,.14),rgba(17,13,9,.85))}
+.abil.taken .abil-mark{background:linear-gradient(160deg,var(--accent),var(--accent-dim))}
+.abil.taken .abil-mark svg{stroke:var(--accent-ink)}
+.abil.maxed{border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.abil.selected{border-color:var(--accent);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 15%,transparent),rgba(17,13,9,.85))}
 .abil.syn-green{border-left:3px solid var(--tier-green)}
 .abil.syn-yellow{border-left:3px solid var(--tier-yellow)}
 
@@ -498,7 +626,7 @@ a:hover{color:var(--gold-2)}
 .side.ov-open .panel-hero:hover{filter:brightness(1.18)}
 .side.ov-open .panel-hero::after{
   content:"";width:9px;height:9px;flex:none;margin-left:2px;
-  border-right:2px solid var(--gold);border-bottom:2px solid var(--gold);
+  border-right:2px solid var(--accent);border-bottom:2px solid var(--accent);
   transform:rotate(-45deg);
 }
 .panel-empty{padding:34px 22px;color:var(--text-faint);font-size:14px;text-align:center}
@@ -507,19 +635,21 @@ a:hover{color:var(--gold-2)}
 /* A 104px block to hold a 52px icon, with the tree name and the level pinned
    into two of the corners it left over. It is one row now: mark, tree, level,
    all on the icon's own line, and the 44px it was wasting goes to the perk. */
+/* The hero band is the loudest statement of which tree you are reading, so it
+   is the tree's colour over the tree's own near-black rather than over brown. */
 .panel-hero{
   display:flex;align-items:center;gap:12px;padding:10px 14px;
-  border-bottom:1px solid var(--line);
-  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 30%,transparent),rgba(0,0,0,0)),
-             linear-gradient(150deg,#2c1f16,#120d0a);
+  border-bottom:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 34%,transparent),rgba(0,0,0,0)),
+             linear-gradient(150deg,color-mix(in srgb,var(--accent-deep) 80%,#241a12),#120d0a);
 }
 .panel-hero .hero-mark{width:40px;height:40px;flex:none;display:grid;place-items:center}
-.panel-hero svg{width:40px;height:40px;stroke:var(--gold-2);fill:none;stroke-width:1.4}
+.panel-hero svg{width:40px;height:40px;stroke:var(--accent-2);fill:none;stroke-width:1.4}
 .panel-hero .hero-tree{
   flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:9px;flex-wrap:wrap;
   font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);
 }
-.panel-hero .hero-lv{flex:none;font-size:13px;font-weight:600;color:var(--gold-2);white-space:nowrap}
+.panel-hero .hero-lv{flex:none;font-size:13px;font-weight:600;color:var(--accent-2);white-space:nowrap}
 /* The exception badge: this perk does not keep its tree's hours. */
 .hero-when{
   display:inline-flex;align-items:center;gap:5px;padding:2px 8px;
@@ -528,7 +658,7 @@ a:hover{color:var(--gold-2)}
 }
 .hero-when i{width:11px;height:11px;margin-right:0}
 .panel-body{padding:14px 18px 0}
-.panel h3{margin:0 0 8px;font-size:22px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gold-2)}
+.panel h3{margin:0 0 8px;font-size:22px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-2)}
 .panel .desc{margin:0 0 14px;font-size:16px;color:var(--text)}
 /* The game prints this under the effect in italics — a passive note, or that
    the ability does not take up a common slot. */
@@ -554,9 +684,9 @@ a:hover{color:var(--gold-2)}
   column-gap:11px;align-items:start;padding:9px 0;
   border-bottom:1px solid rgba(58,48,42,.6);font-size:15px}
 .levels .lp{width:13px;height:13px;flex:none;margin-top:4px;transform:rotate(45deg);
-  background:#2b241e;box-shadow:inset 0 0 0 1px #5d4d3e}
-.levels li.on .lp{background:var(--gold);box-shadow:0 0 8px rgba(231,179,86,.6)}
-.levels li.next .lp{box-shadow:inset 0 0 0 1px var(--gold)}
+  background:#2b241e;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 34%,#4e4238)}
+.levels li.on .lp{background:var(--accent);box-shadow:0 0 8px var(--accent-glow)}
+.levels li.next .lp{box-shadow:inset 0 0 0 1px var(--accent-2)}
 .levels li.blocked{opacity:.55}
 .levels .lv-text{min-width:0;color:var(--text)}
 .levels li.on .lv-text{color:var(--text-dim)}
@@ -603,7 +733,7 @@ a:hover{color:var(--gold-2)}
    figure it is derived from rather than replacing it. */
 .lv-total{
   display:block;margin-top:3px;font-size:12px;font-weight:600;letter-spacing:.02em;
-  color:var(--gold-2);
+  color:var(--accent-2);
 }
 
 /* ---------------------------------------------------- theorycraft panel */
@@ -624,15 +754,16 @@ a:hover{color:var(--gold-2)}
 .tc-line{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .tc-line.dash{stroke-dasharray:4 4;opacity:.55}
 .tc-end{font-size:11.5px;font-weight:700}
-/* One hue per tree, matching the tab marks the board already uses. */
-.tc-s1,.tc-s1.tc-line{stroke:var(--blood-2)} .tc-s1.tc-end,.tc-s1.tc-key{color:var(--blood-2)}
-.tc-s2,.tc-s2.tc-line{stroke:var(--gold)}    .tc-s2.tc-end,.tc-s2.tc-key{color:var(--gold)}
-.tc-s3,.tc-s3.tc-line{stroke:var(--tier-green)} .tc-s3.tc-end,.tc-s3.tc-key{color:var(--tier-green)}
-.tc-end.tc-s1{fill:var(--blood-2);stroke:none}
-.tc-end.tc-s2{fill:var(--gold);stroke:none}
-.tc-end.tc-s3{fill:var(--tier-green);stroke:none}
+/* One hue per tree, and the same three hues the board is painted in: the chart
+   was red / gold / green, which agreed with nothing on the page. Each series is
+   classed by its tree's key, so the line for Witchcraft is purple wherever the
+   tree happens to sit in the data. */
+.tc-wc{--c:#a878e0} .tc-sm{--c:#a9b7c4} .tc-vp{--c:#d94a45}
+.tc-wc.tc-line,.tc-sm.tc-line,.tc-vp.tc-line{stroke:var(--c)}
+.tc-wc.tc-key,.tc-sm.tc-key,.tc-vp.tc-key{color:var(--c)}
+.tc-end.tc-wc,.tc-end.tc-sm,.tc-end.tc-vp{fill:var(--c);stroke:none}
 .tc-dot{stroke:var(--panel-bg,#141210);stroke-width:1.5}
-.tc-dot.tc-s1{fill:var(--blood-2)} .tc-dot.tc-s2{fill:var(--gold)} .tc-dot.tc-s3{fill:var(--tier-green)}
+.tc-dot.tc-wc,.tc-dot.tc-sm,.tc-dot.tc-vp{fill:var(--c)}
 .tc-key{
   display:inline-block;width:11px;height:3px;border-radius:2px;margin-right:8px;
   background:currentColor;vertical-align:middle;
@@ -685,8 +816,12 @@ a:hover{color:var(--gold-2)}
   background:linear-gradient(180deg,rgba(20,15,11,0),rgba(17,13,9,.99) 60%,rgba(17,13,9,1));
 }
 .panel-foot .btn{flex:1;padding:12px 10px;text-align:center;font-size:13px}
-.btn-learn{background:linear-gradient(180deg,#cf9c44,#8a6528);border-color:#e0bb74;color:#1a1209;font-weight:700}
-.btn-learn:hover{background:linear-gradient(180deg,#efc264,#a67a30)}
+/* The one button that belongs to the tree rather than to the app. */
+.btn-learn{
+  background:linear-gradient(180deg,var(--accent),var(--accent-dim));
+  border-color:var(--accent-2);color:var(--accent-ink);font-weight:700;
+}
+.btn-learn:hover{background:linear-gradient(180deg,var(--accent-2),var(--accent))}
 .panel-note{padding:0 18px 16px;margin:0;font-size:13px;color:var(--text-faint)}
 
 /* ----------------------------------------------------- build overview */
@@ -697,7 +832,7 @@ a:hover{color:var(--gold-2)}
 .ov-row{display:flex;justify-content:space-between;gap:12px;padding:4px 0;
   border-bottom:1px solid rgba(58,48,42,.45)}
 .ov-row span{color:var(--text-dim)}
-.ov-row b{color:var(--gold-2);font-weight:600;white-space:nowrap}
+.ov-row b{color:var(--accent-2);font-weight:600;white-space:nowrap}
 .ov-list{margin:0;padding:0;list-style:none}
 .ov-list li{padding:5px 0;border-bottom:1px solid rgba(58,48,42,.45);color:var(--text-dim);font-size:13px}
 .ov-list li b{display:block;color:var(--text);font-weight:600;font-size:13px}
@@ -725,7 +860,7 @@ a:hover{color:var(--gold-2)}
 }
 .ov-sub[open]>summary::before{transform:rotate(90deg) translateX(1px)}
 .ov-sub>summary:hover{color:var(--text-dim)}
-.ov-sub[open]>summary{color:var(--gold)}
+.ov-sub[open]>summary{color:var(--accent)}
 .ov-count{
   margin-left:auto;padding:1px 7px;border:1px solid var(--line-2);border-radius:9px;
   font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--text-dim);
@@ -792,10 +927,19 @@ a:hover{color:var(--gold-2)}
      sideways and the labels stay legible, rather than every name being squeezed
      into its neighbour to make the whole tree fit a phone. */
   :root{--node:70px;--icon:36px;--colmin:118px;--row:150px}
-  .topbar{padding:10px 12px;gap:14px}
+  /* The one width where the bar is allowed a second row: a phone cannot hold
+     five groups side by side, and a bar that overflows would take the whole
+     page sideways with it. Two rows here, never three — the brand and the
+     meters share the first, the controls the second. */
+  .topbar{flex-wrap:wrap;row-gap:8px;gap:10px;padding:8px 12px}
+  .brand{order:1}
+  .meters{order:2;margin-left:auto}
   .meter-lbl{display:none}
+  .sliders{order:3;margin-left:0;flex:1 1 180px}
+  .checks{order:4}
+  .acts{order:5;margin-left:auto}
   .tabs{padding:0 0 6px}
-  .tab{padding:7px 12px;font-size:13px;letter-spacing:.08em}
+  .tab{padding:6px 10px;font-size:12px;letter-spacing:.06em}
   .stage{padding:6px 10px 18px}
   .node .name{font-size:12px}
 }
