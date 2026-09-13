@@ -1,5 +1,5 @@
 {
  "_": "Where the shared build list lives. Empty api = no community list, which is what a fork or a locally served folder gets; everything else in the planner still works. See api/README.md.",
- "api": "",
+ "api": "https://dawnwalker-builds.mlmariss.workers.dev",
  "turnstileSiteKey": ""
 }
