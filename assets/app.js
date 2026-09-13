@@ -163,65 +163,75 @@
     return c === null ? gate : 'Needs Corruption ' + c + ' or higher';
   }
 
-  /* Damage figures are what the game prints for a character at the registry's
-     anchor level. `scales` holds those figures and `effect_template` is the row
-     with each of them punched out, so a row can be restated at another level
-     without re-reading the prose. The model is a straight line between the two
-     captured levels: exact at both, interpolation between, and plainly
-     extrapolation outside — which the card says rather than hides. */
-  function levelFactor(tree) {
-    if (!SCALING || state.charlvl == null) return 1;
-    var spec = SCALING.trees && SCALING.trees[tree.name];
-    if (!spec) return 1;
-    var hi = SCALING.anchor_level, lo = SCALING.low_anchor_level;
-    return 1 + (1 / spec.ratio - 1) * (hi - state.charlvl) / (hi - lo);
+  /* A damage figure is `units x power`, truncated. `units` belongs to the ability
+     level and never moves; `power` belongs to the character, and was read off the
+     game at levels 9, 15 and 20. Between those anchors power is interpolated;
+     past them the nearest segment is continued, which the card labels as the
+     guess it is rather than hiding. */
+  function powerAt(tree, level) {
+    if (!SCALING || !SCALING.power) return null;
+    var table = SCALING.power[tree];
+    if (!table) return null;
+    var xs = Object.keys(table).map(Number).sort(function (x, y) { return x - y; });
+    if (xs.length < 2) return null;
+    var a, b, i;
+    if (level <= xs[0]) { a = 0; b = 1; }
+    else if (level >= xs[xs.length - 1]) { a = xs.length - 2; b = xs.length - 1; }
+    else {
+      a = 0;
+      for (i = 0; i < xs.length - 1; i++) if (xs[i] <= level) a = i;
+      b = a + 1;
+    }
+    var lo = table[String(xs[a])], hi = table[String(xs[b])];
+    return lo + (level - xs[a]) / (xs[b] - xs[a]) * (hi - lo);
   }
-  function atCharLevel(tree) {
-    return !!(SCALING && state.charlvl != null && state.charlvl !== SCALING.anchor_level &&
-              SCALING.trees && SCALING.trees[tree.name]);
+
+  /* Which stat a row follows is not always the tree it sits in — Witchcraft
+     Mastery's flat damage tracks Swordmastery's, figure for figure. */
+  function scaleTreeOf(p, l) {
+    if (l.scale_tree) return l.scale_tree;
+    var t = TREE_OF[p.node_id];
+    return t ? t.name : null;
+  }
+  function atCharLevel(p, l) {
+    if (!SCALING || state.charlvl == null || !l.units || !l.effect_template) return false;
+    var t = scaleTreeOf(p, l);
+    return !!(t && SCALING.power && SCALING.power[t]);
   }
   function groupDigits(n) {
     return n >= 1000 ? String(n).replace(/\B(?=(\d{3})+$)/g, ',') : String(n);
   }
-  /* The game truncates rather than rounds — Voracious Bite reads 602 where
-     rounding its own upgrade step would give 603. So a stored figure d is a true
-     value somewhere in [d, d+1), and restating means carrying its midpoint
-     across and truncating. That reproduces every captured panel; rounding d
-     misses one. */
   function effectAt(p, l) {
-    var tree = TREE_OF[p.node_id];
-    if (!l.scales || !l.effect_template || !tree || !atCharLevel(tree)) return l.effect;
-    var f = levelFactor(tree);
+    if (!atCharLevel(p, l)) return l.effect;
+    var q = powerAt(scaleTreeOf(p, l), state.charlvl);
+    if (q == null) return l.effect;
     return l.effect_template.replace(/\{(\d+)\}/g, function (_, i) {
-      return groupDigits(Math.max(1, Math.floor((l.scales[+i] + 0.5) * f)));
+      return groupDigits(Math.max(1, Math.floor(l.units[+i] * q)));
     });
   }
 
-  /* Damage scales with the save, so a figure read from a stronger one cannot sit
-     beside figures read from a weaker one — splice them and a final level reads
-     as weaker than the one below it. Nine figures were divided back to the
-     registry's own scale rather than left wrong or dropped, and the row says so:
-     the number is the right size, but it was computed, not read. */
+  /* The badge says which character level the row is showing, and turns red once
+     the slider leaves the range the game was actually read at. */
   function srcTag(p, l) {
     if (!l) return '';
     if (l.text_source === 'game8') {
       return '<span class="src-tag bad" title="Not read from the game — this row is still the ' +
         'Game8 table, which flattens wording the game spells out.">Unverified</span>';
     }
-    var tree = TREE_OF[p.node_id];
-    if (l.scales && tree && atCharLevel(tree)) {
-      var lo = SCALING.low_anchor_level, hi = SCALING.anchor_level;
-      var out = state.charlvl < lo || state.charlvl > hi;
-      return '<span class="src-tag' + (out ? ' bad' : '') + '" title="' +
-        esc('Restated for character level ' + state.charlvl + '. The game was read at levels ' +
-            lo + ' and ' + hi + '; ' + (out ? 'outside that range this is extrapolation.'
-                                            : 'between them the figure is interpolated.')) +
-        '">Level ' + state.charlvl + '</span>';
-    }
-    if (l.figure_source === 'scaled') {
-      return '<span class="src-tag" title="' + esc(l.figure_note || '') + '">Scaled</span>';
-    }
-    return '';
+    if (!l.units || !SCALING || state.charlvl == null) return '';
+    var anchors = SCALING.anchor_levels || [];
+    if (!anchors.length) return '';
+    var lo = Math.min.apply(null, anchors), hi = Math.max.apply(null, anchors);
+    var measured = anchors.indexOf(state.charlvl) >= 0;
+    var out = state.charlvl < lo || state.charlvl > hi;
+    if (state.charlvl === SCALING.anchor_level) return '';
+    return '<span class="src-tag' + (out ? ' bad' : '') + '" title="' +
+      esc(measured
+          ? 'Read from the game at character level ' + state.charlvl + '.'
+          : 'Character level ' + state.charlvl + '. The game was read at levels ' +
+            anchors.join(', ') + ' — ' + (out ? 'past those this continues the curve rather than '
+            + 'measuring it.' : 'between them the figure is interpolated.')) +
+      '">Level ' + state.charlvl + '</span>';
   }
 
   function gateTag(gate, owned) {

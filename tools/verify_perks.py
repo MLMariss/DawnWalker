@@ -228,7 +228,8 @@ def ability_checks(abilities, perk_ids):
                 if src not in ("game", "game8"):
                     findings.append(f"{where} Lv{level['level']}: text_source is {src!r}; "
                                     "every level row records where its text came from")
-            findings += figure_checks(where, ability["levels"])
+            findings += figure_checks(where, ability["levels"],
+                                      abilities.get("scaling") or {}, tree_name)
             findings += scale_checks(where, ability["levels"])
             findings += clipped_checks(where, ability["levels"])
     return findings
@@ -262,41 +263,62 @@ def fmt_figure(v):
     return f"{v:,}" if v >= 1000 else str(v)
 
 
-def figure_checks(where, levels):
-    """`scales` and `effect_template` are what lets a figure be restated at
-    another character level. They are only trustworthy while the template still
-    rebuilds the row's own text exactly, so that is checked rather than assumed."""
+def power_at(block, tree, level):
+    """Character power at a level: a straight line between the measured anchors,
+    continuing the nearest segment outside them."""
+    table = (block.get("power") or {}).get(tree)
+    if not table or len(table) < 2:
+        return None
+    xs = sorted(int(k) for k in table)
+    ys = [float(table[str(x)]) for x in xs]
+    if level <= xs[0]:
+        a, b = 0, 1
+    elif level >= xs[-1]:
+        a, b = len(xs) - 2, len(xs) - 1
+    else:
+        a = max(i for i in range(len(xs) - 1) if xs[i] <= level)
+        b = a + 1
+    t = (level - xs[a]) / (xs[b] - xs[a])
+    return ys[a] + t * (ys[b] - ys[a])
+
+
+def restate(block, tree, units, level):
+    """One row's figures at a character level. The game truncates."""
+    q = power_at(block, tree, level)
+    return None if q is None else [math.floor(u * q) for u in units]
+
+
+def figure_checks(where, levels, block, tree):
+    """`units` and `effect_template` are what let a row be restated at another
+    character level, and they are trustworthy only while they still rebuild the
+    row's own text at the anchor level."""
     findings = []
     for level in levels:
-        fig, scales = level.get("figure_source"), level.get("scales")
-        tmpl = level.get("effect_template")
+        units, tmpl = level.get("units"), level.get("effect_template")
         at = f"{where} Lv{level['level']}"
-        if fig is None and scales is None and tmpl is None:
+        if units is None and tmpl is None:
             continue
-        if fig not in ("read", "scaled"):
-            findings.append(f"{at}: figure_source is {fig!r}; it is 'read' or 'scaled'")
-        if fig == "scaled" and not level.get("figure_note"):
-            findings.append(f"{at}: a scaled figure with no figure_note cannot be checked "
-                            "back against the capture it came from")
-        if not isinstance(scales, list) or not scales or tmpl is None:
-            findings.append(f"{at}: a row carrying figures needs both scales and effect_template")
+        if not isinstance(units, list) or not units or tmpl is None:
+            findings.append(f"{at}: a scaling row needs both units and effect_template")
+            continue
+        if any(not isinstance(u, (int, float)) or u <= 0 for u in units):
+            findings.append(f"{at}: units must all be positive numbers, got {units!r}")
+            continue
+        vals = restate(block, level.get("scale_tree", tree), units, block["anchor_level"])
+        if vals is None:
+            findings.append(f"{at}: no power table for {level.get('scale_tree', tree)!r}")
             continue
         try:
-            rebuilt = tmpl.format(*[fmt_figure(v) for v in scales])
+            rebuilt = tmpl.format(*[fmt_figure(v) for v in vals])
         except (IndexError, KeyError):
-            findings.append(f"{at}: effect_template slots do not match its {len(scales)} scales")
+            findings.append(f"{at}: effect_template slots do not match its {len(units)} units")
             continue
         if rebuilt != level["effect"]:
-            findings.append(f"{at}: effect_template does not rebuild the row - "
+            findings.append(f"{at}: units x power at the anchor level does not rebuild the row - "
                             f"{rebuilt!r} != {level['effect']!r}")
     return findings
 
 
-# Levels gain clauses as they rise, so a first level missing what later ones
-# state is ordinary progression. A level missing what the levels *both above and
-# below* it state is not: that is a row clipped off the bottom of the panel.
-# Soul Stigma Lv3 lost "Duration 30s." exactly that way and still read as
-# transcribed, because its neighbours were both intact.
 def clipped_checks(where, levels):
     findings = []
     for key in ("Duration", "Cooldown"):
@@ -323,34 +345,23 @@ def _magnitudes(text):
     return out
 
 
-SCALING_KEYS = {"anchor_level", "low_anchor_level", "model", "trees", "note", "model_note",
-                "scaled_rows", "first_capture", "observations", "observations_note",
-                "rounding", "rounding_note"}
-
-
-def restate(block, tree, value, level):
-    """A figure at `anchor_level`, restated at another character level.
-
-    The game truncates, so a stored figure d stands for a true value anywhere in
-    [d, d+1); carrying its midpoint across and truncating reproduces every
-    captured panel, where rounding d does not."""
-    hi, lo = block["anchor_level"], block["low_anchor_level"]
-    ratio = block["trees"][tree]["ratio"]
-    return math.floor((value + 0.5) * (1 + (1 / ratio - 1) * (hi - level) / (hi - lo)))
+SCALING_KEYS = {"anchor_level", "anchor_levels", "model", "rounding", "power", "closed_form",
+                "note", "closed_form_note", "witchcraft_caveat", "observations",
+                "observations_note"}
 
 
 def observation_checks(abilities, registry=None):
-    """The growth model exists to restate a figure at another character level.
-    That is only worth trusting while it still reproduces the panels actually
-    captured at those levels, so every stored observation is replayed."""
+    """The model exists to restate a row at another character level, so it is
+    worth only as much as the panels it still reproduces. Every stored reading is
+    replayed through it."""
     findings = []
     if abilities is None:
         return findings
     block = abilities.get("scaling") or {}
     obs = block.get("observations") or {}
     if not obs:
-        return ["abilities.json: scaling.observations is empty, so the growth model "
-                "is fitted to nothing that can contradict it"]
+        return ["abilities.json: scaling.observations is empty, so the model is "
+                "fitted to nothing that can contradict it"]
     index = {}
     for doc in (abilities, registry):
         for tree_name, tree in (doc or {}).get("trees", {}).items():
@@ -358,36 +369,36 @@ def observation_checks(abilities, registry=None):
                 for entry in tree.get(group, []):
                     if "levels" in entry:
                         index.setdefault(entry["name"], (tree_name, entry))
-    for level_key, per_ability in obs.items():
+    for level_key, per_entry in obs.items():
         level = int(level_key)
-        for name, per_level in per_ability.items():
+        for name, per_level in per_entry.items():
             if name not in index:
                 findings.append(f"scaling.observations[{level_key}]: nothing named {name!r}")
                 continue
-            tree_name, ability = index[name]
+            tree_name, entry = index[name]
             for lv_key, seen in per_level.items():
-                level_row = next((l for l in ability["levels"] if l["level"] == int(lv_key)), None)
-                if level_row is None or "scales" not in level_row:
+                row = next((l for l in entry["levels"] if l["level"] == int(lv_key)), None)
+                if row is None or "units" not in row:
                     findings.append(f"scaling.observations[{level_key}] {name} Lv{lv_key}: "
-                                    "no such level, or it carries no scales")
+                                    "no such level, or it carries no units")
                     continue
-                got = [restate(block, tree_name, v, level) for v in level_row["scales"]]
-                if len(got) != len(seen):
+                got = restate(block, row.get("scale_tree", tree_name), row["units"], level)
+                if got is None or len(got) != len(seen):
                     findings.append(f"{name} Lv{lv_key}: {len(seen)} figures observed at level "
-                                    f"{level} against {len(got)} in scales")
+                                    f"{level} against {len(got or [])} the model produces")
                     continue
                 for i, (want, have) in enumerate(zip(seen, got)):
                     if want is not None and want != have:
-                        findings.append(f"{name} Lv{lv_key} figure {i}: the model restates "
-                                        f"{level_row['scales'][i]} at level {level} as {have}, but the "
-                                        f"panel showed {want} — the growth model no longer fits")
+                        findings.append(f"{name} Lv{lv_key} figure {i}: the model puts "
+                                        f"{row['units'][i]} units at {have} on level {level}, but "
+                                        f"the panel showed {want} - the model no longer fits")
     return findings
 
 
 def scaling_checks(registry, abilities):
-    """The `scaling` block says which character level every figure belongs to.
-    Without it a figure is a number with no scale, which is the fault that put a
-    level 4 below its level 3 in the first place."""
+    """The `scaling` block is what gives every figure a character level to belong
+    to. Without it a figure is a number with no scale, which is the fault that put
+    a level 4 below its own level 3 in the first place."""
     findings = []
     for name, doc in (("perks.json", registry), ("abilities.json", abilities)):
         if doc is None:
@@ -398,27 +409,29 @@ def scaling_checks(registry, abilities):
             continue
         if set(block) != SCALING_KEYS:
             findings.append(f"{name}: scaling keys are {sorted(block)}, expected {sorted(SCALING_KEYS)}")
-        for field in ("anchor_level", "low_anchor_level"):
-            if not isinstance(block.get(field), int):
-                findings.append(f"{name}: scaling.{field} must be a character level")
-        if block.get("model") not in ("linear", "geometric"):
+        if not isinstance(block.get("anchor_level"), int):
+            findings.append(f"{name}: scaling.anchor_level must be a character level")
+        if block.get("model") != "piecewise-linear":
             findings.append(f"{name}: scaling.model is {block.get('model')!r}; "
-                            "the two the restatement understands are linear and geometric")
-        for tree, spec in (block.get("trees") or {}).items():
-            ratio = spec.get("ratio")
-            if not (isinstance(ratio, (int, float)) and ratio > 0):
-                findings.append(f"{name}: scaling.trees.{tree}.ratio is {ratio!r}; "
-                                "it is the anchor figure over the low-anchor figure")
-            if not spec.get("measured_from"):
-                findings.append(f"{name}: scaling.trees.{tree} does not say which rows its "
-                                "ratio was measured on")
-        missing = set(registry.get("trees", {})) - set(block.get("trees") or {})
+                            "the restatement understands piecewise-linear")
+        anchors = sorted(block.get("anchor_levels") or [])
+        if block.get("anchor_level") not in anchors:
+            findings.append(f"{name}: anchor_level {block.get('anchor_level')} is not one of "
+                            f"the measured anchors {anchors}")
+        for tree, table in (block.get("power") or {}).items():
+            if sorted(int(k) for k in table) != anchors:
+                findings.append(f"{name}: scaling.power.{tree} covers {sorted(table)}, "
+                                f"not the declared anchors {anchors}")
+            for k, v in table.items():
+                if not isinstance(v, (int, float)) or v <= 0:
+                    findings.append(f"{name}: scaling.power.{tree}[{k}] is {v!r}; "
+                                    "power is a positive number")
+        missing = set((registry or {}).get("trees", {})) - set(block.get("power") or {})
         if missing:
-            findings.append(f"{name}: no scaling ratio for {', '.join(sorted(missing))}")
+            findings.append(f"{name}: no power table for {', '.join(sorted(missing))}")
     if registry is not None and abilities is not None:
-        a, b = registry.get("scaling") or {}, abilities.get("scaling") or {}
-        if a.get("anchor_level") != b.get("anchor_level"):
-            findings.append("perks.json and abilities.json state different anchor_levels; "
+        if (registry.get("scaling") or {}).get("power") != (abilities.get("scaling") or {}).get("power"):
+            findings.append("perks.json and abilities.json disagree on scaling.power; "
                             "their figures would not be comparable")
     return findings
 
