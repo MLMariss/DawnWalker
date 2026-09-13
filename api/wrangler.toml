@@ -4,10 +4,10 @@ main = "src/index.js"
 compatibility_date = "2026-01-01"
 
 [[d1_databases]]
-binding = "DB"
+binding = "DB"                       # src/index.js reads env.DB — not the name
+                                     # `wrangler d1 create` suggests
 database_name = "dawnwalker-builds"
-# Filled in by `wrangler d1 create` — paste the id it prints here.
-database_id = "PASTE_DATABASE_ID_HERE"
+database_id = "433fb5ec-7e3b-4d2d-b147-9bba42506037"
 
 [vars]
 # Origins allowed to publish and vote. Reading is public regardless. Add
