@@ -908,7 +908,9 @@
           '"><i class="when-mark ' + whenMark(t.when) + '"></i>' + esc(shortWhen(t.when)) +
           (t.whenMixed ? '*' : '') + '</span>'
         : '';
-      return '<button class="tab" role="tab" type="button" data-tree="' + t.name + '"' +
+      // Each tab wears its own tree's colour class, so the strip shows all three
+      // hues at once rather than only the one you are already looking at.
+      return '<button class="tab t-' + t.key + '" role="tab" type="button" data-tree="' + t.name + '"' +
         ' aria-selected="' + (t.name === state.tab) + '">' +
         '<span class="tab-mark">' + Icons.svg(Icons.forTree(t.name)) + '</span>' + t.name + when +
         '<span class="tab-stat"><i class="s-sp" title="Skill points spent in this tree"></i>' + spent(t) +
@@ -1888,6 +1890,12 @@
      dashed past them, because past them this is arithmetic rather than evidence. */
   var THEORY_MAX = 50;
 
+  /* Tree name -> the two-letter key the colour tokens are filed under. */
+  function treeKey(name) {
+    for (var i = 0; i < TREES.length; i++) if (TREES[i].name === name) return TREES[i].key;
+    return 'wc';
+  }
+
   function powerCurveSVG() {
     if (!SCALING || !SCALING.power) return '';
     var trees = Object.keys(SCALING.power);
@@ -1927,7 +1935,10 @@
       }
       var c = [];
       for (L = hi; L <= THEORY_MAX; L++) c.push(X(L).toFixed(1) + ',' + Y(powerAt(t, L) / base).toFixed(1));
-      var cls = 'tc-s' + (i + 1);
+      // The line is the tree's own colour, keyed by tree rather than by
+      // position in the object — a chart whose Witchcraft line is purple only
+      // as long as Witchcraft happens to come third is a chart waiting to lie.
+      var cls = 'tc-' + treeKey(t);
       out.push('<polyline points="' + a.join(' ') + '" class="tc-line dash ' + cls + '"/>');
       out.push('<polyline points="' + c.join(' ') + '" class="tc-line dash ' + cls + '"/>');
       out.push('<polyline points="' + b.join(' ') + '" class="tc-line ' + cls + '"/>');
@@ -1966,7 +1977,7 @@
     var trees = Object.keys(SCALING.power);
     var rows = trees.map(function (t, i) {
       var base = powerAt(t, lo);
-      return '<tr><td><i class="tc-key tc-s' + (i + 1) + '"></i>' + esc(t) + '</td>' +
+      return '<tr><td><i class="tc-key tc-' + treeKey(t) + '"></i>' + esc(t) + '</td>' +
         anchors.map(function (L) {
           return '<td>' + (powerAt(t, L) / base).toFixed(2) + '\u00d7</td>';
         }).join('') +
