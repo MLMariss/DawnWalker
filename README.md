@@ -74,8 +74,9 @@ Pages and it works as the site index.
   publishes it to the community list; **Builds** is that list plus everything saved
   here, each row showing what the build costs before you load it. Publishing and
   upvoting happen in the page — no account, no sign-in, nowhere else to go — and
-  the vote button only appears while the board still *is* the published build:
-  edit one node and it steps aside for "Back to original", so an upvote always
+  an upvote is a toggle, so a changed mind costs one more click rather than being
+  stuck. The vote button only appears while the board still *is* the published
+  build: edit one node and it steps aside for "Back to original", so an upvote always
   means the build it is attached to. See
   [Community builds](#community-builds) for where the list lives.
 

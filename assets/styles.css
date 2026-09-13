@@ -814,11 +814,17 @@ a:hover{color:var(--gold-2)}
   color:var(--gold-2);font:inherit;font-size:11px;font-weight:600;
   letter-spacing:.09em;text-transform:uppercase;cursor:pointer;transition:.15s
 }
-.votebtn:hover:not(:disabled):not(.off){border-color:var(--gold-dim);
+.votebtn:hover:not(:disabled):not(.off):not(.voted){border-color:var(--gold-dim);
   background:linear-gradient(180deg,rgba(231,179,86,.3),rgba(231,179,86,.1))}
 .votebtn b{font-size:15px;font-weight:700;line-height:1}
 .votebtn:disabled,.votebtn.off{cursor:default;opacity:.55}
-.votebtn.voted{color:var(--green);border-color:rgba(143,192,110,.4);opacity:.85}
+/* Voted is a state you can leave, not a dead end — so it keeps a full-strength
+   colour and a hover of its own, rather than the dimming that used to say
+   "disabled". */
+.votebtn.voted{color:var(--green);border-color:rgba(143,192,110,.4);
+  background:linear-gradient(180deg,rgba(143,192,110,.14),rgba(143,192,110,.03))}
+.votebtn.voted:hover{border-color:rgba(143,192,110,.75);
+  background:linear-gradient(180deg,rgba(143,192,110,.26),rgba(143,192,110,.08))}
 .vote-caret{
   width:0;height:0;flex:none;
   border-left:5px solid transparent;border-right:5px solid transparent;

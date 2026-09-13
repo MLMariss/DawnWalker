@@ -71,6 +71,7 @@ async function route(request, env, url) {
   if (path === '/builds' && request.method === 'GET') return listBuilds(env, url);
   if (path === '/builds' && request.method === 'POST') return postBuild(request, env);
   if (m && m[2] === '/vote' && request.method === 'POST') return postVote(request, env, +m[1]);
+  if (m && m[2] === '/vote' && request.method === 'DELETE') return deleteVote(request, env, +m[1]);
   if (m && m[2] === '/report' && request.method === 'POST') return postReport(request, env, +m[1]);
   if (m && !m[2] && request.method === 'DELETE') return remove(request, env, +m[1]);
   if (m && !m[2] && request.method === 'PATCH') return setHidden(request, env, +m[1], 0);
@@ -185,6 +186,26 @@ async function postVote(request, env, id) {
 
   const already = !r.meta.changes;
   return json({ id: id, votes: build.votes + (already ? 0 : 1), already: already });
+}
+
+/* Changing your mind is the same act as casting the vote, so it costs the same:
+   one row, removed by the fingerprint that wrote it. `absent` says the server
+   holds no vote from this voter — which is the honest answer both to a second
+   click on an un-vote and to a fingerprint that has since drifted, and either
+   way leaves the caller free to vote again. */
+async function deleteVote(request, env, id) {
+  if (!originAllowed(request, env)) return json({ error: 'Not allowed from here.' }, 403);
+
+  const build = await one(env, id);
+  if (!build) return json({ error: 'No such build.' }, 404);
+
+  const who = await fingerprint(request, env);
+  const r = await env.DB.prepare(
+    'DELETE FROM votes WHERE build_id = ? AND voter = ?'
+  ).bind(id, who).run();
+
+  const absent = !r.meta.changes;
+  return json({ id: id, votes: build.votes - (absent ? 0 : 1), absent: absent });
 }
 
 /* A report is not moderation, it is a flag for a human: the row keeps serving

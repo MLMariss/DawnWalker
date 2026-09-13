@@ -1774,20 +1774,13 @@
     if (!attached) { bar.hidden = true; bar.innerHTML = ''; return; }
 
     var intact = attachedIsIntact();
-    var v = voted();
-    /* The number is the server's, never this tab's arithmetic on top of it.
-       `did` only decides how the button looks — adding one for it double-counted
-       the vote the server had already included. */
-    var did = !!v[attached.id];
-    var count = attached.votes || 0;
-
+    /* The number is the server's, never this tab's arithmetic on top of it —
+       adding one for a vote this browser remembers double-counted the vote the
+       server had already included. */
     var vote = intact
-      ? '<button class="votebtn' + (did ? ' voted' : '') + '" type="button" data-act="upvote"' +
-        (did ? ' disabled title="You have already upvoted this build."' : '') +
-        '><i class="vote-caret" aria-hidden="true"></i><b>' + count + '</b>' +
-        (did ? 'Voted' : 'Upvote') + '</button>'
+      ? voteBtn(attached, '', true)
       : '<span class="votebtn off" title="Upvoting is for the build as published. Reset or reload it to vote.">' +
-        '<i class="vote-caret" aria-hidden="true"></i><b>' + count + '</b>Upvote</span>';
+        '<i class="vote-caret" aria-hidden="true"></i><b>' + (attached.votes || 0) + '</b>Upvote</span>';
 
     bar.innerHTML = vote +
       '<span class="loaded-name">' + esc(attached.name) + '</span>' +
@@ -1953,20 +1946,15 @@
     }
 
     var here = encodeBuild(false);
-    var v = voted();
     var list = community.slice().sort(communitySort === 'new'
       ? function (a, b) { return String(b.created || '').localeCompare(String(a.created || '')); }
       : function (a, b) { return (b.votes || 0) - (a.votes || 0); });
 
     var rows = list.map(function (b) {
       var s = statsFor(b.code);
-      var did = !!v[b.id];
-      var count = b.votes || 0;
       var on = s.canon === here;
       return '<article class="brow' + (on ? ' current' : '') + '">' +
-        '<button class="votebtn col' + (did ? ' voted' : '') + '" type="button" data-act="upvote" data-id="' + esc(b.id) + '"' +
-        (did ? ' disabled title="You have already upvoted this build."' : '') +
-        '><i class="vote-caret" aria-hidden="true"></i><b>' + count + '</b></button>' +
+        voteBtn(b, 'col', false) +
         '<div class="brow-main">' +
         '<h3>' + esc(b.name) + (on ? '<span class="brow-now">on the board</span>' : '') + '</h3>' +
         '<p class="brow-meta">' + (b.author ? esc(b.author) : 'Anonymous') +
@@ -2013,6 +2001,19 @@
   function markVoted(b) { var v = voted(); v[b.id] = true; writeStore(K_VOTED, v); }
   function unmarkVoted(b) { var v = voted(); delete v[b.id]; writeStore(K_VOTED, v); }
 
+  /* An upvote you cannot take back is a trap, so the button is a toggle: voted
+     it reads "Voted" and takes the vote away, unvoted it casts one. It used to
+     render `disabled` once voted, which left a changed mind with nowhere to go. */
+  function voteBtn(b, extraClass, label) {
+    var did = !!voted()[b.id];
+    return '<button class="votebtn' + (extraClass ? ' ' + extraClass : '') + (did ? ' voted' : '') +
+      '" type="button" data-act="upvote" data-id="' + esc(b.id) + '"' +
+      ' aria-pressed="' + did + '"' +
+      ' title="' + (did ? 'You upvoted this build — click to take it back.' : 'Upvote this build.') + '"' +
+      '><i class="vote-caret" aria-hidden="true"></i><b>' + (b.votes || 0) + '</b>' +
+      (label ? (did ? 'Voted' : 'Upvote') : '') + '</button>';
+  }
+
   /* The count the page shows is the server's, not this tab's arithmetic: a
      second device, or a vote that was already counted, comes back as the real
      number rather than one more than whatever was on screen. `already` is not
@@ -2036,6 +2037,37 @@
       if (after) after();
       toast('The upvote did not go through — ' + err.message, true);
     });
+  }
+
+  /* `absent` means the server holds no vote from this visitor after all — a
+     browser update reads as a new voter, so a mark this browser kept can outlive
+     the vote it stood for. The mark comes off either way: it was describing a
+     vote that is not there, and leaving it on would strand the button again. */
+  function unvote(b, after) {
+    if (!API) return;
+    var was = b.votes || 0;
+    b.votes = Math.max(0, was - 1);
+    unmarkVoted(b);
+    if (after) after();
+    api('/builds/' + encodeURIComponent(b.id) + '/vote', null, { method: 'DELETE' })
+      .then(function (doc) {
+        b.votes = doc.votes;
+        if (after) after();
+        toast(doc.absent ? 'That vote was no longer on record — the button is clear now.'
+                         : 'Upvote taken back.');
+      })
+      .catch(function (err) {
+        b.votes = was;
+        markVoted(b);
+        if (after) after();
+        toast('Taking the upvote back did not go through — ' + err.message, true);
+      });
+  }
+
+  /* The button is one control, so one handler decides which way it goes. */
+  function toggleVote(b, after) {
+    if (voted()[b.id]) unvote(b, after);
+    else upvote(b, after);
   }
 
   /* The key is the whole proof, so a browser that has lost it cannot do this and
@@ -2160,7 +2192,7 @@
         if (cb) loadBuild(cb.code, cb);
       } else if (act === 'upvote') {
         var ub = commBy(t.dataset.id);
-        if (ub) upvote(ub, function () { renderBuilds(); renderLoadedBar(); });
+        if (ub) toggleVote(ub, function () { renderBuilds(); renderLoadedBar(); });
       } else if (act === 'report') {
         var rb = commBy(t.dataset.id);
         if (rb) report(rb);
@@ -2174,7 +2206,7 @@
       var t = e.target.closest('[data-act]');
       if (!t || !attached) return;
       if (t.dataset.act === 'upvote') {
-        upvote(attached, renderLoadedBar);
+        toggleVote(attached, function () { renderLoadedBar(); renderBuilds(); });
       } else if (t.dataset.act === 'revert') {
         loadBuild(attached.code, attached);
       } else if (t.dataset.act === 'detach') {
