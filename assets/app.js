@@ -22,7 +22,7 @@
   ['tabs', 'tree', 'links', 'nodes', 'ults', 'ult-gate', 'panel', 'toast', 'corruption',
    'corruption-out', 'manuals', 'synergy', 'm-sp', 'm-ts', 'm-bk', 'boardscroll',
    'ov-body', 'ov-note', 'ovdrawer', 'abils', 'abil-note', 'abildrawer', 'ultdrawer',
-   'side', 'hint-key'].forEach(function (id) {
+   'side', 'hint-key', 'modal', 'modal-title', 'modal-body', 'loadedbar'].forEach(function (id) {
     el[id.replace(/-(\w)/g, function (_, c) { return c.toUpperCase(); })] = document.getElementById(id);
   });
 
@@ -85,6 +85,9 @@
     readHash();
     bindChrome();
     renderAll();
+    // Late and non-blocking: the planner works without the list, and a build
+    // arrived at by link only learns it is a community build once it lands.
+    loadCommunity();
     window.addEventListener('resize', debounce(function () { renderTree(); }, 120));
   }
 
@@ -782,6 +785,7 @@
     renderPanel();
     renderMeters();
     renderOverview();
+    renderLoadedBar();
     writeHash();
   }
 
@@ -1258,6 +1262,7 @@
 
     document.getElementById('reset').addEventListener('click', function () {
       state.levels = {}; state.ults = {}; state.quests = {}; state.sel = null;
+      attached = null;
       seedStory();
       renderAll(); toast('Build cleared.');
     });
@@ -1298,6 +1303,8 @@
       el.ovdrawer.open = false;
     });
 
+    bindBuilds();
+
     el.corruption.value = state.corruption;
     el.corruptionOut.textContent = state.corruption;
     el.manuals.checked = state.manuals;
@@ -1334,11 +1341,18 @@
     }
   }
 
-  /* ----------------------------------------------------------- build links */
+  /* ----------------------------------------------------------- build codes */
 
-  var writingHash = false;
+  /* One string is the whole build. It is what the address bar carries after
+     `#b=`, what a saved build keeps, and what a community issue stores — so
+     there is exactly one format to get right and a link, a save and a published
+     build are the same thing wearing different hats.
 
-  function writeHash() {
+     `withTab` appends the tree you happen to be looking at. That belongs in a
+     link and nowhere else: which tab is open is not part of a build's identity,
+     and if it were, clicking Swordmastery would read as editing the build and
+     take the upvote button away. */
+  function encodeBuild(withTab) {
     var parts = ['1', 'c' + state.corruption, 'm' + (state.manuals ? 1 : 0)];
     var picks = Object.keys(state.levels)
       .filter(function (id) {
@@ -1352,19 +1366,17 @@
     var u = Object.keys(state.ults).filter(function (k) { return state.ults[k] != null; })
       .map(function (k) { return k + '.' + state.ults[k]; });
     if (u.length) parts.push('u=' + u.join(','));
-    parts.push('t=' + (tree() ? tree().key : ''));
-
-    writingHash = true;
-    var h = '#b=' + parts.join(';');
-    if (location.hash !== h) history.replaceState(null, '', h);
-    setTimeout(function () { writingHash = false; }, 0);
+    if (withTab) parts.push('t=' + (tree() ? tree().key : ''));
+    return parts.join(';');
   }
 
-  function readHash() {
-    var m = /#b=(.+)$/.exec(location.hash || '');
-    if (!m) return;
+  /* Unknown ids are dropped and every level is clamped, so a code from anywhere
+     — a stranger's link, a community issue, a paste that lost a character —
+     can only ever describe a build you could have clicked yourself. */
+  function decodeBuild(code) {
+    if (!code) return false;
     state.levels = {}; state.ults = {}; state.quests = {};
-    m[1].split(';').forEach(function (chunk) {
+    String(code).split(';').forEach(function (chunk) {
       var k = chunk[0], v = chunk.slice(1).replace(/^=/, '');
       if (k === 'c') state.corruption = clamp(+v, 0, 15);
       else if (k === 'm') state.manuals = v === '1';
@@ -1385,11 +1397,522 @@
         if (tt) state.tab = tt.name;
       }
     });
-    if (el.corruption) { el.corruption.value = state.corruption; el.corruptionOut.textContent = state.corruption; }
-    if (el.manuals) el.manuals.checked = state.manuals;
+    syncControls();
     seedStory();
     dropInvalid();
+    return true;
   }
+
+  function syncControls() {
+    if (el.corruption) { el.corruption.value = state.corruption; el.corruptionOut.textContent = state.corruption; }
+    if (el.manuals) el.manuals.checked = state.manuals;
+  }
+
+  /* ----------------------------------------------------------- build links */
+
+  var writingHash = false;
+
+  function writeHash() {
+    writingHash = true;
+    var h = '#b=' + encodeBuild(true);
+    if (location.hash !== h) history.replaceState(null, '', h);
+    setTimeout(function () { writingHash = false; }, 0);
+  }
+
+  function readHash() {
+    var m = /#b=(.+)$/.exec(location.hash || '');
+    if (m) decodeBuild(m[1]);
+  }
+
+  /* ---------------------------------------------------- reading a build cold */
+
+  /* What a build costs and what it actually is, worked out by the planner's own
+     rules rather than a second set that would drift from them: swap the code in,
+     read it off, put the state back.
+
+     `canon` is the code as the planner understands it, which is not always the
+     code it was handed. A build whose ultimate its points no longer pay for, or
+     that names a perk a patch has removed, loses those parts on the way in — so
+     comparing a stored code to the board by string would call such a build
+     "edited" the instant you loaded it, and take its upvote away. Two codes are
+     the same build when they canonicalise the same.
+
+     Cached by code: a build's reading cannot change while its code does not, and
+     both lists re-read every row on every re-render. */
+  var codeCache = {};
+
+  function snapshot() {
+    return {
+      levels: JSON.parse(JSON.stringify(state.levels)),
+      ults: JSON.parse(JSON.stringify(state.ults)),
+      quests: JSON.parse(JSON.stringify(state.quests)),
+      corruption: state.corruption, manuals: state.manuals, tab: state.tab
+    };
+  }
+  function restore(s) {
+    state.levels = s.levels; state.ults = s.ults; state.quests = s.quests;
+    state.corruption = s.corruption; state.manuals = s.manuals; state.tab = s.tab;
+    syncControls();
+  }
+
+  function readCode(code) {
+    if (codeCache[code]) return codeCache[code];
+    var snap = snapshot();
+    decodeBuild(code);
+    var sp = 0, ts = 0, bk = 0, per = [];
+    TREES.forEach(function (t) {
+      var n = spent(t), u = state.ults[t.key];
+      if (u != null) n += t.ultimates[u].cost.skill_points || 0;
+      if (n) per.push({ key: t.key, name: t.name, sp: n });
+      sp += n; ts += timeSpent(t); bk += manualsNeeded(t);
+    });
+    var ults = TREES.filter(function (t) { return state.ults[t.key] != null; })
+      .map(function (t) { return t.ultimates[state.ults[t.key]].name; });
+    var out = {
+      canon: encodeBuild(false),
+      sp: sp, ts: ts, bk: bk, per: per, ults: ults, corruption: state.corruption
+    };
+    restore(snap);
+    codeCache[code] = out;
+    return out;
+  }
+
+  function statsFor(code) { return readCode(code); }
+  function canonOf(code) { return readCode(code).canon; }
+
+  /* ------------------------------------------------------------ build store */
+
+  /* Two keys, both best-effort. Private windows and blocked site data make
+     localStorage throw on access rather than return nothing, so every touch is
+     wrapped: a browser that will not remember builds still has to run the
+     planner. */
+  var K_MINE = 'bodw.builds.v1';
+  var K_VOTED = 'bodw.voted.v1';
+  var K_AUTHOR = 'bodw.author.v1';
+
+  function readStore(key, fallback) {
+    try {
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) { return fallback; }
+  }
+  function writeStore(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+    catch (e) { return false; }
+  }
+
+  function myBuilds() {
+    var v = readStore(K_MINE, []);
+    return Array.isArray(v) ? v.filter(function (b) { return b && b.code; }) : [];
+  }
+  function voted() { var v = readStore(K_VOTED, {}); return (v && typeof v === 'object') ? v : {}; }
+
+  function saveMine(name, author) {
+    var list = myBuilds();
+    var code = encodeBuild(false);
+    var rec = { id: 'b' + Date.now().toString(36), name: name, author: author, code: code, saved: Date.now() };
+    // Saving the same name twice is a re-save, not a second copy — otherwise a
+    // build you tweak six times leaves six near-identical rows behind.
+    var at = list.map(function (b) { return b.name.toLowerCase(); }).indexOf(name.toLowerCase());
+    if (at >= 0) { rec.id = list[at].id; list[at] = rec; } else list.unshift(rec);
+    if (!writeStore(K_MINE, list)) {
+      toast('This browser will not store saved builds — the link still works.', true);
+      return null;
+    }
+    if (author) writeStore(K_AUTHOR, author);
+    return rec;
+  }
+
+  function deleteMine(id) {
+    writeStore(K_MINE, myBuilds().filter(function (b) { return b.id !== id; }));
+  }
+
+  /* -------------------------------------------------------- community builds */
+
+  /* data/builds.json is generated into the deploy by tools/bake_builds.py out of
+     the issue tracker; see that file for why the tracker is the database. Here
+     it is just a static file on our own origin: one fetch, no API key, nothing
+     to rate-limit. */
+  var REPO = 'MLMariss/DawnWalker';
+  var community = null;      // null until loaded, then an array
+  var communityErr = null;
+  var communityFetch = null;
+
+  function loadCommunity() {
+    if (communityFetch) return communityFetch;
+    communityFetch = fetch('data/builds.json', { cache: 'no-cache' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (doc) {
+        if (doc && doc.repo) REPO = doc.repo;
+        community = ((doc && doc.builds) || []).filter(function (b) {
+          return b && typeof b.code === 'string' && b.code;
+        });
+        matchAttached();
+      })
+      .catch(function (err) { communityErr = String(err); });
+    return communityFetch;
+  }
+
+  /* The list is generated by our own workflow, but it is still a file the page
+     did not write, and its one link is the only thing here that goes into an
+     href. Anything that is not a plain https URL falls back to one we build. */
+  function issueUrl(b) {
+    var fallback = 'https://github.com/' + REPO + '/issues/' + encodeURIComponent(b.id);
+    return /^https:\/\/[\w.-]+\//.test(b.url || '') ? b.url : fallback;
+  }
+
+  function publishUrl(name, author, notes) {
+    var q = {
+      template: 'build.yml',
+      title: '[Build] ' + name,
+      'build-name': name,
+      author: author || '',
+      code: encodeBuild(false),
+      notes: notes || ''
+    };
+    return 'https://github.com/' + REPO + '/issues/new?' +
+      Object.keys(q).map(function (k) {
+        return encodeURIComponent(k) + '=' + encodeURIComponent(q[k]);
+      }).join('&');
+  }
+
+  /* ------------------------------------------------- the build you are viewing */
+
+  /* `attached` is the community build the board currently shows, and it survives
+     edits on purpose: the bar keeps naming the build you started from, and only
+     the upvote goes away, because an upvote has to mean "this build", not "what
+     I made out of it". */
+  var attached = null;
+
+  function attachedIsIntact() { return !!attached && encodeBuild(false) === canonOf(attached.code); }
+
+  /* A community build reached by link rather than by the list is still that
+     build, so the bar and its upvote should appear for it too. */
+  function matchAttached() {
+    if (attached || !community) return;
+    var code = encodeBuild(false);
+    for (var i = 0; i < community.length; i++) {
+      if (canonOf(community[i].code) === code) { attached = community[i]; break; }
+    }
+    renderLoadedBar();
+  }
+
+  function renderLoadedBar() {
+    var bar = el.loadedbar;
+    if (!bar) return;
+    if (!attached) { bar.hidden = true; bar.innerHTML = ''; return; }
+
+    var intact = attachedIsIntact();
+    var v = voted();
+    var did = !!v[attached.id];
+    var count = (attached.votes || 0) + (did ? 1 : 0);
+
+    var vote = intact
+      ? '<button class="votebtn' + (did ? ' voted' : '') + '" type="button" data-act="upvote"' +
+        (did ? ' disabled title="Counted on the site at its next refresh."'
+             : ' title="Opens the build on GitHub, where a 👍 reaction is the vote."') +
+        '><i class="vote-caret" aria-hidden="true"></i><b>' + count + '</b>' +
+        (did ? 'Voted' : 'Upvote') + '</button>'
+      : '<span class="votebtn off" title="Upvoting is for the build as published. Reset or reload it to vote.">' +
+        '<i class="vote-caret" aria-hidden="true"></i><b>' + count + '</b>Upvote</span>';
+
+    bar.innerHTML = vote +
+      '<span class="loaded-name">' + esc(attached.name) + '</span>' +
+      (attached.author ? '<span class="loaded-by">by ' + esc(attached.author) + '</span>' : '') +
+      '<span class="loaded-tag">' + (intact ? 'community build' : 'edited — no longer this build') + '</span>' +
+      (intact ? '' : '<button class="btn btn-ghost btn-sm" type="button" data-act="revert">Back to original</button>') +
+      '<a class="btn btn-ghost btn-sm" href="' + esc(issueUrl(attached)) + '" target="_blank" rel="noopener">Discuss</a>' +
+      '<button class="loaded-x" type="button" data-act="detach" aria-label="Stop following this build">×</button>';
+    bar.hidden = false;
+  }
+
+  function loadBuild(code, from) {
+    decodeBuild(code);
+    // A published code carries no tab — it is not part of the build — so land on
+    // the tree the build actually spends in rather than leaving a Swordmastery
+    // build to open on an untouched Witchcraft board.
+    if (!/(^|;)t=/.test(String(code))) {
+      var best = null;
+      TREES.forEach(function (t) { if (!best || spent(t) > spent(best)) best = t; });
+      if (best && spent(best)) state.tab = best.name;
+    }
+    attached = from || null;
+    if (!attached) matchAttached();
+    closeModal();
+    renderAll();
+    toast(from ? 'Loaded “' + from.name + '”.' : 'Build loaded.');
+  }
+
+  /* ------------------------------------------------------------------ modal */
+
+  var modalMode = null;
+
+  function openModal(mode) {
+    modalMode = mode;
+    renderModal();
+    if (el.modal.open) return;
+    if (el.modal.showModal) el.modal.showModal(); else el.modal.open = true;
+    if (mode === 'save') {
+      var f = el.modalBody.querySelector('#sv-name');
+      if (f) { f.focus(); f.select(); }
+    }
+  }
+  function closeModal() {
+    if (!el.modal || !el.modal.open) return;
+    if (el.modal.close) el.modal.close(); else el.modal.open = false;
+  }
+
+  function renderModal() {
+    if (modalMode === 'save') renderSave();
+    else renderBuilds();
+  }
+
+  function statLine(s) {
+    var per = s.per.map(function (p) {
+      return '<i class="dot t-' + p.key + '"></i>' + esc(p.name) + ' ' + p.sp;
+    }).join('<span class="sep">·</span>');
+    return '<span class="bstat">' + (per || 'Nothing spent') +
+      '<span class="sep">·</span>' + s.ts + ' time' +
+      (s.bk ? '<span class="sep">·</span>' + s.bk + ' manual' + (s.bk === 1 ? '' : 's') : '') +
+      '<span class="sep">·</span>Corruption ' + s.corruption + '</span>';
+  }
+
+  function renderSave() {
+    var s = statsFor(encodeBuild(false));
+    var name = (attached && attachedIsIntact() && attached.name) || lastSaveName();
+    var author = readStore(K_AUTHOR, '') || '';
+    el.modalTitle.textContent = 'Save this build';
+    el.modalBody.innerHTML =
+      '<div class="sv-stats">' + statLine(s) + '</div>' +
+      '<label class="fld"><span>Build name</span>' +
+      '<input id="sv-name" type="text" maxlength="80" placeholder="Sun-proof Blade Dancer" value="' + esc(name) + '"></label>' +
+      '<label class="fld"><span>Author <i>optional</i></span>' +
+      '<input id="sv-author" type="text" maxlength="40" placeholder="Anonymous" value="' + esc(author) + '"></label>' +
+      '<label class="fld"><span>Build code <i>this is the whole build</i></span>' +
+      '<textarea id="sv-code" rows="3" readonly>' + esc(encodeBuild(false)) + '</textarea></label>' +
+      '<div class="modal-acts">' +
+      '<button class="btn" type="button" data-act="save-local">Save to this browser</button>' +
+      '<button class="btn btn-ghost" type="button" data-act="copy-code">Copy code</button>' +
+      '<button class="btn btn-ghost" type="button" data-act="copy-link">Copy link</button>' +
+      '</div>' +
+      '<hr class="modal-rule">' +
+      '<label class="fld"><span>Notes <i>optional, for the community list</i></span>' +
+      '<textarea id="sv-notes" rows="2" maxlength="600" placeholder="How it plays, when it comes online, what it gives up."></textarea></label>' +
+      '<div class="modal-acts">' +
+      '<button class="btn" type="button" data-act="publish">Publish to community…</button>' +
+      '</div>' +
+      '<p class="modal-fine">Publishing opens a prefilled issue on GitHub — press <b>Submit</b> there and ' +
+      'the build joins the community list within about half an hour. Upvotes are 👍 reactions on that issue, ' +
+      'so a GitHub account is needed to publish or to vote. Saving to this browser needs neither, ' +
+      'but it is only this browser: the code above, or the link, is how a build travels.</p>';
+  }
+
+  function lastSaveName() {
+    var m = myBuilds();
+    return m.length && canonOf(m[0].code) === encodeBuild(false) ? m[0].name : '';
+  }
+
+  var buildsTab = 'community';
+  var communitySort = 'top';
+
+  function renderBuilds() {
+    el.modalTitle.textContent = 'Builds';
+    var mine = myBuilds();
+    var n = community ? community.length : null;
+    el.modalBody.innerHTML =
+      '<nav class="mtabs">' +
+      '<button class="mtab" type="button" data-tab="community" aria-selected="' + (buildsTab === 'community') + '">' +
+      'Community' + (n === null ? '' : ' <b>' + n + '</b>') + '</button>' +
+      '<button class="mtab" type="button" data-tab="mine" aria-selected="' + (buildsTab === 'mine') + '">' +
+      'Saved here' + (mine.length ? ' <b>' + mine.length + '</b>' : '') + '</button>' +
+      '</nav>' +
+      '<div class="mlist">' + (buildsTab === 'mine' ? mineHtml(mine) : communityHtml()) + '</div>';
+  }
+
+  function rowActs(inner) { return '<div class="brow-acts">' + inner + '</div>'; }
+
+  function mineHtml(mine) {
+    var here = encodeBuild(false);
+    var rows = mine.map(function (b) {
+      var s = statsFor(b.code);
+      var mine_on = s.canon === here;
+      return '<article class="brow' + (mine_on ? ' current' : '') + '">' +
+        '<div class="brow-main">' +
+        '<h3>' + esc(b.name) + (mine_on ? '<span class="brow-now">on the board</span>' : '') + '</h3>' +
+        '<p class="brow-meta">' + (b.author ? esc(b.author) + '<span class="sep">·</span>' : '') +
+        'saved ' + esc(when(b.saved)) + '</p>' + statLine(s) + '</div>' +
+        rowActs(
+          '<button class="btn btn-sm" type="button" data-act="load-mine" data-id="' + esc(b.id) + '">Load</button>' +
+          '<button class="btn btn-ghost btn-sm" type="button" data-act="link-mine" data-id="' + esc(b.id) + '">Copy link</button>' +
+          '<button class="btn btn-ghost btn-sm danger" type="button" data-act="del-mine" data-id="' + esc(b.id) + '">Delete</button>') +
+        '</article>';
+    }).join('');
+
+    return (rows || '<p class="mempty">Nothing saved in this browser yet. <b>Save</b> in the top bar keeps ' +
+            'the build you are looking at — it stays on this device, so the link is still what you send someone.</p>') +
+      '<div class="mpaste">' +
+      '<label class="fld"><span>Load a build code</span>' +
+      '<div class="mpaste-row"><input id="pa-code" type="text" placeholder="1;c15;m1;p=…" spellcheck="false">' +
+      '<button class="btn btn-sm" type="button" data-act="paste-load">Load</button></div></label></div>';
+  }
+
+  function communityHtml() {
+    if (communityErr) {
+      return '<p class="mempty"><b>The community list is not available on this copy of the planner.</b> ' +
+        'It is generated at deploy time from the issue tracker, so it is empty when the site is served ' +
+        'from a local folder. Saving and sharing links work regardless.</p>';
+    }
+    if (!community) return '<p class="mempty">Loading…</p>';
+    if (!community.length) {
+      return '<p class="mempty">No community builds yet — yours would be the first. ' +
+        '<b>Save</b> in the top bar, then <b>Publish to community</b>.</p>';
+    }
+
+    var here = encodeBuild(false);
+    var v = voted();
+    var list = community.slice().sort(communitySort === 'new'
+      ? function (a, b) { return String(b.created || '').localeCompare(String(a.created || '')); }
+      : function (a, b) { return (b.votes || 0) - (a.votes || 0); });
+
+    var rows = list.map(function (b) {
+      var s = statsFor(b.code);
+      var did = !!v[b.id];
+      var count = (b.votes || 0) + (did ? 1 : 0);
+      var on = s.canon === here;
+      return '<article class="brow' + (on ? ' current' : '') + '">' +
+        '<button class="votebtn col' + (did ? ' voted' : '') + '" type="button" data-act="upvote" data-id="' + esc(b.id) + '"' +
+        (did ? ' disabled title="Counted on the site at its next refresh."'
+             : ' title="Opens the build on GitHub, where a 👍 reaction is the vote."') +
+        '><i class="vote-caret" aria-hidden="true"></i><b>' + count + '</b></button>' +
+        '<div class="brow-main">' +
+        '<h3>' + esc(b.name) + (on ? '<span class="brow-now">on the board</span>' : '') + '</h3>' +
+        '<p class="brow-meta">' + (b.author ? esc(b.author) : 'Anonymous') +
+        '<span class="sep">·</span>' + esc(when(Date.parse(b.created || '') || 0)) + '</p>' +
+        (b.notes ? '<p class="brow-notes">' + esc(b.notes) + '</p>' : '') + statLine(s) + '</div>' +
+        rowActs(
+          '<button class="btn btn-sm" type="button" data-act="load-comm" data-id="' + esc(b.id) + '">Load</button>' +
+          '<a class="btn btn-ghost btn-sm" href="' + esc(issueUrl(b)) + '" target="_blank" rel="noopener">Discuss</a>') +
+        '</article>';
+    }).join('');
+
+    return '<div class="msort">' +
+      '<button class="msort-b" type="button" data-sort="top" aria-selected="' + (communitySort === 'top') + '">Most upvoted</button>' +
+      '<button class="msort-b" type="button" data-sort="new" aria-selected="' + (communitySort === 'new') + '">Newest</button>' +
+      '</div>' + rows;
+  }
+
+  function when(ms) {
+    if (!ms) return 'unknown';
+    var d = Math.floor((Date.now() - ms) / 86400000);
+    if (d <= 0) return 'today';
+    if (d === 1) return 'yesterday';
+    if (d < 30) return d + ' days ago';
+    return new Date(ms).toISOString().slice(0, 10);
+  }
+
+  function copy(text, ok) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { toast(ok); },
+        function () { toast('Copy failed — select the text and copy it by hand.', true); });
+    } else toast('Copy is unavailable here — select the text and copy it by hand.', true);
+  }
+
+  function commBy(id) {
+    return (community || []).filter(function (b) { return String(b.id) === String(id); })[0];
+  }
+
+  function markVoted(b) {
+    var v = voted();
+    v[b.id] = true;
+    writeStore(K_VOTED, v);
+  }
+
+  /* Reporting "opened GitHub" into a blocked popup is the kind of lie that has
+     the player waiting for a tab that never came. */
+  function openTab(url, ok) {
+    if (window.open(url, '_blank', 'noopener')) toast(ok);
+    else toast('Your browser blocked the tab — allow pop-ups, or use Discuss.', true);
+  }
+
+  function bindBuilds() {
+    document.getElementById('save').addEventListener('click', function () { openModal('save'); });
+    document.getElementById('builds').addEventListener('click', function () {
+      buildsTab = 'community';
+      openModal('builds');
+      loadCommunity().then(function () { if (el.modal.open && modalMode === 'builds') renderBuilds(); });
+    });
+
+    // Clicking the backdrop closes it; <dialog> gives us Escape and the focus
+    // trap for free, which is the whole reason this is a dialog and not a div.
+    el.modal.addEventListener('click', function (e) {
+      if (e.target === el.modal) closeModal();
+    });
+
+    el.modalBody.addEventListener('click', function (e) {
+      var t = e.target.closest('[data-tab],[data-sort],[data-act]');
+      if (!t) return;
+
+      if (t.dataset.tab) { buildsTab = t.dataset.tab; renderBuilds(); return; }
+      if (t.dataset.sort) { communitySort = t.dataset.sort; renderBuilds(); return; }
+
+      var act = t.dataset.act;
+      if (act === 'save-local') {
+        var nm = (el.modalBody.querySelector('#sv-name').value || '').trim();
+        if (!nm) { toast('Give the build a name first.', true); return; }
+        var au = (el.modalBody.querySelector('#sv-author').value || '').trim();
+        if (saveMine(nm, au)) { closeModal(); toast('Saved “' + nm + '” in this browser.'); }
+      } else if (act === 'copy-code') {
+        copy(encodeBuild(false), 'Build code copied.');
+      } else if (act === 'copy-link') {
+        writeHash(); copy(location.href, 'Build link copied.');
+      } else if (act === 'publish') {
+        var pn = (el.modalBody.querySelector('#sv-name').value || '').trim();
+        if (!pn) { toast('Give the build a name first.', true); return; }
+        var pa = (el.modalBody.querySelector('#sv-author').value || '').trim();
+        var pnotes = (el.modalBody.querySelector('#sv-notes').value || '').trim();
+        saveMine(pn, pa);          // publishing keeps a copy too, so it is not lost in the tab
+        closeModal();
+        openTab(publishUrl(pn, pa, pnotes), 'Opened GitHub — press Submit there to publish.');
+      } else if (act === 'load-mine') {
+        var mb = myBuilds().filter(function (b) { return b.id === t.dataset.id; })[0];
+        if (mb) loadBuild(mb.code, null);
+      } else if (act === 'link-mine') {
+        var lb = myBuilds().filter(function (b) { return b.id === t.dataset.id; })[0];
+        if (lb) copy(location.origin + location.pathname + '#b=' + lb.code, 'Build link copied.');
+      } else if (act === 'del-mine') {
+        deleteMine(t.dataset.id); renderBuilds(); toast('Saved build deleted.');
+      } else if (act === 'paste-load') {
+        var raw = (el.modalBody.querySelector('#pa-code').value || '').trim().replace(/^.*#b=/, '');
+        if (!/^1;/.test(raw)) { toast('That does not look like a build code.', true); return; }
+        loadBuild(raw, null);
+      } else if (act === 'load-comm') {
+        var cb = commBy(t.dataset.id);
+        if (cb) loadBuild(cb.code, cb);
+      } else if (act === 'upvote') {
+        var ub = commBy(t.dataset.id);
+        if (ub) {
+          markVoted(ub); renderBuilds(); renderLoadedBar();
+          openTab(issueUrl(ub), UPVOTE_HINT);
+        }
+      }
+    });
+
+    el.loadedbar.addEventListener('click', function (e) {
+      var t = e.target.closest('[data-act]');
+      if (!t || !attached) return;
+      if (t.dataset.act === 'upvote') {
+        markVoted(attached); renderLoadedBar();
+        openTab(issueUrl(attached), UPVOTE_HINT);
+      } else if (t.dataset.act === 'revert') {
+        loadBuild(attached.code, attached);
+      } else if (t.dataset.act === 'detach') {
+        attached = null; renderLoadedBar();
+      }
+    });
+  }
+
+  var UPVOTE_HINT = 'React 👍 on the GitHub page to record the vote.';
 
   /* ----------------------------------------------------------------- util */
 
