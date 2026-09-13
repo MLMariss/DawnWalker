@@ -1,0 +1,21 @@
+# Deploy from this folder: see README.md for the four commands.
+name = "dawnwalker-builds"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dawnwalker-builds"
+# Filled in by `wrangler d1 create` — paste the id it prints here.
+database_id = "PASTE_DATABASE_ID_HERE"
+
+[vars]
+# Origins allowed to publish and vote. Reading is public regardless. Add
+# http://localhost:8000 while working on the planner locally.
+ALLOWED_ORIGINS = "https://mlmariss.github.io"
+
+# Secrets are NOT set here — they would end up in git. Set them with
+# `wrangler secret put NAME`:
+#   VOTE_SALT         any long random string; it salts the voter fingerprint
+#   ADMIN_TOKEN       any long random string; hides and unhides rows
+#   TURNSTILE_SECRET  optional; setting it turns the human check on
