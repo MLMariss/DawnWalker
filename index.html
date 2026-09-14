@@ -61,11 +61,11 @@
          label is the longest in the group, and the grid's columns are shared —
          under Theorycraft it widens the one column that was widest anyway.
          Hidden outright on touch, where there is no hover to preview with and
-         no right-click to refund with, so confirm is the only mode a phone is
-         ever in and a switch between two would be a lie. -->
-    <button class="btn btn-ghost btn-toggle" id="pickmode" type="button" aria-pressed="false"
-            title="Off: click a node to learn it, right-click to refund. On: a click only selects, and the Learn and Refund buttons in the panel do the rest — the way the game works.">
-      <span class="sw" aria-hidden="true"></span><span>Confirm picks</span>
+         no right-click to refund with, so quick picks is unusable on a phone
+         and a switch offering it would be a lie. -->
+    <button class="btn btn-ghost btn-toggle" id="pickmode" type="button" aria-pressed="true"
+            title="On: hover reads a perk, a click learns it together with any prerequisites it still needs, and a right-click refunds it together with everything built on it. Off: a click only selects, and the Learn and Refund buttons in the panel do the rest, one prerequisite at a time — the way the game works.">
+      <span class="sw" aria-hidden="true"></span><span>Quick picks</span>
     </button>
     <button class="btn btn-ghost" id="share" type="button">Copy link</button>
     <button class="btn btn-ghost" id="reset" type="button">Reset</button>

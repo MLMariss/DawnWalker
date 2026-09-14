@@ -17,17 +17,18 @@
     tab: null, sel: null,
     levels: {}, ults: {}, quests: {},
     corruption: 15, manuals: true, synergy: true, charlvl: null,
-    /* Confirm mode: a click on the board only selects, and nothing is learned
-       or refunded until the Learn or Refund button in the side panel is
-       pressed — which is what the game itself asks for. Off by default on a
-       mouse, because clicking straight through a tree is faster once you know
-       it; always on where there is no mouse. */
-    confirm: false
+    /* Quick picks: the board is a map rather than a ladder. Hover reads a perk,
+       a click buys it along with any prerequisites it still needs, and a
+       right-click takes it back with everything standing on it. Switched off,
+       the board does what the game does — a click only selects, and nothing is
+       spent until Learn or Refund is pressed in the panel. On by default on a
+       mouse; never available where there is no mouse. */
+    quick: true
   };
 
   /* No hover to preview with and no right-click to refund with: on a touch
-     screen the quick mode is not a worse choice, it is an unusable one, so it
-     is not offered at all and the switch that would offer it is hidden. */
+     screen quick picks is not a worse choice, it is an unusable one, so it is
+     not offered at all and the switch that would offer it is hidden. */
   var TOUCH = !!(window.matchMedia &&
     window.matchMedia('(hover:none) and (pointer:coarse)').matches);
 
@@ -99,7 +100,7 @@
     // The switch is a preference, not part of a build, so it is remembered on
     // the device rather than carried in the link: a build you share should
     // arrive looking the way the reader left their own planner.
-    state.confirm = TOUCH || readStore(K_PICK, false) === true;
+    state.quick = !TOUCH && storedQuick();
     renderHintKey();
     state.tab = TREES[0].name;
     seedStory();
@@ -309,13 +310,19 @@
     return { ok: true, level: nl };
   }
 
-  function canRefund(p) {
+  /* `cascade` is quick picks asking the two questions this function otherwise
+     answers no to — what about the perks below this one, and what about the
+     ultimate they pay for — because in that mode both are handled rather than
+     refused: the dependants come off with it, and `dropInvalid` has the last
+     word on an ultimate the remaining points no longer buy. */
+  function canRefund(p, cascade) {
     var n = lv(p.node_id), floor = storyFloor(p);
     if (n <= floor) {
       return { ok: false, why: floor
         ? 'The story grants level 1 outright — it cannot be refunded.'
         : 'Nothing learned here.' };
     }
+    if (cascade) return { ok: true };
     if (n === 1) {
       var deps = (CHILDREN[p.node_id] || []).filter(function (c) { return lv(c.node_id) > 0; });
       if (deps.length) {
@@ -343,6 +350,102 @@
     var n = lv(p.node_id) - 1;
     if (n) state.levels[p.node_id] = n; else delete state.levels[p.node_id];
     return true;
+  }
+
+  /* ------------------------------------------------- quick picks, both ways
+
+     Quick picks reads the tree as a map rather than a ladder: you point at the
+     perk you are building toward and the route is bought for you, and you take
+     a perk back without first dismantling everything standing on it. The rules
+     themselves do not change — every perk on the route is bought at a level the
+     strict rules allow, and everything left standing on nothing is dropped by
+     the same `dropInvalid` that corruption and manuals already go through. What
+     changes is who does the clicking. */
+
+  /* Every ancestor of `p` still at zero, deepest first — the order they would
+     have to be bought in, with each perk named once however many routes to it
+     the tree has. */
+  function missingPath(p) {
+    var out = [], seen = {};
+    (function walk(node) {
+      node.prerequisites.forEach(function (id) {
+        if (seen[id]) return;
+        seen[id] = true;
+        var q = BY_ID[id];
+        if (!q) return;
+        walk(q);
+        if (lv(id) < 1) out.push(q);
+      });
+    }(p));
+    return out;
+  }
+
+  /* Whether the route is buyable, answered by walking it on a copy of the build
+     rather than by a second set of rules that could disagree with `canLearn` —
+     a prerequisite gated behind corruption or an unfound manual still stops the
+     whole route, and stops it before anything has been spent. */
+  function canLearnPath(p) {
+    var path = missingPath(p);
+    if (!path.length) return canLearn(p);
+    var real = state.levels;
+    state.levels = JSON.parse(JSON.stringify(real));
+    try {
+      for (var i = 0; i < path.length; i++) {
+        var r = canLearn(path[i]);
+        if (!r.ok) return { ok: false, why: path[i].name + ' first — ' + lower(r.why), path: path };
+        state.levels[path[i].node_id] = 1;
+      }
+      var last = canLearn(p);
+      return last.ok ? { ok: true, level: last.level, path: path } : last;
+    } finally { state.levels = real; }
+  }
+
+  function learnPath(p) {
+    var r = canLearnPath(p);
+    if (!r.ok) { toast(r.why, true); return false; }
+    (r.path || []).forEach(function (q) { state.levels[q.node_id] = 1; });
+    state.levels[p.node_id] = lv(p.node_id) + 1;
+    if (r.path && r.path.length) {
+      toast(p.name + ' — took ' + listOf(r.path.map(function (q) { return q.name; })) +
+        ' on the way.');
+    }
+    return true;
+  }
+
+  /* Refund with the dependants following it down. The levels below are not
+     hunted for by hand: dropping this one and running `dropInvalid` peels back
+     everything that now stands on nothing, in as many passes as it takes, using
+     the same rule that decides legality everywhere else. */
+  function refundCascade(p) {
+    var r = canRefund(p, true);
+    if (!r.ok) { toast(r.why, true); return false; }
+    var before = {};
+    Object.keys(state.levels).forEach(function (id) { before[id] = state.levels[id]; });
+    var hadUlt = {};
+    TREES.forEach(function (t) { hadUlt[t.key] = state.ults[t.key]; });
+
+    var n = lv(p.node_id) - 1;
+    if (n) state.levels[p.node_id] = n; else delete state.levels[p.node_id];
+    dropInvalid();
+
+    var also = Object.keys(before).filter(function (id) {
+      return id !== p.node_id && (state.levels[id] || 0) < before[id];
+    }).map(nameOf);
+    var ults = TREES.filter(function (t) {
+      return hadUlt[t.key] != null && state.ults[t.key] == null;
+    }).map(function (t) { return t.ultimates[hadUlt[t.key]].name; });
+
+    if (also.length || ults.length) {
+      toast('Refunded ' + p.name + ' — also dropped ' +
+        listOf(also.concat(ults)) + '.');
+    }
+    return true;
+  }
+
+  function lower(s) { return s.charAt(0).toLowerCase() + s.slice(1); }
+  function listOf(names) {
+    if (names.length < 3) return names.join(' and ');
+    return names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
   }
 
   /* Totals. Levels learned are the first `n` entries of a perk's level list. */
@@ -907,7 +1010,7 @@
     // assign the tree class alone, which quietly wiped the mode class on every
     // render, a click included.
     document.body.className = 't-' + (tree() ? tree().key : 'wc') +
-      (state.confirm ? ' confirm-mode' : '');
+      (state.quick ? '' : ' confirm-mode');
     renderTabs();
     renderAbilities();
     renderUltimates();
@@ -1151,15 +1254,20 @@
         '<div class="panel-hero panel-hero-bare">' +
           '<span class="hero-tree">No perk selected</span></div>' +
         '<div class="panel-empty"><b>Nothing to read yet</b>' +
-        (state.confirm
-          ? (TOUCH ? 'Tap a node to read it. ' : 'Click a node to read it. ') +
-            'Its levels, and the Learn and Refund buttons, appear here.'
-          : 'Hover a node to read it. Click to learn its next level, right-click to refund.') +
+        (state.quick
+          ? 'Hover a node to read it. Click to learn it and anything it needs first, ' +
+            'right-click to refund it and anything built on it.'
+          : (TOUCH ? 'Tap a node to read it. ' : 'Click a node to read it. ') +
+            'Its levels, and the Learn and Refund buttons, appear here.') +
         '</div>';
       return;
     }
     var p = BY_ID[id], t = TREE_OF[id], n = lv(id);
-    var nl = nextLevel(p), learnable = canLearn(p), refundable = canRefund(p);
+    // The buttons answer to the mode the board is in, or they would offer a
+    // deal the click beside them does not honour.
+    var nl = nextLevel(p);
+    var learnable = state.quick ? canLearnPath(p) : canLearn(p);
+    var refundable = canRefund(p, state.quick);
     var when = activeTime(p);
 
     var reqLine = '';
@@ -1223,7 +1331,26 @@
         '<button class="btn btn-ghost" type="button" data-act="refund"' +
           (refundable.ok ? '' : ' disabled') + '>Refund</button>' +
       '</div>' +
-      (!learnable.ok && !p.quest_unlock ? '<p class="panel-note">' + esc(learnable.why) + '</p>' : '');
+      panelNote(p, learnable);
+  }
+
+  /* The line under the two buttons. Either the reason the perk cannot be had,
+     or — where quick picks is about to buy a route to it — what that route is,
+     because the cost shown above is the perk's own and the click will spend
+     more than that. */
+  function panelNote(p, learnable) {
+    if (p.quest_unlock) return '';
+    if (!learnable.ok) return '<p class="panel-note">' + esc(learnable.why) + '</p>';
+    var path = learnable.path || [];
+    if (!path.length) return '';
+    var sp = 0, ts = 0;
+    path.forEach(function (q) {
+      sp += levelCost(q, 0, 'skill_points');
+      ts += levelCost(q, 0, 'time_segments');
+    });
+    return '<p class="panel-note">Learning this also takes level 1 of ' +
+      esc(listOf(path.map(function (q) { return q.name; }))) + ' — a further ' +
+      costHTML(sp, ts, true) + '</p>';
   }
 
   function renderMeters() {
@@ -1312,20 +1439,22 @@
       renderAll();
     });
 
-    /* One click handler for the board and one for the ability grid, both
-       reading the same rule: in confirm mode a click selects and stops there,
-       and the only things that ever change the build are the two buttons in
-       the panel. In quick mode it selects and buys in the same motion, which
-       is what the planner has always done. */
+    /* One pair of verbs for the board, the ability grid and the panel buttons
+       alike, so the three routes into a build cannot drift apart. Quick picks
+       buys the route and refunds the dependants with it; switched off, a click
+       selects and stops there and these two run only from the panel, under the
+       strict rules the game plays by. */
     function pickLearn(p) {
       if (p.quest_unlock) {
         state.quests[p.node_id] = !state.quests[p.node_id];
         if (state.quests[p.node_id]) state.levels[p.node_id] = 1; else delete state.levels[p.node_id];
-      } else learn(p);
+        return;
+      }
+      if (state.quick) learnPath(p); else learn(p);
     }
     function pickRefund(p) {
-      if (p.quest_unlock) { state.quests[p.node_id] = false; delete state.levels[p.node_id]; }
-      else refund(p);
+      if (p.quest_unlock) { state.quests[p.node_id] = false; delete state.levels[p.node_id]; return; }
+      if (state.quick) refundCascade(p); else refund(p);
     }
 
     el.nodes.addEventListener('click', function (e) {
@@ -1333,11 +1462,11 @@
       if (!b) return;
       var p = BY_ID[b.dataset.node];
       state.sel = p.node_id;
-      if (!state.confirm) pickLearn(p);
+      if (state.quick) pickLearn(p);
       var byKeyboard = e.detail === 0;
       renderAll();
       // On a narrow screen the panel is a scroll below the board, so every
-      // selection brings it into view — in confirm mode it is not just the
+      // selection brings it into view — with quick picks off it is not just the
       // description, it is where the Learn button is.
       if (byKeyboard) focusNode(p.node_id); else revealPanel();
     });
@@ -1348,12 +1477,12 @@
       e.preventDefault();
       var p = BY_ID[b.dataset.node];
       state.sel = p.node_id;
-      if (!state.confirm) pickRefund(p);
+      if (state.quick) pickRefund(p);
       renderAll();
     });
 
     el.nodes.addEventListener('mouseover', function (e) {
-      if (state.confirm) return;   // the panel follows the selection, not the cursor
+      if (!state.quick) return;   // the panel follows the selection, not the cursor
       var b = e.target.closest('[data-node]');
       if (!b || state.sel === b.dataset.node) return;
       state.sel = b.dataset.node;
@@ -1364,8 +1493,8 @@
       var b = e.target.closest('[data-node]');
       if (!b || (e.key !== 'Backspace' && e.key !== 'Delete')) return;
       e.preventDefault();
-      if (state.confirm) { state.sel = b.dataset.node; renderAll(); focusNode(b.dataset.node); return; }
-      refund(BY_ID[b.dataset.node]);
+      if (state.quick) pickRefund(BY_ID[b.dataset.node]);
+      else state.sel = b.dataset.node;
       renderAll(); focusNode(b.dataset.node);
     });
 
@@ -1373,20 +1502,20 @@
       var b = e.target.closest('[data-node]');
       if (!b) return;
       state.sel = b.dataset.node;
-      if (!state.confirm) learn(BY_ID[b.dataset.node]);
+      if (state.quick) pickLearn(BY_ID[b.dataset.node]);
       renderAll();
-      if (state.confirm) revealPanel();
+      if (!state.quick) revealPanel();
     });
     el.abils.addEventListener('contextmenu', function (e) {
       var b = e.target.closest('[data-node]');
       if (!b) return;
       e.preventDefault();
       state.sel = b.dataset.node;
-      if (!state.confirm) refund(BY_ID[b.dataset.node]);
+      if (state.quick) pickRefund(BY_ID[b.dataset.node]);
       renderAll();
     });
     el.abils.addEventListener('mouseover', function (e) {
-      if (state.confirm) return;
+      if (!state.quick) return;
       var b = e.target.closest('[data-node]');
       if (!b || state.sel === b.dataset.node) return;
       state.sel = b.dataset.node;
@@ -1412,21 +1541,21 @@
       var p = BY_ID[state.sel];
       if (b.dataset.act === 'learn') {
         if (p.quest_unlock) { state.quests[p.node_id] = true; state.levels[p.node_id] = 1; }
-        else learn(p);
+        else if (state.quick) learnPath(p); else learn(p);
       } else if (p.quest_unlock) { state.quests[p.node_id] = false; delete state.levels[p.node_id]; }
-      else refund(p);
+      else if (state.quick) refundCascade(p); else refund(p);
       renderAll();
     });
 
     if (el.pickmode) {
       el.pickmode.hidden = TOUCH;
       el.pickmode.addEventListener('click', function () {
-        state.confirm = !state.confirm;
-        writeStore(K_PICK, state.confirm);
+        state.quick = !state.quick;
+        writeStore(K_QUICK, state.quick);
         syncPickMode(); renderAll();
-        toast(state.confirm
-          ? 'Confirm picks: clicking a node selects it — Learn and Refund are in the panel.'
-          : 'Quick picks: click a node to learn, right-click to refund.');
+        toast(state.quick
+          ? 'Quick picks on: a click learns and brings its prerequisites, a right-click refunds and takes its dependants.'
+          : 'Quick picks off: a click selects — Learn and Refund are in the panel.');
       });
     }
 
@@ -1525,8 +1654,8 @@
   }
 
   function syncPickMode() {
-    if (el.pickmode) el.pickmode.setAttribute('aria-pressed', String(!!state.confirm));
-    document.body.classList.toggle('confirm-mode', !!state.confirm);
+    if (el.pickmode) el.pickmode.setAttribute('aria-pressed', String(!!state.quick));
+    document.body.classList.toggle('confirm-mode', !state.quick);
     renderHintHow();
   }
 
@@ -1535,10 +1664,10 @@
      mode and wrong on every phone. */
   function renderHintHow() {
     if (!el.hintHow) return;
-    el.hintHow.textContent = state.confirm
-      ? (TOUCH ? 'Tap a node to select it · Learn and Refund are in the panel · Padlocked nodes are story unlocks'
-               : 'Click a node to select it · Learn and Refund are in the panel · Padlocked nodes are story unlocks')
-      : 'Click a node to learn its next level · Right-click to refund · Padlocked nodes are story unlocks';
+    el.hintHow.textContent = state.quick
+      ? 'Click a node to learn it, prerequisites included · Right-click to refund it and everything built on it · Padlocked nodes are story unlocks'
+      : (TOUCH ? 'Tap a node to select it · Learn and Refund are in the panel · Padlocked nodes are story unlocks'
+               : 'Click a node to select it · Learn and Refund are in the panel · Padlocked nodes are story unlocks');
   }
 
   function focusNode(id) {
@@ -1727,7 +1856,16 @@
      that exists anywhere — the server kept a hash — so losing it is losing the
      ability to take that build down. */
   var K_KEYS = 'bodw.buildkeys.v1';
-  var K_PICK = 'bodw.pickmode.v1';
+  var K_QUICK = 'bodw.quickpicks.v1';
+  /* The switch used to be worded the other way round and stored the other
+     answer. Anyone who set it then still gets what they chose, read through the
+     inversion, rather than silently back to the default. */
+  var K_PICK_OLD = 'bodw.pickmode.v1';
+  function storedQuick() {
+    var v = readStore(K_QUICK, null);
+    if (v === null) { var old = readStore(K_PICK_OLD, null); v = old === null ? true : !old; }
+    return v === true;
+  }
 
   function readStore(key, fallback) {
     try {
