@@ -93,6 +93,13 @@ you did not click — turns **Quick picks** off.
 
 ## Layout
 
+Every hexagon on the page is regular. A pointy-top hexagon is taller than it is
+wide — width is height x sqrt(3)/2 — so cutting the clip-path from a square box
+stretches it sideways by 15%, which reads as a hexagon squashed vertically. Each
+box the shape is cut from is 0.866 of its own height wide instead, which also
+makes the element's bounds the shape's bounds: the manual badge in a node's
+corner now sits against the rim it is actually drawn against.
+
 The board fits the window rather than scrolling. Columns are remapped into the
 space available — keeping the game's relative spacing, with a floor *and a
 ceiling* on the gap between neighbours — instead of zooming the whole board,
@@ -162,7 +169,10 @@ the perk having lost the map you were reading it against, and getting back cost 
 scroll in the other direction.
 
 The panel is the same element and the same markup; below 1000px it is pinned to
-the bottom of the viewport over the board instead. Nothing scrolls on selection
+the bottom of the viewport over the board instead. Its hero is a caption there
+rather than the banner it is in the column — 46px against 75px, the tree mark
+down from 40px to 26 — because a fifth of the sheet spent on the tree's name,
+above the levels that are the reason it is open, is a fifth of the sheet wasted. Nothing scrolls on selection
 except the smallest nudge that clears the tapped node out from behind the sheet,
 in whichever axis it was hidden, and none at all when it is already in sight. The
 hero and the buttons are the sheet's fixed ends and only the level list between

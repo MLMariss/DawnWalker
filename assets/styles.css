@@ -178,8 +178,13 @@ a:hover{color:var(--gold-2)}
   padding-inline:max(var(--gutter),calc((100% - var(--shell)) / 2 + var(--gutter)));
 }
 .brand{display:flex;align-items:center;gap:11px;min-width:0;flex:0 1 auto}
+/* The hex ratio. A pointy-top hexagon is taller than it is wide — width is
+   height x sqrt(3)/2 — so drawing this clip-path in a square box stretches it
+   sideways by 15%, which reads as a hexagon squashed vertically. Every box the
+   shape is cut from is 0.866 of its own height wide, so the shape is regular
+   and the element's bounds are the shape's bounds. */
 .brand-mark{
-  width:30px;height:30px;flex:none;
+  width:calc(30px * .866);height:30px;flex:none;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   background:linear-gradient(150deg,var(--gold),var(--blood));
 }
@@ -399,7 +404,7 @@ a:hover{color:var(--gold-2)}
    legend for the three hues as well as the way between them. */
 .tab:hover{color:var(--accent-2);border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
 .tab .tab-mark{
-  width:25px;height:25px;flex:none;display:grid;place-items:center;
+  width:calc(25px * .866);height:25px;flex:none;display:grid;place-items:center;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   background:linear-gradient(150deg,color-mix(in srgb,var(--accent) 30%,transparent),rgba(255,255,255,.04));
   color:var(--accent-2);
@@ -437,7 +442,7 @@ a:hover{color:var(--gold-2)}
 .tab .tab-when i{width:12px;height:12px}
 @media (max-width:1400px){
   .tab{padding:6px 11px;font-size:12.5px;letter-spacing:.07em;gap:7px}
-  .tab .tab-mark{width:22px;height:22px}
+  .tab .tab-mark{width:calc(22px * .866);height:22px}
   .tabs{gap:5px}
 }
 
@@ -481,7 +486,7 @@ a:hover{color:var(--gold-2)}
 
 /* --------------------------------------------------------------- node */
 .node{
-  position:absolute;width:var(--node);height:var(--node);
+  position:absolute;width:calc(var(--node) * .866);height:var(--node);
   transform:translate(-50%,-50%);
   background:none;border:0;padding:0;cursor:pointer;display:grid;place-items:center;
 }
@@ -541,7 +546,9 @@ a:hover{color:var(--gold-2)}
   background:#2b241e;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 34%,#4e4238)}
 .pip.on{background:var(--accent);box-shadow:0 0 8px var(--accent-glow)}
 .pip.next{background:transparent;box-shadow:inset 0 0 0 1.5px var(--accent-2)}
-.node .badge{position:absolute;right:4px;bottom:16px;width:17px;height:17px;
+/* Nudged in from the rim now that the box is the hexagon's true width rather
+   than 15% wider than it: at right:4px the manual badge sat on the slant. */
+.node .badge{position:absolute;right:6px;bottom:18px;width:17px;height:17px;
   background:var(--text-faint);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
   -webkit-mask-size:contain;mask-size:contain;-webkit-mask-image:var(--m-bk);mask-image:var(--m-bk)}
 .node .badge.lock{background:var(--blood-2);-webkit-mask-image:var(--m-lock);mask-image:var(--m-lock)}
@@ -640,7 +647,7 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
   background:linear-gradient(180deg,rgba(33,26,19,.8),rgba(15,12,9,.8));transition:.15s;
 }
 .ult:hover{border-color:var(--line-2)}
-.ult .ult-mark{width:38px;height:38px;flex:none;display:grid;place-items:center;
+.ult .ult-mark{width:calc(38px * .866);height:38px;flex:none;display:grid;place-items:center;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:rgba(255,255,255,.07)}
 .ult .ult-mark svg{width:20px;height:20px;stroke:var(--text-faint);fill:none;stroke-width:1.5}
 .ult b{display:block;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
@@ -683,7 +690,7 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
 }
 .abil:hover{border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
 .abil .abil-mark{
-  width:42px;height:42px;flex:none;display:grid;place-items:center;
+  width:calc(42px * .866);height:42px;flex:none;display:grid;place-items:center;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 30%,#453a30),
     color-mix(in srgb,var(--accent-deep) 55%,#1d1712));
@@ -1483,7 +1490,7 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
   /* The grabber. It says "this came up and can go down again" in 38 pixels,
      which is less than any sentence could. */
   body.sheet-open .side>.panel::before{
-    content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);
+    content:'';position:absolute;top:5px;left:50%;transform:translateX(-50%);
     width:38px;height:4px;border-radius:2px;z-index:3;pointer-events:none;
     background:rgba(255,255,255,.24);
   }
@@ -1491,9 +1498,22 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
      scrolls, so the Learn button is at the bottom of the screen whatever the
      perk's level list does. Sticky is what the panel used as a column — inside
      a flex column of fixed height it has nothing to stick to. */
+  /* The hero was 75px of a 520px sheet — a fifth of it spent on the tree's name
+     and the level count, above the levels that are the reason the sheet is
+     open. It is a caption, not a banner: the 40px tree mark comes down to 26,
+     the padding with it, and the grabber sits in the top of that padding rather
+     than being paid for in a row of its own. About 46px, and the 29 it gives
+     back go to the level list. */
   body.sheet-open .side>.panel>.panel-hero{
-    position:static;flex:none;border-radius:13px 13px 0 0;padding-top:15px;
+    position:static;flex:none;border-radius:13px 13px 0 0;
+    padding:12px 12px 9px;gap:10px;
   }
+  body.sheet-open .panel-hero .hero-mark,
+  body.sheet-open .panel-hero svg,
+  body.sheet-open .panel-hero .mark{width:26px;height:26px}
+  body.sheet-open .panel-hero .hero-tree{font-size:11px;letter-spacing:.1em;gap:7px}
+  body.sheet-open .panel-hero .hero-lv{font-size:12px}
+  body.sheet-open .panel-hero .hero-when{padding:1px 6px;font-size:10px}
   body.sheet-open .side>.panel>.panel-body{
     display:block;flex:1 1 auto;min-height:0;
     overflow-y:auto;overscroll-behavior:contain;
@@ -1528,8 +1548,8 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
 .hero-x{display:none}
 body.sheet-open .hero-x{
   display:grid;place-items:center;flex:none;
-  width:36px;height:36px;margin:-6px -8px -6px 0;
+  width:32px;height:32px;margin:-7px -7px -7px 0;
   border:0;border-radius:9px;background:none;cursor:pointer;
-  color:var(--text-dim);font-size:24px;line-height:1;transition:.15s;
+  color:var(--text-dim);font-size:22px;line-height:1;transition:.15s;
 }
 body.sheet-open .hero-x:hover{color:var(--accent-2);background:rgba(255,255,255,.07)}
