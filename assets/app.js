@@ -16,15 +16,28 @@
   var state = {
     tab: null, sel: null,
     levels: {}, ults: {}, quests: {},
-    corruption: 15, manuals: true, synergy: true, charlvl: null
+    corruption: 15, manuals: true, synergy: true, charlvl: null,
+    /* Confirm mode: a click on the board only selects, and nothing is learned
+       or refunded until the Learn or Refund button in the side panel is
+       pressed — which is what the game itself asks for. Off by default on a
+       mouse, because clicking straight through a tree is faster once you know
+       it; always on where there is no mouse. */
+    confirm: false
   };
+
+  /* No hover to preview with and no right-click to refund with: on a touch
+     screen the quick mode is not a worse choice, it is an unusable one, so it
+     is not offered at all and the switch that would offer it is hidden. */
+  var TOUCH = !!(window.matchMedia &&
+    window.matchMedia('(hover:none) and (pointer:coarse)').matches);
 
   var el = {};
   ['tabs', 'tree', 'links', 'nodes', 'ults', 'ult-gate', 'panel', 'toast', 'corruption',
    'corruption-out', 'charlvl', 'charlvl-out', 'charlvl-ctl', 'theory',
    'manuals', 'synergy', 'm-sp', 'm-ts', 'm-bk', 'boardscroll',
    'ov-body', 'ov-note', 'ovdrawer', 'abils', 'abil-note', 'abildrawer', 'ultdrawer',
-   'side', 'hint-key', 'modal', 'modal-title', 'modal-body', 'loadedbar'].forEach(function (id) {
+   'side', 'hint-key', 'hint-how', 'pickmode',
+   'modal', 'modal-title', 'modal-body', 'loadedbar'].forEach(function (id) {
     el[id.replace(/-(\w)/g, function (_, c) { return c.toUpperCase(); })] = document.getElementById(id);
   });
 
@@ -83,6 +96,10 @@
       var w = treeWhen(tree);
       tree.when = w.when; tree.whenMixed = w.mixed;
     });
+    // The switch is a preference, not part of a build, so it is remembered on
+    // the device rather than carried in the link: a build you share should
+    // arrive looking the way the reader left their own planner.
+    state.confirm = TOUCH || readStore(K_PICK, false) === true;
     renderHintKey();
     state.tab = TREES[0].name;
     seedStory();
@@ -885,7 +902,12 @@
   /* -------------------------------------------------------------- render */
 
   function renderAll() {
-    document.body.className = 't-' + (tree() ? tree().key : 'wc');
+    // The body carries two independent things — which tree is on screen, and
+    // whether a click buys or only selects — so this writes both. It used to
+    // assign the tree class alone, which quietly wiped the mode class on every
+    // render, a click included.
+    document.body.className = 't-' + (tree() ? tree().key : 'wc') +
+      (state.confirm ? ' confirm-mode' : '');
     renderTabs();
     renderAbilities();
     renderUltimates();
@@ -1129,7 +1151,11 @@
         '<div class="panel-hero panel-hero-bare">' +
           '<span class="hero-tree">No perk selected</span></div>' +
         '<div class="panel-empty"><b>Nothing to read yet</b>' +
-        'Hover a node to read it. Click to learn its next level, right-click to refund.</div>';
+        (state.confirm
+          ? (TOUCH ? 'Tap a node to read it. ' : 'Click a node to read it. ') +
+            'Its levels, and the Learn and Refund buttons, appear here.'
+          : 'Hover a node to read it. Click to learn its next level, right-click to refund.') +
+        '</div>';
       return;
     }
     var p = BY_ID[id], t = TREE_OF[id], n = lv(id);
@@ -1286,17 +1312,33 @@
       renderAll();
     });
 
+    /* One click handler for the board and one for the ability grid, both
+       reading the same rule: in confirm mode a click selects and stops there,
+       and the only things that ever change the build are the two buttons in
+       the panel. In quick mode it selects and buys in the same motion, which
+       is what the planner has always done. */
+    function pickLearn(p) {
+      if (p.quest_unlock) {
+        state.quests[p.node_id] = !state.quests[p.node_id];
+        if (state.quests[p.node_id]) state.levels[p.node_id] = 1; else delete state.levels[p.node_id];
+      } else learn(p);
+    }
+    function pickRefund(p) {
+      if (p.quest_unlock) { state.quests[p.node_id] = false; delete state.levels[p.node_id]; }
+      else refund(p);
+    }
+
     el.nodes.addEventListener('click', function (e) {
       var b = e.target.closest('[data-node]');
       if (!b) return;
       var p = BY_ID[b.dataset.node];
       state.sel = p.node_id;
-      if (p.quest_unlock) {
-        state.quests[p.node_id] = !state.quests[p.node_id];
-        if (state.quests[p.node_id]) state.levels[p.node_id] = 1; else delete state.levels[p.node_id];
-      } else learn(p);
+      if (!state.confirm) pickLearn(p);
       var byKeyboard = e.detail === 0;
       renderAll();
+      // On a narrow screen the panel is a scroll below the board, so every
+      // selection brings it into view — in confirm mode it is not just the
+      // description, it is where the Learn button is.
       if (byKeyboard) focusNode(p.node_id); else revealPanel();
     });
 
@@ -1306,12 +1348,12 @@
       e.preventDefault();
       var p = BY_ID[b.dataset.node];
       state.sel = p.node_id;
-      if (p.quest_unlock) { state.quests[p.node_id] = false; delete state.levels[p.node_id]; }
-      else refund(p);
+      if (!state.confirm) pickRefund(p);
       renderAll();
     });
 
     el.nodes.addEventListener('mouseover', function (e) {
+      if (state.confirm) return;   // the panel follows the selection, not the cursor
       var b = e.target.closest('[data-node]');
       if (!b || state.sel === b.dataset.node) return;
       state.sel = b.dataset.node;
@@ -1322,6 +1364,7 @@
       var b = e.target.closest('[data-node]');
       if (!b || (e.key !== 'Backspace' && e.key !== 'Delete')) return;
       e.preventDefault();
+      if (state.confirm) { state.sel = b.dataset.node; renderAll(); focusNode(b.dataset.node); return; }
       refund(BY_ID[b.dataset.node]);
       renderAll(); focusNode(b.dataset.node);
     });
@@ -1330,18 +1373,20 @@
       var b = e.target.closest('[data-node]');
       if (!b) return;
       state.sel = b.dataset.node;
-      learn(BY_ID[b.dataset.node]);
+      if (!state.confirm) learn(BY_ID[b.dataset.node]);
       renderAll();
+      if (state.confirm) revealPanel();
     });
     el.abils.addEventListener('contextmenu', function (e) {
       var b = e.target.closest('[data-node]');
       if (!b) return;
       e.preventDefault();
       state.sel = b.dataset.node;
-      refund(BY_ID[b.dataset.node]);
+      if (!state.confirm) refund(BY_ID[b.dataset.node]);
       renderAll();
     });
     el.abils.addEventListener('mouseover', function (e) {
+      if (state.confirm) return;
       var b = e.target.closest('[data-node]');
       if (!b || state.sel === b.dataset.node) return;
       state.sel = b.dataset.node;
@@ -1373,15 +1418,29 @@
       renderAll();
     });
 
+    if (el.pickmode) {
+      el.pickmode.hidden = TOUCH;
+      el.pickmode.addEventListener('click', function () {
+        state.confirm = !state.confirm;
+        writeStore(K_PICK, state.confirm);
+        syncPickMode(); renderAll();
+        toast(state.confirm
+          ? 'Confirm picks: clicking a node selects it — Learn and Refund are in the panel.'
+          : 'Quick picks: click a node to learn, right-click to refund.');
+      });
+    }
+
     el.corruption.addEventListener('input', function () {
       state.corruption = +el.corruption.value;
       el.corruptionOut.textContent = state.corruption;
+      paintRange(el.corruption);
       dropInvalid(); renderAll();
     });
     if (el.charlvl) {
       el.charlvl.addEventListener('input', function () {
         state.charlvl = +el.charlvl.value;
         el.charlvlOut.textContent = state.charlvl;
+        paintRange(el.charlvl);
         renderPanel();
       });
     }
@@ -1442,15 +1501,44 @@
 
     el.corruption.value = state.corruption;
     el.corruptionOut.textContent = state.corruption;
+    paintRange(el.corruption);
     if (el.charlvlCtl) {
       el.charlvlCtl.hidden = !SCALING;
       if (SCALING) {
         el.charlvl.value = state.charlvl;
         el.charlvlOut.textContent = state.charlvl;
+        paintRange(el.charlvl);
       }
     }
     el.manuals.checked = state.manuals;
     el.synergy.checked = state.synergy;
+    syncPickMode();
+  }
+
+  /* The filled share of the track, handed to the stylesheet. A range input
+     cannot paint its own two halves in different colours without it. */
+  function paintRange(input) {
+    if (!input) return;
+    var min = +input.min || 0, max = +input.max, v = +input.value;
+    var pct = max > min ? (v - min) / (max - min) * 100 : 100;
+    input.style.setProperty('--fill', pct.toFixed(2) + '%');
+  }
+
+  function syncPickMode() {
+    if (el.pickmode) el.pickmode.setAttribute('aria-pressed', String(!!state.confirm));
+    document.body.classList.toggle('confirm-mode', !!state.confirm);
+    renderHintHow();
+  }
+
+  /* What a click does, said where the reader is looking when they wonder. The
+     line used to name right-click unconditionally, which was wrong in confirm
+     mode and wrong on every phone. */
+  function renderHintHow() {
+    if (!el.hintHow) return;
+    el.hintHow.textContent = state.confirm
+      ? (TOUCH ? 'Tap a node to select it · Learn and Refund are in the panel · Padlocked nodes are story unlocks'
+               : 'Click a node to select it · Learn and Refund are in the panel · Padlocked nodes are story unlocks')
+      : 'Click a node to learn its next level · Right-click to refund · Padlocked nodes are story unlocks';
   }
 
   function focusNode(id) {
@@ -1546,7 +1634,11 @@
   }
 
   function syncControls() {
-    if (el.corruption) { el.corruption.value = state.corruption; el.corruptionOut.textContent = state.corruption; }
+    if (el.corruption) {
+      el.corruption.value = state.corruption;
+      el.corruptionOut.textContent = state.corruption;
+      paintRange(el.corruption);
+    }
     if (el.manuals) el.manuals.checked = state.manuals;
   }
 
@@ -1635,6 +1727,7 @@
      that exists anywhere — the server kept a hash — so losing it is losing the
      ability to take that build down. */
   var K_KEYS = 'bodw.buildkeys.v1';
+  var K_PICK = 'bodw.pickmode.v1';
 
   function readStore(key, fallback) {
     try {
