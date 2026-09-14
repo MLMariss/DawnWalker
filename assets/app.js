@@ -32,12 +32,39 @@
   var TOUCH = !!(window.matchMedia &&
     window.matchMedia('(hover:none) and (pointer:coarse)').matches);
 
+  /* The width at which the stylesheet stops being two columns and the side
+     panel becomes a sheet over the board. One query, read by everything that
+     has to know which of the two layouts is on screen, so a window dragged
+     across the boundary cannot leave the two disagreeing. */
+  var MQ_SHEET = window.matchMedia('(max-width:1000px)');
+  function narrow() { return MQ_SHEET.matches; }
+
+  /* Two questions the interaction asks, and they are not the same question.
+
+     `quickOn` — does a click on a node buy it? Only with a mouse on a wide
+     screen: in the sheet layout the Learn button is a thumb's width away, and
+     a tap that spends a point without asking is a tap you cannot take back
+     without the right-click a phone does not have.
+
+     `cascadeOn` — when Learn is pressed, does it bring the prerequisites with
+     it, and does Refund take the dependants down with it? Always, except in
+     the strict confirm mode a mouse user opted into. Picking out of order is
+     the whole point of a planner, and a narrow screen is exactly where walking
+     a chain node by node is most painful. */
+  function quickOn() { return state.quick && !narrow(); }
+  function cascadeOn() { return quickOn() || narrow(); }
+
+  /* Whether the perk panel is currently a sheet over the board. Only ever true
+     in the narrow layout; `renderAll` writes it onto the body so the
+     stylesheet and the click handlers read one answer. */
+  var sheetOpen = false;
+
   var el = {};
   ['tabs', 'tree', 'links', 'nodes', 'ults', 'ult-gate', 'panel', 'toast', 'corruption',
    'corruption-out', 'charlvl', 'charlvl-out', 'charlvl-ctl', 'theory',
    'manuals', 'synergy', 'm-sp', 'm-ts', 'm-bk', 'boardscroll',
    'ov-body', 'ov-note', 'ovdrawer', 'abils', 'abil-note', 'abildrawer', 'ultdrawer',
-   'side', 'hint-key', 'hint-how', 'pickmode',
+   'side', 'hint-key', 'hint-how', 'pickmode', 'barmore',
    'modal', 'modal-title', 'modal-body', 'loadedbar'].forEach(function (id) {
     el[id.replace(/-(\w)/g, function (_, c) { return c.toUpperCase(); })] = document.getElementById(id);
   });
@@ -295,7 +322,15 @@
       return { ok: false, why: 'Story unlock — click the node to mark it found.' };
     }
     if (!unlocked(p)) {
-      return { ok: false, why: 'Learn ' + p.prerequisites.map(nameOf).join(' and ') + ' to make this one available.' };
+      /* Tagged, because this is the one refusal the card already answers: the
+         Requires line above the levels names the same perks and ticks the ones
+         that are in. Printing it again under the buttons is a second line
+         saying nothing new, and it is redundant besides wherever Learn walks
+         the chain up for you — which is everywhere but strict confirm mode. */
+      return {
+        ok: false, kind: 'prereq',
+        why: 'Learn ' + p.prerequisites.map(nameOf).join(' and ') + ' to make this one available.'
+      };
     }
     var nl = nextLevel(p);
     if (!nl) return { ok: false, why: 'Fully learned.' };
@@ -1005,12 +1040,21 @@
   /* -------------------------------------------------------------- render */
 
   function renderAll() {
-    // The body carries two independent things — which tree is on screen, and
-    // whether a click buys or only selects — so this writes both. It used to
-    // assign the tree class alone, which quietly wiped the mode class on every
-    // render, a click included.
+    // A sheet with nothing in it is a sheet in the way: Reset, a tab change and
+    // a refund that drops the selection all land here, so the one guard covers
+    // all three rather than each remembering to close it.
+    if (!state.sel || !narrow()) sheetOpen = false;
+    // The body carries three independent things — which tree is on screen,
+    // whether a click buys or only selects, and whether the panel is a sheet —
+    // so this writes all of them. It used to assign the tree class alone, which
+    // quietly wiped the mode class on every render, a click included.
     document.body.className = 't-' + (tree() ? tree().key : 'wc') +
-      (state.quick ? '' : ' confirm-mode');
+      (quickOn() ? '' : ' confirm-mode') +
+      (sheetOpen ? ' sheet-open' : '') +
+      /* The bar's fold is the reader's, not the build's: it survives a render,
+         which this line rewrites wholesale. Forgetting it here is exactly the
+         bug the mode class had once already. */
+      (el.barmore && el.barmore.getAttribute('aria-expanded') === 'true' ? ' bar-open' : '');
     renderTabs();
     renderAbilities();
     renderUltimates();
@@ -1037,7 +1081,8 @@
       // hues at once rather than only the one you are already looking at.
       return '<button class="tab t-' + t.key + '" role="tab" type="button" data-tree="' + t.name + '"' +
         ' aria-selected="' + (t.name === state.tab) + '">' +
-        '<span class="tab-mark">' + Icons.svg(Icons.forTree(t.name)) + '</span>' + t.name + when +
+        '<span class="tab-mark">' + Icons.svg(Icons.forTree(t.name)) + '</span>' +
+        '<span class="tab-name">' + esc(t.name) + '</span>' + when +
         '<span class="tab-stat"><i class="s-sp" title="Skill points spent in this tree"></i>' + spent(t) +
         (mn ? '<i class="s-bk" title="Manuals this tree\'s build needs"></i>' + mn : '') +
         '</span></button>';
@@ -1249,6 +1294,14 @@
     return out.join(' ');
   }
 
+  /* The sheet's own dismiss. It rides the hero rather than floating over the
+     board, because the hero is the one row of the sheet that is never a control
+     for anything else, and it is hidden outright in the two-column layout where
+     the panel is a column and not a sheet. */
+  function heroClose() {
+    return '<button class="hero-x" type="button" data-act="close" aria-label="Close">&times;</button>';
+  }
+
   function renderPanel() {
     var id = state.sel;
     if (!id || !BY_ID[id]) {
@@ -1256,12 +1309,12 @@
       // the only thing left of this pane and the only way to unfold it again.
       el.panel.innerHTML =
         '<div class="panel-hero panel-hero-bare">' +
-          '<span class="hero-tree">No perk selected</span></div>' +
+          '<span class="hero-tree">No perk selected</span>' + heroClose() + '</div>' +
         '<div class="panel-empty"><b>Nothing to read yet</b>' +
-        (state.quick
+        (quickOn()
           ? 'Hover a node to read it. Click to learn it and anything it needs first, ' +
             'right-click to refund it and anything built on it.'
-          : (TOUCH ? 'Tap a node to read it. ' : 'Click a node to read it. ') +
+          : ((TOUCH || narrow()) ? 'Tap a node to read it. ' : 'Click a node to read it. ') +
             'Its levels, and the Learn and Refund buttons, appear here.') +
         '</div>';
       return;
@@ -1270,8 +1323,8 @@
     // The buttons answer to the mode the board is in, or they would offer a
     // deal the click beside them does not honour.
     var nl = nextLevel(p);
-    var learnable = state.quick ? canLearnPath(p) : canLearn(p);
-    var refundable = canRefund(p, state.quick);
+    var learnable = cascadeOn() ? canLearnPath(p) : canLearn(p);
+    var refundable = canRefund(p, cascadeOn());
     var when = activeTime(p);
 
     var reqLine = '';
@@ -1319,7 +1372,8 @@
         '<span class="hero-mark">' +
           (p.is_ability ? Icons.forAbilityMark(id, p.name) : Icons.forNodeMark(id)) + '</span>' +
         '<span class="hero-tree">' + esc(t.name) + whenBadge + '</span>' +
-        '<span class="hero-lv">Level ' + n + ' / ' + p.max_level + '</span></div>' +
+        '<span class="hero-lv">Level ' + n + ' / ' + p.max_level + '</span>' +
+        heroClose() + '</div>' +
       '<div class="panel-body">' +
         (p.cooldown ? '<p class="panel-cd"><i class="cd-mark"></i>Cooldown: ' +
           esc(p.cooldown) + '</p>' : '') +
@@ -1344,7 +1398,10 @@
      more than that. */
   function panelNote(p, learnable) {
     if (p.quest_unlock) return '';
-    if (!learnable.ok) return '<p class="panel-note">' + esc(learnable.why) + '</p>';
+    if (!learnable.ok) {
+      if (learnable.kind === 'prereq') return '';
+      return '<p class="panel-note">' + esc(learnable.why) + '</p>';
+    }
     var path = learnable.path || [];
     if (!path.length) return '';
     var sp = 0, ts = 0;
@@ -1440,6 +1497,7 @@
       var b = e.target.closest('[data-tree]');
       if (!b) return;
       state.tab = b.dataset.tree; state.sel = null;
+      sheetOpen = false;
       renderAll();
     });
 
@@ -1454,25 +1512,27 @@
         if (state.quests[p.node_id]) state.levels[p.node_id] = 1; else delete state.levels[p.node_id];
         return;
       }
-      if (state.quick) learnPath(p); else learn(p);
+      if (cascadeOn()) learnPath(p); else learn(p);
     }
     function pickRefund(p) {
       if (p.quest_unlock) { state.quests[p.node_id] = false; delete state.levels[p.node_id]; return; }
-      if (state.quick) refundCascade(p); else refund(p);
+      if (cascadeOn()) refundCascade(p); else refund(p);
     }
 
     el.nodes.addEventListener('click', function (e) {
       var b = e.target.closest('[data-node]');
       if (!b) return;
       var p = BY_ID[b.dataset.node];
+      // A second tap on the perk already being read puts the sheet away again:
+      // the node is its own toggle, so the way out is the way in.
+      if (narrow() && sheetOpen && state.sel === p.node_id) { closeSheet(); return; }
       state.sel = p.node_id;
-      if (state.quick) pickLearn(p);
+      if (quickOn()) pickLearn(p);
       var byKeyboard = e.detail === 0;
+      if (!byKeyboard && narrow()) sheetOpen = true;
       renderAll();
-      // On a narrow screen the panel is a scroll below the board, so every
-      // selection brings it into view — with quick picks off it is not just the
-      // description, it is where the Learn button is.
-      if (byKeyboard) focusNode(p.node_id); else revealPanel();
+      if (byKeyboard) focusNode(p.node_id);
+      else if (narrow()) revealNode(p.node_id);
     });
 
     el.nodes.addEventListener('contextmenu', function (e) {
@@ -1481,12 +1541,12 @@
       e.preventDefault();
       var p = BY_ID[b.dataset.node];
       state.sel = p.node_id;
-      if (state.quick) pickRefund(p);
+      if (quickOn()) pickRefund(p);
       renderAll();
     });
 
     el.nodes.addEventListener('mouseover', function (e) {
-      if (!state.quick) return;   // the panel follows the selection, not the cursor
+      if (!quickOn()) return;   // the panel follows the selection, not the cursor
       var b = e.target.closest('[data-node]');
       if (!b || state.sel === b.dataset.node) return;
       state.sel = b.dataset.node;
@@ -1497,7 +1557,7 @@
       var b = e.target.closest('[data-node]');
       if (!b || (e.key !== 'Backspace' && e.key !== 'Delete')) return;
       e.preventDefault();
-      if (state.quick) pickRefund(BY_ID[b.dataset.node]);
+      if (quickOn()) pickRefund(BY_ID[b.dataset.node]);
       else state.sel = b.dataset.node;
       renderAll(); focusNode(b.dataset.node);
     });
@@ -1505,21 +1565,22 @@
     el.abils.addEventListener('click', function (e) {
       var b = e.target.closest('[data-node]');
       if (!b) return;
+      if (narrow() && sheetOpen && state.sel === b.dataset.node) { closeSheet(); return; }
       state.sel = b.dataset.node;
-      if (state.quick) pickLearn(BY_ID[b.dataset.node]);
+      if (quickOn()) pickLearn(BY_ID[b.dataset.node]);
+      if (narrow()) sheetOpen = true;
       renderAll();
-      if (!state.quick) revealPanel();
     });
     el.abils.addEventListener('contextmenu', function (e) {
       var b = e.target.closest('[data-node]');
       if (!b) return;
       e.preventDefault();
       state.sel = b.dataset.node;
-      if (state.quick) pickRefund(BY_ID[b.dataset.node]);
+      if (quickOn()) pickRefund(BY_ID[b.dataset.node]);
       renderAll();
     });
     el.abils.addEventListener('mouseover', function (e) {
-      if (!state.quick) return;
+      if (!quickOn()) return;
       var b = e.target.closest('[data-node]');
       if (!b || state.sel === b.dataset.node) return;
       state.sel = b.dataset.node;
@@ -1541,18 +1602,65 @@
 
     el.panel.addEventListener('click', function (e) {
       var b = e.target.closest('[data-act]');
-      if (!b || !state.sel) return;
+      if (!b) return;
+      if (b.dataset.act === 'close') { closeSheet(); return; }
+      if (!state.sel) return;
       var p = BY_ID[state.sel];
       if (b.dataset.act === 'learn') {
         if (p.quest_unlock) { state.quests[p.node_id] = true; state.levels[p.node_id] = 1; }
-        else if (state.quick) learnPath(p); else learn(p);
+        else if (cascadeOn()) learnPath(p); else learn(p);
       } else if (p.quest_unlock) { state.quests[p.node_id] = false; delete state.levels[p.node_id]; }
-      else if (state.quick) refundCascade(p); else refund(p);
+      else if (cascadeOn()) refundCascade(p); else refund(p);
       renderAll();
+      // The perk the sheet is covering may have just changed shape — a new pip,
+      // a greyed-out Learn — so bring it back above the sheet if it drifted off.
+      if (narrow() && sheetOpen) revealNode(state.sel);
     });
 
+    /* Everything outside the sheet dismisses it — except a node, because
+       tapping a second perk should read that perk rather than cost a tap on
+       closing the first. No scrim: dimming the board would defeat the point of
+       a sheet, which is that the tree stays readable behind it.
+
+       On the capture phase, and it has to be: the panel's own handler rewrites
+       `el.panel.innerHTML`, so by the time a bubbling listener sees the click,
+       the button that was clicked has been detached from the document and
+       `closest('#panel')` walks up an orphaned tree to null. Pressing Learn
+       would have read as a tap outside the sheet and closed it. Capture runs
+       before any of that, while the DOM the user actually clicked still
+       exists. */
+    document.addEventListener('click', function (e) {
+      if (!sheetOpen) return;
+      if (e.target.closest('#panel') || e.target.closest('[data-node]')) return;
+      closeSheet();
+    }, true);
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || !sheetOpen) return;
+      if (el.modal && el.modal.open) return;   // the dialog answers Escape first
+      closeSheet();
+      if (state.sel) focusNode(state.sel);
+    });
+
+    /* Crossing the layout boundary is a change of interaction, not just of
+       width: the sheet has no meaning in two columns, and quick picks has none
+       in one. Both are re-read here rather than left over from whichever
+       layout the page happened to load in. */
+    var onLayout = function () { sheetOpen = false; syncPickMode(); renderAll(); };
+    if (MQ_SHEET.addEventListener) MQ_SHEET.addEventListener('change', onLayout);
+    else if (MQ_SHEET.addListener) MQ_SHEET.addListener(onLayout);
+
+    /* The bar's own fold. It is a body class rather than a style on the groups
+       because what it switches is a layout — three rows instead of one — and
+       the stylesheet already owns which width that layout applies at. */
+    if (el.barmore) {
+      el.barmore.addEventListener('click', function () {
+        var open = el.barmore.getAttribute('aria-expanded') !== 'true';
+        el.barmore.setAttribute('aria-expanded', String(open));
+        document.body.classList.toggle('bar-open', open);
+      });
+    }
+
     if (el.pickmode) {
-      el.pickmode.hidden = TOUCH;
       el.pickmode.addEventListener('click', function () {
         state.quick = !state.quick;
         writeStore(K_QUICK, state.quick);
@@ -1658,8 +1766,16 @@
   }
 
   function syncPickMode() {
-    if (el.pickmode) el.pickmode.setAttribute('aria-pressed', String(!!state.quick));
-    document.body.classList.toggle('confirm-mode', !state.quick);
+    if (el.pickmode) {
+      el.pickmode.setAttribute('aria-pressed', String(!!state.quick));
+      /* Hidden wherever a click cannot be a purchase: on a touch screen, which
+         has neither the hover to preview with nor the right-click to refund
+         with, and in the narrow layout, where the sheet's own Learn button is
+         the interaction and a switch offering a second one is just a control
+         in the way. */
+      el.pickmode.hidden = TOUCH || narrow();
+    }
+    document.body.classList.toggle('confirm-mode', !quickOn());
     renderHintHow();
   }
 
@@ -1668,19 +1784,52 @@
      mode and wrong on every phone. */
   function renderHintHow() {
     if (!el.hintHow) return;
-    el.hintHow.textContent = state.quick
+    el.hintHow.textContent = quickOn()
       ? 'Click a node to learn it, prerequisites included · Right-click to refund it and everything built on it · Padlocked nodes are story unlocks'
-      : (TOUCH ? 'Tap a node to select it · Learn and Refund are in the panel · Padlocked nodes are story unlocks'
-               : 'Click a node to select it · Learn and Refund are in the panel · Padlocked nodes are story unlocks');
+      : narrow()
+        ? 'Tap a node to read it · Learn takes any prerequisites with it, Refund takes the dependants · Padlocked nodes are story unlocks'
+        : (TOUCH ? 'Tap a node to select it · Learn and Refund are in the panel · Padlocked nodes are story unlocks'
+                 : 'Click a node to select it · Learn and Refund are in the panel · Padlocked nodes are story unlocks');
   }
 
   function focusNode(id) {
     var b = el.nodes.querySelector('[data-node="' + id + '"]');
     if (b) b.focus();
   }
-  function revealPanel() {
-    if (window.matchMedia('(min-width:1001px)').matches) return;
-    el.panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  function closeSheet() {
+    if (!sheetOpen) return;
+    sheetOpen = false;
+    document.body.classList.remove('sheet-open');
+  }
+
+  /* Selecting a perk used to scroll the panel into view, which on a phone meant
+     scrolling the tree off the top of the screen — you read the perk having
+     lost the map you were reading it against. The panel is a sheet over the
+     board now, so nothing has to move; all that is left is making sure the node
+     you just tapped is not the one hiding behind the sheet. The smallest scroll
+     that clears it, in both axes, and none at all when it is already in sight. */
+  function revealNode(id) {
+    var b = el.nodes.querySelector('[data-node="' + id + '"]');
+    if (!b) return;
+    requestAnimationFrame(function () {
+      var r = b.getBoundingClientRect();
+      var pad = 10;
+      var top = el.tabs ? el.tabs.getBoundingClientRect().bottom : 0;
+      var floorY = sheetOpen ? el.panel.getBoundingClientRect().top : window.innerHeight;
+      var dy = 0;
+      if (r.bottom > floorY - pad) dy = r.bottom - (floorY - pad);
+      else if (r.top < top + pad) dy = r.top - (top + pad);
+      // Only if the node genuinely fits in what is left between the two: on a
+      // very short screen the lesser evil is to leave the board where it is
+      // rather than to scroll it somewhere no better.
+      if (dy && r.height < floorY - top - pad * 2) window.scrollBy({ top: dy, behavior: 'smooth' });
+
+      var bs = el.boardscroll.getBoundingClientRect();
+      var dx = 0;
+      if (r.right > bs.right - pad) dx = r.right - (bs.right - pad);
+      else if (r.left < bs.left + pad) dx = r.left - (bs.left + pad);
+      if (dx) el.boardscroll.scrollBy({ left: dx, behavior: 'smooth' });
+    });
   }
 
   /* Corruption dropping or manuals switching off can make learned levels

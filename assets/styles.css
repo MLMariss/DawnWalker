@@ -178,8 +178,13 @@ a:hover{color:var(--gold-2)}
   padding-inline:max(var(--gutter),calc((100% - var(--shell)) / 2 + var(--gutter)));
 }
 .brand{display:flex;align-items:center;gap:11px;min-width:0;flex:0 1 auto}
+/* The hex ratio. A pointy-top hexagon is taller than it is wide — width is
+   height x sqrt(3)/2 — so drawing this clip-path in a square box stretches it
+   sideways by 15%, which reads as a hexagon squashed vertically. Every box the
+   shape is cut from is 0.866 of its own height wide, so the shape is regular
+   and the element's bounds are the shape's bounds. */
 .brand-mark{
-  width:30px;height:30px;flex:none;
+  width:calc(30px * .866);height:30px;flex:none;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   background:linear-gradient(150deg,var(--gold),var(--blood));
 }
@@ -399,7 +404,7 @@ a:hover{color:var(--gold-2)}
    legend for the three hues as well as the way between them. */
 .tab:hover{color:var(--accent-2);border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
 .tab .tab-mark{
-  width:25px;height:25px;flex:none;display:grid;place-items:center;
+  width:calc(25px * .866);height:25px;flex:none;display:grid;place-items:center;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   background:linear-gradient(150deg,color-mix(in srgb,var(--accent) 30%,transparent),rgba(255,255,255,.04));
   color:var(--accent-2);
@@ -437,7 +442,7 @@ a:hover{color:var(--gold-2)}
 .tab .tab-when i{width:12px;height:12px}
 @media (max-width:1400px){
   .tab{padding:6px 11px;font-size:12.5px;letter-spacing:.07em;gap:7px}
-  .tab .tab-mark{width:22px;height:22px}
+  .tab .tab-mark{width:calc(22px * .866);height:22px}
   .tabs{gap:5px}
 }
 
@@ -481,7 +486,7 @@ a:hover{color:var(--gold-2)}
 
 /* --------------------------------------------------------------- node */
 .node{
-  position:absolute;width:var(--node);height:var(--node);
+  position:absolute;width:calc(var(--node) * .866);height:var(--node);
   transform:translate(-50%,-50%);
   background:none;border:0;padding:0;cursor:pointer;display:grid;place-items:center;
 }
@@ -541,7 +546,9 @@ a:hover{color:var(--gold-2)}
   background:#2b241e;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 34%,#4e4238)}
 .pip.on{background:var(--accent);box-shadow:0 0 8px var(--accent-glow)}
 .pip.next{background:transparent;box-shadow:inset 0 0 0 1.5px var(--accent-2)}
-.node .badge{position:absolute;right:4px;bottom:16px;width:17px;height:17px;
+/* Nudged in from the rim now that the box is the hexagon's true width rather
+   than 15% wider than it: at right:4px the manual badge sat on the slant. */
+.node .badge{position:absolute;right:6px;bottom:18px;width:17px;height:17px;
   background:var(--text-faint);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
   -webkit-mask-size:contain;mask-size:contain;-webkit-mask-image:var(--m-bk);mask-image:var(--m-bk)}
 .node .badge.lock{background:var(--blood-2);-webkit-mask-image:var(--m-lock);mask-image:var(--m-lock)}
@@ -640,7 +647,7 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
   background:linear-gradient(180deg,rgba(33,26,19,.8),rgba(15,12,9,.8));transition:.15s;
 }
 .ult:hover{border-color:var(--line-2)}
-.ult .ult-mark{width:38px;height:38px;flex:none;display:grid;place-items:center;
+.ult .ult-mark{width:calc(38px * .866);height:38px;flex:none;display:grid;place-items:center;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:rgba(255,255,255,.07)}
 .ult .ult-mark svg{width:20px;height:20px;stroke:var(--text-faint);fill:none;stroke-width:1.5}
 .ult b{display:block;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
@@ -683,7 +690,7 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
 }
 .abil:hover{border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
 .abil .abil-mark{
-  width:42px;height:42px;flex:none;display:grid;place-items:center;
+  width:calc(42px * .866);height:42px;flex:none;display:grid;place-items:center;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 30%,#453a30),
     color-mix(in srgb,var(--accent-deep) 55%,#1d1712));
@@ -1332,3 +1339,217 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
 }
 
 @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+
+/* --------------------------------------------- the top bar on a phone
+   194px of header, then 54px of tabs, and the board started a third of the way
+   down an 844px screen. The totals earn their place — they are the only figures
+   on the page that change on every click — and so does the tab strip. The two
+   sliders, the two switches and the five buttons do not: nothing in either
+   group changes while you are reading a tree, and between them they were 148px
+   of that header. They fold behind one button, which is the whole saving.
+
+   Collapsed the bar is one row of totals, about 46px. The board starts where
+   the tabs used to and gets the difference. */
+.bar-more{display:none}
+.bar-more-ico{width:17px;height:17px;flex:none}
+.bar-more[aria-expanded=true]{
+  color:var(--gold-2);border-color:var(--gold-dim);
+  background:linear-gradient(180deg,rgba(231,179,86,.24),rgba(231,179,86,.08));
+}
+
+@media (max-width:760px){
+  .bar-more{display:inline-flex;align-items:center;gap:7px;order:3;margin-left:auto;padding:6px 10px}
+  /* The hexagon goes. The wordmark went at 1300, so what is left of the brand
+     here is a decorative shape, and the row it is sitting in is the one row on
+     a phone that has to hold the totals and this button as well. */
+  .brand{display:none}
+  /* The three groups keep their own `display:grid` when they come back; only
+     the folding is written here, so nothing about how they lay out internally
+     is duplicated or has to be kept in step with the desktop rules. */
+  .topbar>.bargroup{display:none}
+  body.bar-open .topbar>.bargroup{display:grid}
+  /* Open, the bar is three rows: the totals it always had, the two settings
+     groups sharing a row, and the buttons across the bottom on a grid of equal
+     columns rather than one sized to the longest word. */
+  body.bar-open .sliders{order:4;flex:1 1 210px}
+  body.bar-open .checks{order:5;flex:0 1 auto;margin-left:auto}
+  body.bar-open .acts{order:6;flex:1 0 100%;grid-template-columns:repeat(3,1fr);margin-left:0}
+  body.bar-open .acts .btn{text-align:center}
+  /* Five buttons in three columns leaves the second row a cell short. Copy link
+     takes it rather than Reset: a destructive button twice the width of the one
+     beside it is a button you press by accident. */
+  body.bar-open .acts #share{grid-column:span 2}
+}
+/* The word beside the glyph is what pushes the row over at 430, and the glyph
+   is the half that survives: it says "settings" on its own in a way the word
+   cannot say in 40px. */
+@media (max-width:430px){
+  .bar-more-lbl{display:none}
+  .bar-more{padding:6px 9px}
+  .meters{column-gap:10px}
+  .meter{gap:6px}
+}
+/* Last stop. The three icons are distinct and each total carries a `title`,
+   so at this width the words go rather than the row wrapping. */
+@media (max-width:365px){
+  .meter-lbl{display:none}
+  /* Too narrow for the sliders and the switches to share a row, so they stack —
+     and stack left, rather than being pushed to the right edge by the margin
+     that packs them against the buttons when they do fit beside each other. */
+  body.bar-open .checks{margin-left:0}
+}
+
+/* ==================================================== the narrow layout
+   Below 1000px the planner is one column: the tree, then everything under it.
+   Two things about that column are not just a desktop squeezed — the tab strip
+   and the perk panel — and both live here, after every earlier rule they have
+   to win against. */
+
+/* ----------------------------------------------------- tabs on a phone
+   Three tabs, one screen, always. At 667px the strip was already sideways-
+   scrolling with Vampirism half off the edge, which makes the third tree
+   something you have to discover rather than something you can see.
+
+   The hexagon goes: it is the one part of a tab that says nothing the word
+   beside it does not. The hours drop under the name rather than out of the
+   tab — a tree that only works at night is a fact worth a line — and the
+   points stay beside them, because what a tree has cost is the whole reason
+   to glance at a tab you are not looking at. Two short lines are narrower
+   than one long one, and the strip fits in about half the width it took. */
+/* 1180, not a phone width, because the strip does not run out of room at a
+   phone width — it runs out of room wherever the board column is under about
+   790px, and the two-column layout hands the board less than that anywhere
+   below 1180. Left at 760 the strip still clipped Vampirism across the whole
+   1001-1180 band and again between 761 and 800, which is the same bug wearing
+   a desktop's clothes. */
+@media (max-width:1180px){
+  .tabs{gap:5px}
+  /* A two-column grid rather than a wrapping flex: `flex-basis:100%` inside a
+     shrink-to-fit flex item asks the tab how wide it is in order to answer how
+     wide it is, and the browser settles that by making the tab as wide as the
+     strip. A grid row that spans both columns says the same thing without the
+     circularity, and the tab stays as wide as its widest line. */
+  .tab{
+    display:grid;grid-template-columns:auto auto;justify-content:center;
+    justify-items:center;align-content:center;gap:1px 7px;
+    padding:6px 10px;font-size:12px;letter-spacing:.04em;
+  }
+  .tab .tab-mark{display:none}
+  .tab .tab-name{grid-column:1 / -1;text-align:center}
+  .tab .tab-when{font-size:10px;letter-spacing:.06em;gap:4px}
+  .tab .tab-stat{font-size:11px;gap:4px}
+  /* Only one child on the second row — a tree with no hours of its own, or one
+     whose build has cost nothing yet — and it centres under the name rather
+     than sitting in a column of a grid the other tab is using. */
+  .tab .tab-name:only-child{grid-column:1 / -1}
+}
+/* The last two steps, for phones. Tracking on an uppercase word is a luxury,
+   and SWORDMASTERY is twelve letters paying for it eleven times; below 360 —
+   an SE, a fold's cover screen — the gutter goes too, because at that width
+   the three tree names are worth more than the margin beside them. */
+@media (max-width:430px){
+  .tab{padding:5px 7px;font-size:11px;letter-spacing:0}
+  .tabs{gap:4px}
+}
+@media (max-width:360px){
+  :root{--gutter:7px}
+  .tab{padding:4px 5px;font-size:10px;gap:1px 5px}
+  .tab .tab-when{font-size:9.5px;letter-spacing:.04em}
+  .tab .tab-stat{font-size:10px}
+  .tabs{gap:3px}
+}
+
+/* ------------------------------------------------------ the perk sheet
+   Selecting a perk used to scroll the panel into view, and on a phone the
+   panel is below the whole board: you got the description with the tree
+   scrolled off the top, having lost the map you were reading it against, and
+   getting back cost a scroll in the other direction. The panel is the same
+   element and the same markup — it is simply pinned to the bottom of the
+   screen over the board instead, which is where a thumb already is.
+
+   There is no scrim. Dimming the board would defeat the point of putting the
+   panel over it, and a scrim would make reading a second perk cost two taps
+   instead of one. A tap anywhere that is not the sheet and not a node closes
+   it, and so do Escape, the cross in the hero, and a second tap on the perk
+   already open. */
+@media (max-width:1000px){
+  body.sheet-open .side>.panel{
+    position:fixed;left:0;right:0;bottom:0;z-index:60;
+    max-height:min(62vh,520px);
+    display:flex;flex-direction:column;overflow:hidden;
+    border:1px solid var(--line-2);border-bottom:0;
+    border-top-color:color-mix(in srgb,var(--accent) 45%,var(--line-2));
+    border-radius:14px 14px 0 0;
+    box-shadow:0 -18px 44px rgba(0,0,0,.72);
+    /* Opaque, unlike the column version. The panel's 4% of translucency is a
+       texture against the page's own background and a legibility bug against a
+       tree of glowing nodes scrolling underneath it. */
+    background:linear-gradient(180deg,#1e1711,#0e0b08);
+    animation:sheet-rise .18s ease-out;
+  }
+  /* The grabber. It says "this came up and can go down again" in 38 pixels,
+     which is less than any sentence could. */
+  body.sheet-open .side>.panel::before{
+    content:'';position:absolute;top:5px;left:50%;transform:translateX(-50%);
+    width:38px;height:4px;border-radius:2px;z-index:3;pointer-events:none;
+    background:rgba(255,255,255,.24);
+  }
+  /* The hero and the buttons are the sheet's two fixed ends; only the middle
+     scrolls, so the Learn button is at the bottom of the screen whatever the
+     perk's level list does. Sticky is what the panel used as a column — inside
+     a flex column of fixed height it has nothing to stick to. */
+  /* The hero was 75px of a 520px sheet — a fifth of it spent on the tree's name
+     and the level count, above the levels that are the reason the sheet is
+     open. It is a caption, not a banner: the 40px tree mark comes down to 26,
+     the padding with it, and the grabber sits in the top of that padding rather
+     than being paid for in a row of its own. About 46px, and the 29 it gives
+     back go to the level list. */
+  body.sheet-open .side>.panel>.panel-hero{
+    position:static;flex:none;border-radius:13px 13px 0 0;
+    padding:12px 12px 9px;gap:10px;
+  }
+  body.sheet-open .panel-hero .hero-mark,
+  body.sheet-open .panel-hero svg,
+  body.sheet-open .panel-hero .mark{width:26px;height:26px}
+  body.sheet-open .panel-hero .hero-tree{font-size:11px;letter-spacing:.1em;gap:7px}
+  body.sheet-open .panel-hero .hero-lv{font-size:12px}
+  body.sheet-open .panel-hero .hero-when{padding:1px 6px;font-size:10px}
+  body.sheet-open .side>.panel>.panel-body{
+    display:block;flex:1 1 auto;min-height:0;
+    overflow-y:auto;overscroll-behavior:contain;
+  }
+  body.sheet-open .side>.panel>.panel-foot{
+    display:flex;position:static;flex:none;padding:12px 14px;
+    /* Learn on the right, where a thumb falls. Refund is the destructive one
+       of the pair and it keeps the corner that is harder to hit by accident. */
+    flex-direction:row-reverse;
+  }
+  body.sheet-open .side>.panel>.panel-note{display:block;flex:none;padding:0 14px 12px}
+  body.sheet-open .side>.panel>.panel-empty{display:block;flex:none}
+  /* Whichever of the two ends up last carries the phone's home indicator. */
+  body.sheet-open .side>.panel>:last-child{
+    padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  }
+  /* The overview drawer folds the panel to its hero in the column layout. As a
+     sheet the panel is not sharing a column with anything, so it unfolds. */
+  body.sheet-open .side.ov-open>.panel{overflow:hidden}
+
+  /* Quick picks is a mouse's mode — hover to read, click to buy, right-click to
+     refund — and none of those three exist here. The switch is hidden by the
+     stylesheet as well as by the script, so a desktop window dragged narrow
+     loses it at the same width the layout changes. */
+  #pickmode{display:none!important}
+}
+@keyframes sheet-rise{from{transform:translateY(101%)}to{transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){ .side>.panel{animation:none!important} }
+
+/* The cross in the hero. Nothing but a sheet has anything to close, so it is
+   not rendered as visible anywhere else. */
+.hero-x{display:none}
+body.sheet-open .hero-x{
+  display:grid;place-items:center;flex:none;
+  width:32px;height:32px;margin:-7px -7px -7px 0;
+  border:0;border-radius:9px;background:none;cursor:pointer;
+  color:var(--text-dim);font-size:22px;line-height:1;transition:.15s;
+}
+body.sheet-open .hero-x:hover{color:var(--accent-2);background:rgba(255,255,255,.07)}

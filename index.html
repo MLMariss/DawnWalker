@@ -56,7 +56,32 @@
     </div>
   </div>
 
-  <div class="bargroup sliders">
+  <!-- Everything past the totals is occasional. The two sliders are set once for
+       a build, the two switches likewise, and Save, Builds, Copy link and Reset
+       are things you do when you are finished rather than while you are picking
+       perks. On a phone they were 148px of permanent chrome above a board that
+       had 590px to work in — a quarter of the screen spent on controls that
+       change nothing about the tree you are reading. They fold behind this
+       instead, and the bar is the brand, the totals and this button until you
+       ask for the rest. It is not rendered at all on a desktop, where the whole
+       bar is one row and there is nothing to fold. -->
+  <button class="btn btn-ghost bar-more" id="barmore" type="button"
+          aria-expanded="false" aria-controls="bar-sliders bar-checks bar-acts"
+          aria-label="Controls"
+          title="Corruption and character level, the two switches, and Save, Builds, Copy link and Reset">
+    <!-- Two sliders with their knobs at different marks: the glyph is a picture
+         of most of what is behind the button, and it is what every other app
+         puts on this control. It carries the button on its own under 430px,
+         where the word beside it is the difference between one row and two. -->
+    <svg class="bar-more-ico" viewBox="0 0 20 20" aria-hidden="true" fill="none"
+         stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <path d="M3 6.5h6.5M13.5 6.5H17M3 13.5h1.5M8.5 13.5H17"></path>
+      <circle cx="11.5" cy="6.5" r="2"></circle><circle cx="6.5" cy="13.5" r="2"></circle>
+    </svg>
+    <span class="bar-more-lbl">Controls</span>
+  </button>
+
+  <div class="bargroup sliders" id="bar-sliders">
     <label class="ctl" title="Vampiric perk levels unlock at Corruption levels">
       <span class="ctl-lbl">Corruption</span>
       <input type="range" id="corruption" min="0" max="15" step="1" value="15">
@@ -69,7 +94,7 @@
     </label>
   </div>
 
-  <div class="bargroup checks">
+  <div class="bargroup checks" id="bar-checks">
     <label class="ctl ctl-check" title="Some levels can only be learned from a Manual found in the world">
       <input type="checkbox" id="manuals" checked>
       <span>Manuals found</span>
@@ -80,7 +105,7 @@
     </label>
   </div>
 
-  <div class="bargroup acts">
+  <div class="bargroup acts" id="bar-acts">
     <button class="btn btn-ghost" id="theory" type="button">Theorycraft</button>
     <button class="btn" id="save" type="button">Save</button>
     <button class="btn" id="builds" type="button">Builds</button>
