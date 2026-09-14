@@ -510,7 +510,7 @@ a:hover{color:var(--gold-2)}
 .node.maxed .frame{background:linear-gradient(160deg,var(--accent-2),var(--accent));
   filter:drop-shadow(0 0 12px color-mix(in srgb,var(--accent) 40%,transparent))}
 .node.gated svg.glyph{stroke:color-mix(in srgb,var(--accent) 22%,#7a6f64)}
-.node.locked{cursor:not-allowed}
+.node.locked{cursor:pointer}
 .node.locked .frame{background:linear-gradient(160deg,
   color-mix(in srgb,var(--accent) 14%,#2b241e),#15110e)}
 .node.locked .frame::after{background:linear-gradient(160deg,#171310,#0d0b09)}
