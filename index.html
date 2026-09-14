@@ -18,7 +18,11 @@
      group inside is now two lines tall instead of one — the two sliders sit one
      over the other, the two checkboxes likewise, the buttons in a 3x2 grid — so
      the bar is one row of double-height groups rather than three rows of
-     single-height ones, and it costs about 70px at every width. -->
+     single-height ones, and it costs about 70px at every width.
+
+     Full-bleed background, content on the page's own width: the bar paints edge
+     to edge like the header it is, but the brand and the controls line up with
+     the columns underneath instead of hugging the window's corners. -->
 <header class="topbar">
   <div class="brand">
     <span class="brand-mark" aria-hidden="true"></span>
@@ -70,24 +74,6 @@
     <button class="btn btn-ghost" id="share" type="button">Copy link</button>
     <button class="btn btn-ghost" id="reset" type="button">Reset</button>
   </div>
-
-  <div class="meters">
-    <div class="meter" title="Skill points spent across all three trees">
-      <span class="meter-ico ico-sp" aria-hidden="true"></span>
-      <span class="meter-val" id="m-sp">0</span>
-      <span class="meter-lbl">Skill points</span>
-    </div>
-    <div class="meter" title="Time segments spent training">
-      <span class="meter-ico ico-ts" aria-hidden="true"></span>
-      <span class="meter-val" id="m-ts">0</span>
-      <span class="meter-lbl">Time segments</span>
-    </div>
-    <div class="meter" title="Manuals this build needs you to find">
-      <span class="meter-ico ico-bk" aria-hidden="true"></span>
-      <span class="meter-val" id="m-bk">0</span>
-      <span class="meter-lbl">Manuals</span>
-    </div>
-  </div>
 </header>
 
 <div class="loadedbar" id="loadedbar" hidden></div>
@@ -96,8 +82,34 @@
   <section class="board">
     <!-- The tree selector is the board's header, so it sits inside the board's
          column. As a full-width row above the stage it left the right-hand third
-         of the page empty and started the side panel a row below the top bar. -->
-    <nav class="tabs" id="tabs" role="tablist" aria-label="Skill trees"></nav>
+         of the page empty and started the side panel a row below the top bar.
+         The three totals ride with it: they are what every click on the board
+         changes, so they belong over the board rather than in the far corner of
+         a bar the eye has already left. Both rows stick together. -->
+    <div class="boardhead">
+      <nav class="tabs" id="tabs" role="tablist" aria-label="Skill trees"></nav>
+
+      <!-- One line, centred over the tree, and bigger than it was in the top
+           bar: this is the running cost of the build, read while spending, not
+           chrome. It wraps to two rows only where one will not fit. -->
+      <div class="meters" role="status" aria-label="Build totals">
+        <div class="meter" title="Skill points spent across all three trees">
+          <span class="meter-ico ico-sp" aria-hidden="true"></span>
+          <span class="meter-val" id="m-sp">0</span>
+          <span class="meter-lbl">Skill points</span>
+        </div>
+        <div class="meter" title="Time segments spent training">
+          <span class="meter-ico ico-ts" aria-hidden="true"></span>
+          <span class="meter-val" id="m-ts">0</span>
+          <span class="meter-lbl">Time segments</span>
+        </div>
+        <div class="meter" title="Manuals this build needs you to find">
+          <span class="meter-ico ico-bk" aria-hidden="true"></span>
+          <span class="meter-val" id="m-bk">0</span>
+          <span class="meter-lbl">Manuals</span>
+        </div>
+      </div>
+    </div>
 
     <div class="boardscroll" id="boardscroll">
       <div class="tree" id="tree">
