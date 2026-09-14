@@ -1126,14 +1126,18 @@
       if (need) badge = '<span class="badge"></span>';
       else if (used) badge = '<span class="badge got"></span>';
     }
-    var bang = (learnable && n === 0 && !p.quest_unlock) ? '<span class="bang">!</span>' : '';
 
     var pt = L.pos(p);
     return '<button class="' + cls.join(' ') + '" type="button" data-node="' + p.node_id + '"' +
       ' style="left:' + pt.x + 'px;top:' + pt.y + 'px"' +
       ' aria-label="' + esc(p.name) + ', level ' + n + ' of ' + p.max_level + '">' +
       '<span class="frame"></span>' + Icons.forNodeMark(p.node_id, 'glyph') +
-      badge + bang + '<span class="syn"></span>' +
+      /* No "you can take this now" bang: the frame, the glyph and the name are
+         already lit on a node that can be taken and dimmed on one that cannot,
+         so a second marker for the same fact only crowded the hex — and with
+         quick picks on, a click buys the prerequisites anyway, which makes
+         "available" a much softer line than the badge implied. */
+      badge + '<span class="syn"></span>' +
       '<span class="pips">' + pips + '</span>' +
       '<span class="name" style="width:' + L.labelW + 'px">' + esc(p.name) + '</span></button>';
   }

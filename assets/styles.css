@@ -193,22 +193,23 @@ a:hover{color:var(--gold-2)}
    tallest group, and every group is two rows, so none of them costs anything
    the others were not already costing. */
 .bargroup{display:grid;row-gap:4px;flex:none;align-content:center}
-/* The one flexible gap in the bar sits here, so the brand stays left and
-   everything that is actually a control packs to the right. */
-.sliders{grid-template-columns:auto;column-gap:0;min-width:0;flex:0 1 auto;margin-left:auto}
+/* The bar's flexible gaps sit either side of the totals, not in front of the
+   sliders: the brand stays left, the controls stay packed right, and the three
+   numbers land in the middle of what is left rather than in the far corner. */
+.sliders{grid-template-columns:auto;column-gap:0;min-width:0;flex:0 1 auto}
 .checks{grid-template-columns:auto}
 .acts{grid-template-columns:repeat(3,auto);column-gap:6px}
 
 /* --------------------------------------------------------- the totals
-   One line, centred over the tree, and the only numbers on the page that change
-   on every click. They used to live in the far right corner of the top bar,
-   which is the one place the eye is not while it is spending points — a build's
-   running cost belongs over the board that is spending it. `wrap` rather than a
-   fixed grid: three groups fit on one line at every width that matters, and the
-   few that cannot get two centred rows instead of a squeeze. */
+   One line across the middle of the bar, not the 2x2 block in its corner they
+   used to be: three numbers on a line read as three numbers, where a grid of
+   them reads as a table to be studied. They are the only figures on the page
+   that change on every click, so they are the one thing here worth a size you
+   can read without looking for it. One line is the point of them, so wrapping
+   is held off until 1080, where the bar has nothing left to give. */
 .meters{
-  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
-  column-gap:30px;row-gap:6px;padding:7px 14px 9px;
+  display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;
+  column-gap:26px;row-gap:4px;flex:0 1 auto;min-width:0;margin-inline:auto;
 }
 .meter{display:flex;align-items:baseline;gap:9px;white-space:nowrap}
 .meter-ico{width:17px;height:17px;flex:none;background:currentColor;align-self:center;
@@ -218,6 +219,13 @@ a:hover{color:var(--gold-2)}
 .ico-bk{color:var(--text-dim);-webkit-mask-image:var(--m-bk);mask-image:var(--m-bk)}
 .meter-val{font-size:22px;font-weight:700;color:var(--gold-2);line-height:1.1;min-width:1ch;text-align:right}
 .meter-lbl{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-faint)}
+/* Two labels per meter, one shown at a time. "Skill points" and "Time segments"
+   are what they are called; "Skills" and "Time" are what they mean, and next to
+   their own icon and a number that is all the word has left to do. The long
+   form is worth the width while there is width to spare, so the short one waits
+   for the first step of the ladder that actually runs out of room. */
+.meter-lbl b{font-weight:inherit}
+.meter-lbl i{font-style:normal;display:none}
 
 .ctl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-dim);min-width:0}
 /* These two labels used to be blood red, which made a pair of quiet settings the
@@ -300,24 +308,72 @@ a:hover{color:var(--gold-2)}
 .btn-toggle[aria-pressed=true] .sw::after{left:13px;background:var(--gold-2)}
 
 /* The give-way ladder. Each step drops the least informative thing left, so the
-   row survives down to a phone without ever becoming two rows. */
+   bar holds one row down to 760px — a phone, and nothing wider. */
+/* The step where the two-word labels stop being affordable: at full tracking the
+   bar needs 1609px to hold them next to everything else, so they hand over just
+   above that. Below it the icon, the number and one word carry the whole
+   meaning, and the 127px they give back goes to the controls. */
+@media (max-width:1600px){
+  .meter-lbl b{display:none}
+  .meter-lbl i{display:inline}
+  .meters{column-gap:22px}
+}
 @media (max-width:1500px){
   .topbar{gap:14px}
   .brand-text i{display:none}
   .ctl-lbl{width:auto}
   .ctl input[type=range]{max-width:104px}
 }
-/* The title is 17px too long for a 1280 window at its full tracking, and an
-   ellipsised game title reads as a bug rather than as a fit. */
-@media (max-width:1380px){ .brand-text b{font-size:13px;letter-spacing:.05em} }
-@media (max-width:1240px){
-  .topbar{gap:11px}
+/* An ellipsised game title reads as a bug rather than as a fit, so the title
+   drops its tracking here and everything around it gives up a few pixels a step
+   earlier than it used to — the totals are a wider group on one line than they
+   were as a 2x2 block in the corner, and the width has to come from somewhere.
+   In order: the title's tracking, then the totals' own gaps, then the button
+   padding and the slider length. */
+@media (max-width:1440px){
+  .brand-text b{font-size:13px;letter-spacing:.05em}
+  .meters{column-gap:18px}
+  .meter{gap:7px}
+  .meter-val{font-size:20px}
+}
+@media (max-width:1400px){
+  .topbar{gap:12px}
   .btn{padding:6px 9px;letter-spacing:.06em}
   .ctl input[type=range]{max-width:88px}
 }
+@media (max-width:1240px){
+  .topbar{gap:11px}
+  .meters{column-gap:14px}
+  .meter-lbl{font-size:11px;letter-spacing:.06em}
+}
+/* The wordmark goes, the hex mark stays. It is the last thing on the bar that
+   carries no information — the page's title is in the tab and the <h1> either
+   way — and below this the alternative is ellipsising it, or taking the width
+   out of the sliders' own labels, which do say what they set. */
+@media (max-width:1300px){ .brand-text{display:none} }
+/* Below this the bar genuinely runs out of room for three totals on one line.
+   They wrap to two — which costs no height at all, because every other group in
+   the bar is already two lines tall — rather than being squeezed until the
+   labels clip. */
 @media (max-width:1080px){
-  .brand-text{display:none}
   .ctl-check span{font-size:12px}
+  .meters{flex-wrap:wrap;column-gap:14px;row-gap:2px}
+  .meter-val{font-size:19px}
+  .meter-lbl{font-size:10.5px;letter-spacing:.05em}
+}
+
+/* The width where the bar is allowed a second row. It used to be 640, back when
+   the totals were a narrow 2x2 block; one line of three is wider than that, and
+   holding all four groups on one row below this squeezed the totals until their
+   labels clipped. Two rows here, never three — the brand and the totals share
+   the first, the controls take the second. */
+@media (max-width:760px){
+  .topbar{flex-wrap:wrap;row-gap:8px;gap:10px}
+  .brand{order:1}
+  .meters{order:2;margin-inline:auto 0;column-gap:16px;flex-wrap:nowrap}
+  .sliders{order:3;margin-left:0;flex:1 1 180px}
+  .checks{order:4}
+  .acts{order:5;margin-left:auto}
 }
 
 /* --------------------------------------------------------------- tabs */
@@ -402,28 +458,13 @@ a:hover{color:var(--gold-2)}
   display:flex;flex-direction:column;min-width:0;min-height:0;
   overflow-y:auto;overscroll-behavior-y:contain;scroll-behavior:smooth;
 }
-/* The board's header — the tree selector and the three totals — stays put while
-   the board scrolls under it. The tree is now allowed to be taller than the
-   column, and losing either the tree selector or the running cost off the top of
-   a scrolled board is not a trade worth making. One sticky box rather than two
-   stacked ones, so the second row needs no offset kept in sync with the first
-   row's height. */
-.boardhead{
+/* The tab strip is the board's header and stays put while the board scrolls
+   under it — the tree is now allowed to be taller than the column, and losing
+   the tree selector off the top of a scrolled board is not a trade worth making. */
+.board>.tabs{
   position:sticky;top:0;z-index:3;padding-top:2px;
-  /* Opaque, not the half-transparent wash the tab strip used to carry. With a
-     second row under the tabs the header is tall enough that a tree scrolling
-     beneath it showed through the totals — perk names ghosting behind the one
-     set of numbers that has to be readable at a glance. It fades only over its
-     last few pixels, so the edge is still soft. */
-  background:linear-gradient(180deg,var(--ink) 0 94%,rgba(11,9,8,.9));
+  background:linear-gradient(180deg,var(--ink) 62%,rgba(11,9,8,.86));
 }
-/* The hairline under the header: it separates two things that scroll at
-   different speeds, so it earns a line the tab strip alone never did. */
-.boardhead .meters{
-  border-top:1px solid var(--line);
-  background:linear-gradient(180deg,rgba(231,179,86,.05),rgba(231,179,86,0));
-}
-.boardhead>.tabs{padding-bottom:6px}
 /* Horizontal only. `overflow-y:visible` next to `overflow-x:auto` is not honoured —
    the spec makes the browser compute it as `auto` — so it has to be said outright,
    or the board grows a second vertical scrollbar it never wanted. */
@@ -505,13 +546,6 @@ a:hover{color:var(--gold-2)}
   -webkit-mask-size:contain;mask-size:contain;-webkit-mask-image:var(--m-bk);mask-image:var(--m-bk)}
 .node .badge.lock{background:var(--blood-2);-webkit-mask-image:var(--m-lock);mask-image:var(--m-lock)}
 .node .badge.got{background:var(--green)}
-/* the game's "you can take this now" marker */
-.node .bang{
-  position:absolute;top:9px;right:9px;width:17px;height:17px;border-radius:50%;
-  display:grid;place-items:center;background:var(--gold-2);color:#1a1209;
-  font-size:12px;font-weight:800;line-height:1;
-  box-shadow:0 0 10px rgba(246,215,154,.7);
-}
 .node .name{
   position:absolute;top:calc(100% + 16px);left:50%;transform:translateX(-50%);
   text-align:center;font-size:13px;font-weight:500;line-height:1.2;
@@ -1023,7 +1057,7 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
      the viewport instead — over the drawers, through a background built to be
      half-transparent over a tree. Bounded by the board either way, so it still
      leaves the panel alone; it just has to be opaque. */
-  .boardhead{box-shadow:0 7px 11px -7px rgba(0,0,0,.95)}
+  .board>.tabs{background:var(--ink);box-shadow:0 7px 11px -7px rgba(0,0,0,.95)}
   /* The page scrolls here, so nothing inside it may be a scroller of its own or
      claim a slice of viewport height — each box sizes to its content and the
      column simply gets longer. Without this the stage keeps the height it had
@@ -1044,23 +1078,13 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
      sideways and the labels stay legible, rather than every name being squeezed
      into its neighbour to make the whole tree fit a phone. */
   :root{--node:70px;--icon:36px;--colmin:118px;--row:150px}
-  /* The one width where the bar is allowed a second row: a phone cannot hold
-     four groups side by side, and a bar that overflows would take the whole
-     page sideways with it. Two rows here, never three — the brand and the
-     sliders share the first, the rest of the controls the second. */
   :root{--gutter:10px}
-  .topbar{flex-wrap:wrap;row-gap:8px;gap:10px}
-  .brand{order:1}
-  .sliders{order:2;margin-left:auto;flex:1 1 180px}
-  .checks{order:3}
-  .acts{order:4;margin-left:auto}
+  /* The totals keep the first row with the brand, still labelled — a phone has
+     no room to spare, which is exactly where a bare number next to another bare
+     number stops being readable. They wrap within that row if they must. */
+  .meters{column-gap:13px;flex-wrap:wrap;row-gap:2px}
   .tabs{padding:0 0 6px}
   .tab{padding:6px 10px;font-size:12px;letter-spacing:.06em}
-  /* Two per row and one under them rather than a sideways squeeze: the labels
-     are what makes a bare number mean something, so they stay. */
-  .meters{column-gap:18px;padding:6px 10px 8px}
-  .meter-val{font-size:19px}
-  .meter-lbl{font-size:11px;letter-spacing:.06em}
   .stage{padding-bottom:18px}
   .node .name{font-size:12px}
 }

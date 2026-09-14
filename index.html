@@ -32,6 +32,30 @@
     </span>
   </div>
 
+  <!-- The running cost of the build, and the only numbers here that change on
+       every click, so they sit in the middle of the bar rather than in its far
+       corner: one line at a size worth reading across the room, with the empty
+       space either side of them rather than all of it between the brand and the
+       controls. The two-word labels shorten to one word where the bar is too
+       narrow to afford both. -->
+  <div class="meters" role="status" aria-label="Build totals">
+    <div class="meter" title="Skill points spent across all three trees">
+      <span class="meter-ico ico-sp" aria-hidden="true"></span>
+      <span class="meter-val" id="m-sp">0</span>
+      <span class="meter-lbl"><b>Skill points</b><i>Skills</i></span>
+    </div>
+    <div class="meter" title="Time segments spent training">
+      <span class="meter-ico ico-ts" aria-hidden="true"></span>
+      <span class="meter-val" id="m-ts">0</span>
+      <span class="meter-lbl"><b>Time segments</b><i>Time</i></span>
+    </div>
+    <div class="meter" title="Manuals this build needs you to find">
+      <span class="meter-ico ico-bk" aria-hidden="true"></span>
+      <span class="meter-val" id="m-bk">0</span>
+      <span class="meter-lbl"><b>Manuals</b><i>Manuals</i></span>
+    </div>
+  </div>
+
   <div class="bargroup sliders">
     <label class="ctl" title="Vampiric perk levels unlock at Corruption levels">
       <span class="ctl-lbl">Corruption</span>
@@ -82,34 +106,8 @@
   <section class="board">
     <!-- The tree selector is the board's header, so it sits inside the board's
          column. As a full-width row above the stage it left the right-hand third
-         of the page empty and started the side panel a row below the top bar.
-         The three totals ride with it: they are what every click on the board
-         changes, so they belong over the board rather than in the far corner of
-         a bar the eye has already left. Both rows stick together. -->
-    <div class="boardhead">
-      <nav class="tabs" id="tabs" role="tablist" aria-label="Skill trees"></nav>
-
-      <!-- One line, centred over the tree, and bigger than it was in the top
-           bar: this is the running cost of the build, read while spending, not
-           chrome. It wraps to two rows only where one will not fit. -->
-      <div class="meters" role="status" aria-label="Build totals">
-        <div class="meter" title="Skill points spent across all three trees">
-          <span class="meter-ico ico-sp" aria-hidden="true"></span>
-          <span class="meter-val" id="m-sp">0</span>
-          <span class="meter-lbl">Skill points</span>
-        </div>
-        <div class="meter" title="Time segments spent training">
-          <span class="meter-ico ico-ts" aria-hidden="true"></span>
-          <span class="meter-val" id="m-ts">0</span>
-          <span class="meter-lbl">Time segments</span>
-        </div>
-        <div class="meter" title="Manuals this build needs you to find">
-          <span class="meter-ico ico-bk" aria-hidden="true"></span>
-          <span class="meter-val" id="m-bk">0</span>
-          <span class="meter-lbl">Manuals</span>
-        </div>
-      </div>
-    </div>
+         of the page empty and started the side panel a row below the top bar. -->
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Skill trees"></nav>
 
     <div class="boardscroll" id="boardscroll">
       <div class="tree" id="tree">
