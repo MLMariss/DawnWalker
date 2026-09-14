@@ -197,8 +197,49 @@ a:hover{color:var(--gold-2)}
 .meter-lbl{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint)}
 
 .ctl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-dim);min-width:0}
-.ctl-lbl{flex:none;width:8.2em;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--blood-2)}
-.ctl input[type=range]{flex:1 1 auto;width:auto;min-width:70px;max-width:132px;accent-color:var(--blood);margin:0}
+/* These two labels used to be blood red, which made a pair of quiet settings the
+   loudest thing in a bar of gold chrome. They are meter labels in everything but
+   name, so they are painted like the meter labels. */
+.ctl-lbl{flex:none;width:8.2em;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint)}
+
+/* ------------------------------------------------------------- sliders
+   Drawn by hand rather than left to `accent-color`, which gives the filled
+   half the accent and the empty half the browser's own near-white — a bright
+   bar sitting in the dark top bar, next to nothing else that is white. Both
+   halves are ours now: the fill is the app's gold, the rest is the same warm
+   near-black the panels are made of. `--fill` is the value as a percentage,
+   written by the script on every input; Firefox would manage without it via
+   ::-moz-range-progress, but one gradient for both engines is one thing to
+   keep true rather than two. */
+.ctl input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  flex:1 1 auto;width:auto;min-width:70px;max-width:132px;margin:0;
+  height:16px;background:transparent;cursor:pointer;
+}
+.ctl input[type=range]::-webkit-slider-runnable-track{
+  height:6px;border-radius:999px;border:1px solid var(--line);
+  background:linear-gradient(90deg,
+    var(--gold-dim) 0%, var(--gold) var(--fill,100%), #221a13 var(--fill,100%));
+}
+.ctl input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:14px;height:14px;margin-top:-5px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,var(--gold-2),var(--gold-dim));
+  border:1px solid #120e0a;box-shadow:0 0 0 1px rgba(231,179,86,.28);
+}
+.ctl input[type=range]::-moz-range-track{
+  height:6px;border-radius:999px;border:1px solid var(--line);background:#221a13;
+}
+.ctl input[type=range]::-moz-range-progress{
+  height:6px;border-radius:999px;background:linear-gradient(90deg,var(--gold-dim),var(--gold));
+}
+.ctl input[type=range]::-moz-range-thumb{
+  width:13px;height:13px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,var(--gold-2),var(--gold-dim));
+  border:1px solid #120e0a;box-shadow:0 0 0 1px rgba(231,179,86,.28);
+}
+.ctl input[type=range]:focus{outline:none}
+.ctl input[type=range]:focus-visible{outline:2px solid var(--gold-dim);outline-offset:3px;border-radius:999px}
 .ctl output{font-size:15px;font-weight:700;color:var(--gold-2);min-width:2ch;text-align:right}
 .ctl-check{cursor:pointer;user-select:none;font-size:12.5px;white-space:nowrap}
 .ctl-check input{width:15px;height:15px;flex:none;accent-color:var(--gold-dim);margin:0}
@@ -213,6 +254,27 @@ a:hover{color:var(--gold-2)}
 .btn-ghost{background:none;color:var(--text-dim)}
 .btn-ghost:hover{color:var(--text);background:rgba(255,255,255,.05)}
 .btn:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.4)}
+
+/* The pick-mode switch. A toggle rather than a third button: it does nothing on
+   its own, it changes what every click on the board means, so it has to show
+   which of the two it is in rather than what pressing it would do. Off is a
+   ghost button, on is lit — the same on/off language as an ultimate card. */
+.btn-toggle{display:inline-flex;align-items:center;gap:7px;justify-content:flex-start}
+.btn-toggle[hidden]{display:none}
+.btn-toggle .sw{
+  width:24px;height:13px;flex:none;border-radius:999px;position:relative;
+  background:#2a211a;box-shadow:inset 0 0 0 1px var(--line-2);transition:.15s;
+}
+.btn-toggle .sw::after{
+  content:'';position:absolute;top:2px;left:2px;width:9px;height:9px;border-radius:50%;
+  background:var(--text-faint);transition:.15s;
+}
+.btn-toggle[aria-pressed=true]{
+  color:var(--gold-2);border-color:var(--gold-dim);
+  background:linear-gradient(180deg,rgba(231,179,86,.28),rgba(231,179,86,.09));
+}
+.btn-toggle[aria-pressed=true] .sw{background:var(--gold-dim);box-shadow:inset 0 0 0 1px var(--gold)}
+.btn-toggle[aria-pressed=true] .sw::after{left:13px;background:var(--gold-2)}
 
 /* The give-way ladder. Each step drops the least informative thing left, so the
    row survives down to a phone without ever becoming two rows. */
@@ -248,6 +310,7 @@ a:hover{color:var(--gold-2)}
    cannot fit gets a sideways scroll. */
 .tabs{flex:none;display:flex;gap:8px;justify-content:center;flex-wrap:nowrap;
   padding:0 0 8px;overflow-x:auto;scrollbar-width:none}
+.tabs{justify-content:safe center}
 .tabs::-webkit-scrollbar{height:0}
 .tab{
   display:flex;align-items:center;gap:9px;padding:7px 15px;flex:none;
@@ -462,6 +525,12 @@ a:hover{color:var(--gold-2)}
 .node.selected .name{color:var(--accent-2)}
 .node:focus-visible{outline:none}
 .node:focus-visible .frame{background:linear-gradient(160deg,#fff,var(--accent-2))}
+/* In confirm mode the selection is a standing state — it is what the Learn and
+   Refund buttons will act on — rather than a highlight trailing the cursor, so
+   it burns brighter than hover instead of merely differently. */
+body.confirm-mode .node.selected .frame{
+  filter:drop-shadow(0 0 20px color-mix(in srgb,var(--accent) 85%,transparent))}
+body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4px var(--accent-glow)}
 
 /* ------------------------------------------------------------ drawers */
 .drawer{flex:none;border:1px solid var(--line);border-radius:4px;background:rgba(20,15,11,.72);margin-top:10px}
@@ -901,6 +970,10 @@ a:hover{color:var(--gold-2)}
 @media (max-height:820px){  :root{--node:68px;--icon:34px;--row:126px} }
 @media (max-height:720px){
   :root{--node:62px;--icon:31px;--row:120px}
+  /* The hint is dropped to buy board height, which is only worth buying where
+     the board is sized to the window. Below 1000px the page scrolls instead, so
+     there is no height to buy and the line — which is where it says what a tap
+     does, and where the attribution lives — stays. */
   .hint{display:none}
   .drawer>summary{padding:7px 14px}
   .drawer{margin-top:7px}
@@ -908,6 +981,12 @@ a:hover{color:var(--gold-2)}
 
 @media (max-width:1000px){
   body{overflow:auto}
+  .hint{display:block}
+  /* The board stops being a scroller here, so its sticky tab strip sticks to
+     the viewport instead — over the drawers, through a background built to be
+     half-transparent over a tree. Bounded by the board either way, so it still
+     leaves the panel alone; it just has to be opaque. */
+  .board>.tabs{background:var(--ink);box-shadow:0 7px 11px -7px rgba(0,0,0,.95)}
   /* The page scrolls here, so nothing inside it may be a scroller of its own or
      claim a slice of viewport height — each box sizes to its content and the
      column simply gets longer. Without this the stage keeps the height it had
@@ -1155,6 +1234,35 @@ a:hover{color:var(--gold-2)}
   .brow-acts .btn{flex:1}
   .loadedbar{padding:8px 14px;gap:9px}
   .loaded-tag{width:100%;margin-right:0;order:9}
+}
+
+/* ------------------------------------------------------------ touch
+   A finger is not a mouse pointer: it is about 9mm wide, it cannot hover, and
+   the browser will happily turn a slow tap into a text selection or a 300ms
+   wait. Everything here is scoped to coarse pointers, so a desktop window
+   dragged narrow keeps the desktop sizing it has always had. */
+@media (pointer:coarse){
+  /* No grey flash box on tap, no accidental word selection when a tap on a node
+     label is held a fraction too long, no synthetic-click delay. */
+  .node,.abil,.ult,.tab,.btn,.drawer>summary{
+    -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  }
+  .node,.abil,.ult{-webkit-user-select:none;user-select:none}
+
+  /* A 6px track with a 14px thumb is a mouse-sized control. The track keeps its
+     look and the input grows a 28px tall hit area around it. */
+  .ctl input[type=range]{height:28px}
+  .ctl input[type=range]::-webkit-slider-thumb{width:20px;height:20px;margin-top:-8px}
+  .ctl input[type=range]::-moz-range-thumb{width:19px;height:19px}
+  .ctl-check input{width:19px;height:19px}
+  .ctl-check{padding:2px 0}
+
+  /* The two buttons that are the whole interaction on a phone. */
+  .panel-foot{padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px))}
+  .panel-foot .btn{padding:15px 10px;font-size:14px}
+
+  .tab{padding:9px 12px}
+  .drawer>summary{padding:12px 14px}
 }
 
 @media (prefers-reduced-motion:reduce){ *{transition:none!important} }

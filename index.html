@@ -56,6 +56,17 @@
     <button class="btn btn-ghost" id="theory" type="button">Theorycraft</button>
     <button class="btn" id="save" type="button">Save</button>
     <button class="btn" id="builds" type="button">Builds</button>
+    <!-- Sixth control in a 3x2 grid of five buttons: the cell was already
+         there. It leads the second row rather than trailing it because its
+         label is the longest in the group, and the grid's columns are shared —
+         under Theorycraft it widens the one column that was widest anyway.
+         Hidden outright on touch, where there is no hover to preview with and
+         no right-click to refund with, so confirm is the only mode a phone is
+         ever in and a switch between two would be a lie. -->
+    <button class="btn btn-ghost btn-toggle" id="pickmode" type="button" aria-pressed="false"
+            title="Off: click a node to learn it, right-click to refund. On: a click only selects, and the Learn and Refund buttons in the panel do the rest — the way the game works.">
+      <span class="sw" aria-hidden="true"></span><span>Confirm picks</span>
+    </button>
     <button class="btn btn-ghost" id="share" type="button">Copy link</button>
     <button class="btn btn-ghost" id="reset" type="button">Reset</button>
   </div>
@@ -118,7 +129,7 @@
     </details>
 
     <p class="hint">
-      Click a node to learn its next level · Right-click to refund · Padlocked nodes are story unlocks
+      <span id="hint-how"></span>
       <span class="hint-key" id="hint-key"></span>
       <details class="legal">
         <summary>Unofficial fan content</summary>
