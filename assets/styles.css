@@ -1332,3 +1332,145 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
 }
 
 @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+
+/* ==================================================== the narrow layout
+   Below 1000px the planner is one column: the tree, then everything under it.
+   Two things about that column are not just a desktop squeezed — the tab strip
+   and the perk panel — and both live here, after every earlier rule they have
+   to win against. */
+
+/* ----------------------------------------------------- tabs on a phone
+   Three tabs, one screen, always. At 667px the strip was already sideways-
+   scrolling with Vampirism half off the edge, which makes the third tree
+   something you have to discover rather than something you can see.
+
+   The hexagon goes: it is the one part of a tab that says nothing the word
+   beside it does not. The hours drop under the name rather than out of the
+   tab — a tree that only works at night is a fact worth a line — and the
+   points stay beside them, because what a tree has cost is the whole reason
+   to glance at a tab you are not looking at. Two short lines are narrower
+   than one long one, and the strip fits in about half the width it took. */
+/* 1180, not a phone width, because the strip does not run out of room at a
+   phone width — it runs out of room wherever the board column is under about
+   790px, and the two-column layout hands the board less than that anywhere
+   below 1180. Left at 760 the strip still clipped Vampirism across the whole
+   1001-1180 band and again between 761 and 800, which is the same bug wearing
+   a desktop's clothes. */
+@media (max-width:1180px){
+  .tabs{gap:5px}
+  /* A two-column grid rather than a wrapping flex: `flex-basis:100%` inside a
+     shrink-to-fit flex item asks the tab how wide it is in order to answer how
+     wide it is, and the browser settles that by making the tab as wide as the
+     strip. A grid row that spans both columns says the same thing without the
+     circularity, and the tab stays as wide as its widest line. */
+  .tab{
+    display:grid;grid-template-columns:auto auto;justify-content:center;
+    justify-items:center;align-content:center;gap:1px 7px;
+    padding:6px 10px;font-size:12px;letter-spacing:.04em;
+  }
+  .tab .tab-mark{display:none}
+  .tab .tab-name{grid-column:1 / -1;text-align:center}
+  .tab .tab-when{font-size:10px;letter-spacing:.06em;gap:4px}
+  .tab .tab-stat{font-size:11px;gap:4px}
+  /* Only one child on the second row — a tree with no hours of its own, or one
+     whose build has cost nothing yet — and it centres under the name rather
+     than sitting in a column of a grid the other tab is using. */
+  .tab .tab-name:only-child{grid-column:1 / -1}
+}
+/* The last two steps, for phones. Tracking on an uppercase word is a luxury,
+   and SWORDMASTERY is twelve letters paying for it eleven times; below 360 —
+   an SE, a fold's cover screen — the gutter goes too, because at that width
+   the three tree names are worth more than the margin beside them. */
+@media (max-width:430px){
+  .tab{padding:5px 7px;font-size:11px;letter-spacing:0}
+  .tabs{gap:4px}
+}
+@media (max-width:360px){
+  :root{--gutter:7px}
+  .tab{padding:4px 5px;font-size:10px;gap:1px 5px}
+  .tab .tab-when{font-size:9.5px;letter-spacing:.04em}
+  .tab .tab-stat{font-size:10px}
+  .tabs{gap:3px}
+}
+
+/* ------------------------------------------------------ the perk sheet
+   Selecting a perk used to scroll the panel into view, and on a phone the
+   panel is below the whole board: you got the description with the tree
+   scrolled off the top, having lost the map you were reading it against, and
+   getting back cost a scroll in the other direction. The panel is the same
+   element and the same markup — it is simply pinned to the bottom of the
+   screen over the board instead, which is where a thumb already is.
+
+   There is no scrim. Dimming the board would defeat the point of putting the
+   panel over it, and a scrim would make reading a second perk cost two taps
+   instead of one. A tap anywhere that is not the sheet and not a node closes
+   it, and so do Escape, the cross in the hero, and a second tap on the perk
+   already open. */
+@media (max-width:1000px){
+  body.sheet-open .side>.panel{
+    position:fixed;left:0;right:0;bottom:0;z-index:60;
+    max-height:min(62vh,520px);
+    display:flex;flex-direction:column;overflow:hidden;
+    border:1px solid var(--line-2);border-bottom:0;
+    border-top-color:color-mix(in srgb,var(--accent) 45%,var(--line-2));
+    border-radius:14px 14px 0 0;
+    box-shadow:0 -18px 44px rgba(0,0,0,.72);
+    /* Opaque, unlike the column version. The panel's 4% of translucency is a
+       texture against the page's own background and a legibility bug against a
+       tree of glowing nodes scrolling underneath it. */
+    background:linear-gradient(180deg,#1e1711,#0e0b08);
+    animation:sheet-rise .18s ease-out;
+  }
+  /* The grabber. It says "this came up and can go down again" in 38 pixels,
+     which is less than any sentence could. */
+  body.sheet-open .side>.panel::before{
+    content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);
+    width:38px;height:4px;border-radius:2px;z-index:3;pointer-events:none;
+    background:rgba(255,255,255,.24);
+  }
+  /* The hero and the buttons are the sheet's two fixed ends; only the middle
+     scrolls, so the Learn button is at the bottom of the screen whatever the
+     perk's level list does. Sticky is what the panel used as a column — inside
+     a flex column of fixed height it has nothing to stick to. */
+  body.sheet-open .side>.panel>.panel-hero{
+    position:static;flex:none;border-radius:13px 13px 0 0;padding-top:15px;
+  }
+  body.sheet-open .side>.panel>.panel-body{
+    display:block;flex:1 1 auto;min-height:0;
+    overflow-y:auto;overscroll-behavior:contain;
+  }
+  body.sheet-open .side>.panel>.panel-foot{
+    display:flex;position:static;flex:none;padding:12px 14px;
+    /* Learn on the right, where a thumb falls. Refund is the destructive one
+       of the pair and it keeps the corner that is harder to hit by accident. */
+    flex-direction:row-reverse;
+  }
+  body.sheet-open .side>.panel>.panel-note{display:block;flex:none;padding:0 14px 12px}
+  body.sheet-open .side>.panel>.panel-empty{display:block;flex:none}
+  /* Whichever of the two ends up last carries the phone's home indicator. */
+  body.sheet-open .side>.panel>:last-child{
+    padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  }
+  /* The overview drawer folds the panel to its hero in the column layout. As a
+     sheet the panel is not sharing a column with anything, so it unfolds. */
+  body.sheet-open .side.ov-open>.panel{overflow:hidden}
+
+  /* Quick picks is a mouse's mode — hover to read, click to buy, right-click to
+     refund — and none of those three exist here. The switch is hidden by the
+     stylesheet as well as by the script, so a desktop window dragged narrow
+     loses it at the same width the layout changes. */
+  #pickmode{display:none!important}
+}
+@keyframes sheet-rise{from{transform:translateY(101%)}to{transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){ .side>.panel{animation:none!important} }
+
+/* The cross in the hero. Nothing but a sheet has anything to close, so it is
+   not rendered as visible anywhere else. */
+.hero-x{display:none}
+body.sheet-open .hero-x{
+  display:grid;place-items:center;flex:none;
+  width:36px;height:36px;margin:-6px -8px -6px 0;
+  border:0;border-radius:9px;background:none;cursor:pointer;
+  color:var(--text-dim);font-size:24px;line-height:1;transition:.15s;
+}
+body.sheet-open .hero-x:hover{color:var(--accent-2);background:rgba(255,255,255,.07)}

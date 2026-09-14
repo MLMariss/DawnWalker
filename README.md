@@ -82,7 +82,14 @@ Pages and it works as the site index.
 
 Controls: **click** a node to learn its next level, **right-click** to refund,
 **Backspace** refunds the focused node, and the side panel has explicit Learn/Refund
-buttons for touch.
+buttons for touch. Below 1000px the panel is a sheet over the board instead of a
+column beside it — see [The narrow layout](#the-narrow-layout).
+
+Picking out of order is the default everywhere: **Learn** takes level 1 of any
+prerequisite the perk still needs along with it, and says what that costs before
+you press it; **Refund** takes the dependants down with it. A mouse user who
+wants the game's own strict ladder — one prerequisite at a time, nothing bought
+you did not click — turns **Quick picks** off.
 
 ## Layout
 
@@ -146,6 +153,40 @@ claims a slice of viewport height. Below 640px fitting the board to the window
 would put the names on top of each other, so the floor on column spacing wins
 instead and the board scrolls sideways — a name you can read beats a tree that
 fits. Scrollbars are themed to the page rather than left as system chrome.
+
+### The narrow layout
+
+One column means the perk panel is below the board, and selecting a perk used to
+scroll it into view — which scrolled the tree off the top of the screen. You read
+the perk having lost the map you were reading it against, and getting back cost a
+scroll in the other direction.
+
+The panel is the same element and the same markup; below 1000px it is pinned to
+the bottom of the viewport over the board instead. Nothing scrolls on selection
+except the smallest nudge that clears the tapped node out from behind the sheet,
+in whichever axis it was hidden, and none at all when it is already in sight. The
+hero and the buttons are the sheet's fixed ends and only the level list between
+them scrolls, so **Learn** is at the bottom of the screen whatever the perk is —
+and it is on the right, where a thumb falls, with the destructive **Refund** in
+the corner that is harder to hit by accident.
+
+There is no scrim. Dimming the board would defeat the point of putting the panel
+over it, and a scrim would make reading a second perk cost two taps instead of
+one. The sheet closes on a second tap of the perk it is showing, on the cross in
+its hero, on Escape, and on a tap anywhere that is not the sheet and not another
+node.
+
+Quick picks is hidden here rather than switched off: hover to read, click to buy
+and right-click to refund are three things a touch screen does not have, and the
+sheet's own Learn button is the interaction. What that switch used to buy —
+prerequisites coming along — is the default in this layout.
+
+The tab strip is the board's header and stays put while the page scrolls under
+it, so the three trees and what each has cost are never off screen. It does not
+clip to get there: under 1180px, which is where the board column drops below the
+790px the full-size tabs need, each tab loses its hexagon and puts its hours
+under its name, so two short lines stand in for one long one. That holds three
+tabs on a 320px phone without a sideways scroll.
 
 ## Repository layout
 
