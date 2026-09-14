@@ -45,6 +45,16 @@
 
   --shadow:0 16px 40px rgba(0,0,0,.6);
 
+  /* The page's own width, and the gutter it keeps inside it. The stage is
+     capped here, so the top bar is measured against the same two numbers
+     rather than against the window: the bar's background still runs edge to
+     edge, but the brand on its left and the controls on its right land on the
+     same two lines as the board and the side panel below them. Before this the
+     controls sat in the window's corner, a wide screen's worth of empty margin
+     away from the column they act on. */
+  --shell:2240px;
+  --gutter:18px;
+
   /* Every mark here is painted as an alpha mask, so a subpath with no area —
      a bare `M..v..` line with no stroke — contributes nothing and vanishes.
      Several of these were drawn as if they were strokable glyphs and rendered
@@ -152,13 +162,20 @@ a:hover{color:var(--gold-2)}
    Never more than one row. `flex-wrap:wrap` on five groups of single-height
    controls is what broke it into three stacked rows and took 167px off the top
    of the board; the groups are two lines tall each now and the bar does not
-   wrap at all. Everything inside may shrink, and the three things that carry no
-   information on their own — the brand subtitle, the meter words, the button
-   padding — give way in that order as the window narrows. */
+   wrap at all. Everything inside may shrink, and the things that carry no
+   information on their own — the brand subtitle, the slider label, the button
+   padding — give way in that order as the window narrows. The totals no longer
+   ride here: they sit over the board, where the clicks that change them are. */
 .topbar{
   flex:none;display:flex;align-items:center;gap:18px;flex-wrap:nowrap;
-  padding:8px 18px;border-bottom:1px solid var(--line);
+  padding-block:8px;border-bottom:1px solid var(--line);
   background:linear-gradient(180deg,rgba(28,21,16,.96),rgba(13,10,8,.92));
+}
+/* `max()` rather than a wrapper element: below the cap each bar keeps its plain
+   gutter, above it the padding grows by exactly the margin the stage takes, so
+   the two line up at every width with nothing extra in the DOM. */
+.topbar,.loadedbar{
+  padding-inline:max(var(--gutter),calc((100% - var(--shell)) / 2 + var(--gutter)));
 }
 .brand{display:flex;align-items:center;gap:11px;min-width:0;flex:0 1 auto}
 .brand-mark{
@@ -182,19 +199,25 @@ a:hover{color:var(--gold-2)}
 .checks{grid-template-columns:auto}
 .acts{grid-template-columns:repeat(3,auto);column-gap:6px}
 
-.meters{display:grid;grid-template-columns:auto auto;column-gap:16px;row-gap:2px;flex:none;align-content:center}
-/* Three meters over two rows: the two spent totals share the top line and the
-   manual count, which is a thing to go and find rather than a thing you have
-   spent, sits under them across both columns. */
-.meters .meter:last-child{grid-column:1 / -1}
-.meter{display:flex;align-items:center;gap:7px;white-space:nowrap}
-.meter-ico{width:14px;height:14px;flex:none;background:currentColor;
+/* --------------------------------------------------------- the totals
+   One line, centred over the tree, and the only numbers on the page that change
+   on every click. They used to live in the far right corner of the top bar,
+   which is the one place the eye is not while it is spending points — a build's
+   running cost belongs over the board that is spending it. `wrap` rather than a
+   fixed grid: three groups fit on one line at every width that matters, and the
+   few that cannot get two centred rows instead of a squeeze. */
+.meters{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+  column-gap:30px;row-gap:6px;padding:7px 14px 9px;
+}
+.meter{display:flex;align-items:baseline;gap:9px;white-space:nowrap}
+.meter-ico{width:17px;height:17px;flex:none;background:currentColor;align-self:center;
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain}
 .ico-sp{color:var(--blood-2);-webkit-mask-image:var(--m-sp);mask-image:var(--m-sp)}
 .ico-ts{color:var(--gold);-webkit-mask-image:var(--m-ts);mask-image:var(--m-ts)}
 .ico-bk{color:var(--text-dim);-webkit-mask-image:var(--m-bk);mask-image:var(--m-bk)}
-.meter-val{font-size:18px;font-weight:700;color:var(--gold-2);line-height:1.15;min-width:1ch;text-align:right}
-.meter-lbl{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint)}
+.meter-val{font-size:22px;font-weight:700;color:var(--gold-2);line-height:1.1;min-width:1ch;text-align:right}
+.meter-lbl{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-faint)}
 
 .ctl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-dim);min-width:0}
 /* These two labels used to be blood red, which made a pair of quiet settings the
@@ -288,9 +311,7 @@ a:hover{color:var(--gold-2)}
    ellipsised game title reads as a bug rather than as a fit. */
 @media (max-width:1380px){ .brand-text b{font-size:13px;letter-spacing:.05em} }
 @media (max-width:1240px){
-  .topbar{gap:11px;padding:8px 14px}
-  .meter-lbl{display:none}
-  .meters{column-gap:14px}
+  .topbar{gap:11px}
   .btn{padding:6px 9px;letter-spacing:.06em}
   .ctl input[type=range]{max-width:88px}
 }
@@ -369,24 +390,40 @@ a:hover{color:var(--gold-2)}
    the width: the widest tree stops growing at `--colmax` and the panel at its
    own clamp, so the rest would be margin either way. Centring the stage puts
    that margin on both sides rather than stranding the tree in the middle of an
-   empty board. The top bar stays full-bleed — it is a header, and it reads as
-   one. */
+   empty board. The top bar's background stays full-bleed — it is a header, and
+   it reads as one — but its contents are padded onto this same width, so the
+   brand lines up with the board and the buttons with the side panel. */
 .stage{
-  flex:1;min-height:0;width:100%;max-width:2240px;margin-inline:auto;
+  flex:1;min-height:0;width:100%;max-width:var(--shell);margin-inline:auto;
   display:grid;grid-template-columns:minmax(0,1fr) var(--side);gap:16px;
-  padding:6px 18px 14px;
+  padding:6px var(--gutter) 14px;
 }
 .board{
   display:flex;flex-direction:column;min-width:0;min-height:0;
   overflow-y:auto;overscroll-behavior-y:contain;scroll-behavior:smooth;
 }
-/* The tab strip is the board's header and stays put while the board scrolls
-   under it — the tree is now allowed to be taller than the column, and losing
-   the tree selector off the top of a scrolled board is not a trade worth making. */
-.board>.tabs{
+/* The board's header — the tree selector and the three totals — stays put while
+   the board scrolls under it. The tree is now allowed to be taller than the
+   column, and losing either the tree selector or the running cost off the top of
+   a scrolled board is not a trade worth making. One sticky box rather than two
+   stacked ones, so the second row needs no offset kept in sync with the first
+   row's height. */
+.boardhead{
   position:sticky;top:0;z-index:3;padding-top:2px;
-  background:linear-gradient(180deg,var(--ink) 62%,rgba(11,9,8,.86));
+  /* Opaque, not the half-transparent wash the tab strip used to carry. With a
+     second row under the tabs the header is tall enough that a tree scrolling
+     beneath it showed through the totals — perk names ghosting behind the one
+     set of numbers that has to be readable at a glance. It fades only over its
+     last few pixels, so the edge is still soft. */
+  background:linear-gradient(180deg,var(--ink) 0 94%,rgba(11,9,8,.9));
 }
+/* The hairline under the header: it separates two things that scroll at
+   different speeds, so it earns a line the tab strip alone never did. */
+.boardhead .meters{
+  border-top:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(231,179,86,.05),rgba(231,179,86,0));
+}
+.boardhead>.tabs{padding-bottom:6px}
 /* Horizontal only. `overflow-y:visible` next to `overflow-x:auto` is not honoured —
    the spec makes the browser compute it as `auto` — so it has to be said outright,
    or the board grows a second vertical scrollbar it never wanted. */
@@ -986,12 +1023,13 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
      the viewport instead — over the drawers, through a background built to be
      half-transparent over a tree. Bounded by the board either way, so it still
      leaves the panel alone; it just has to be opaque. */
-  .board>.tabs{background:var(--ink);box-shadow:0 7px 11px -7px rgba(0,0,0,.95)}
+  .boardhead{box-shadow:0 7px 11px -7px rgba(0,0,0,.95)}
   /* The page scrolls here, so nothing inside it may be a scroller of its own or
      claim a slice of viewport height — each box sizes to its content and the
      column simply gets longer. Without this the stage keeps the height it had
      as a two-column layout, and the tree spills straight over the panel. */
-  .stage{grid-template-columns:minmax(0,1fr);padding:6px 14px 20px;flex:none;min-height:auto}
+  :root{--gutter:14px}
+  .stage{grid-template-columns:minmax(0,1fr);padding-bottom:20px;flex:none;min-height:auto}
   .board{overflow:visible;flex:none;min-height:auto}
   .boardscroll{overflow-x:auto;overflow-y:hidden}
   /* The page scrolls here, so neither pane is a scrollport and neither claims a
@@ -1007,19 +1045,23 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
      into its neighbour to make the whole tree fit a phone. */
   :root{--node:70px;--icon:36px;--colmin:118px;--row:150px}
   /* The one width where the bar is allowed a second row: a phone cannot hold
-     five groups side by side, and a bar that overflows would take the whole
+     four groups side by side, and a bar that overflows would take the whole
      page sideways with it. Two rows here, never three — the brand and the
-     meters share the first, the controls the second. */
-  .topbar{flex-wrap:wrap;row-gap:8px;gap:10px;padding:8px 12px}
+     sliders share the first, the rest of the controls the second. */
+  :root{--gutter:10px}
+  .topbar{flex-wrap:wrap;row-gap:8px;gap:10px}
   .brand{order:1}
-  .meters{order:2;margin-left:auto}
-  .meter-lbl{display:none}
-  .sliders{order:3;margin-left:0;flex:1 1 180px}
-  .checks{order:4}
-  .acts{order:5;margin-left:auto}
+  .sliders{order:2;margin-left:auto;flex:1 1 180px}
+  .checks{order:3}
+  .acts{order:4;margin-left:auto}
   .tabs{padding:0 0 6px}
   .tab{padding:6px 10px;font-size:12px;letter-spacing:.06em}
-  .stage{padding:6px 10px 18px}
+  /* Two per row and one under them rather than a sideways squeeze: the labels
+     are what makes a bare number mean something, so they stay. */
+  .meters{column-gap:18px;padding:6px 10px 8px}
+  .meter-val{font-size:19px}
+  .meter-lbl{font-size:11px;letter-spacing:.06em}
+  .stage{padding-bottom:18px}
   .node .name{font-size:12px}
 }
 
@@ -1062,7 +1104,7 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
    hidden until there is one, so it costs no height on an ordinary visit. */
 .loadedbar{
   flex:none;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
-  padding:8px 20px;border-bottom:1px solid var(--line);
+  padding-block:8px;border-bottom:1px solid var(--line);
   background:linear-gradient(180deg,rgba(40,30,18,.9),rgba(18,14,10,.9));
 }
 .loadedbar[hidden]{display:none}
