@@ -1333,6 +1333,65 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
 
 @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
 
+/* --------------------------------------------- the top bar on a phone
+   194px of header, then 54px of tabs, and the board started a third of the way
+   down an 844px screen. The totals earn their place — they are the only figures
+   on the page that change on every click — and so does the tab strip. The two
+   sliders, the two switches and the five buttons do not: nothing in either
+   group changes while you are reading a tree, and between them they were 148px
+   of that header. They fold behind one button, which is the whole saving.
+
+   Collapsed the bar is one row of totals, about 46px. The board starts where
+   the tabs used to and gets the difference. */
+.bar-more{display:none}
+.bar-more-ico{width:17px;height:17px;flex:none}
+.bar-more[aria-expanded=true]{
+  color:var(--gold-2);border-color:var(--gold-dim);
+  background:linear-gradient(180deg,rgba(231,179,86,.24),rgba(231,179,86,.08));
+}
+
+@media (max-width:760px){
+  .bar-more{display:inline-flex;align-items:center;gap:7px;order:3;margin-left:auto;padding:6px 10px}
+  /* The hexagon goes. The wordmark went at 1300, so what is left of the brand
+     here is a decorative shape, and the row it is sitting in is the one row on
+     a phone that has to hold the totals and this button as well. */
+  .brand{display:none}
+  /* The three groups keep their own `display:grid` when they come back; only
+     the folding is written here, so nothing about how they lay out internally
+     is duplicated or has to be kept in step with the desktop rules. */
+  .topbar>.bargroup{display:none}
+  body.bar-open .topbar>.bargroup{display:grid}
+  /* Open, the bar is three rows: the totals it always had, the two settings
+     groups sharing a row, and the buttons across the bottom on a grid of equal
+     columns rather than one sized to the longest word. */
+  body.bar-open .sliders{order:4;flex:1 1 210px}
+  body.bar-open .checks{order:5;flex:0 1 auto;margin-left:auto}
+  body.bar-open .acts{order:6;flex:1 0 100%;grid-template-columns:repeat(3,1fr);margin-left:0}
+  body.bar-open .acts .btn{text-align:center}
+  /* Five buttons in three columns leaves the second row a cell short. Copy link
+     takes it rather than Reset: a destructive button twice the width of the one
+     beside it is a button you press by accident. */
+  body.bar-open .acts #share{grid-column:span 2}
+}
+/* The word beside the glyph is what pushes the row over at 430, and the glyph
+   is the half that survives: it says "settings" on its own in a way the word
+   cannot say in 40px. */
+@media (max-width:430px){
+  .bar-more-lbl{display:none}
+  .bar-more{padding:6px 9px}
+  .meters{column-gap:10px}
+  .meter{gap:6px}
+}
+/* Last stop. The three icons are distinct and each total carries a `title`,
+   so at this width the words go rather than the row wrapping. */
+@media (max-width:365px){
+  .meter-lbl{display:none}
+  /* Too narrow for the sliders and the switches to share a row, so they stack —
+     and stack left, rather than being pushed to the right edge by the margin
+     that packs them against the buttons when they do fit beside each other. */
+  body.bar-open .checks{margin-left:0}
+}
+
 /* ==================================================== the narrow layout
    Below 1000px the planner is one column: the tree, then everything under it.
    Two things about that column are not just a desktop squeezed — the tab strip

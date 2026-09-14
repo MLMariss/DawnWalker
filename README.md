@@ -181,6 +181,16 @@ and right-click to refund are three things a touch screen does not have, and the
 sheet's own Learn button is the interaction. What that switch used to buy —
 prerequisites coming along — is the default in this layout.
 
+The top bar folds. The totals are the only figures on the page that change on
+every click and they stay; the two sliders, the two switches and the five
+buttons do not change while you are reading a tree, and between them they were
+148px of a 194px header. They go behind one **Controls** button, which leaves
+the bar one row of about 48px — the board now starts 146px higher than it did,
+which is more height than the sheet takes from the bottom. The fold is the
+reader's rather than the build's, so it survives a render and is not carried in
+a link. Under 430px the button is its glyph alone; the word beside it is the
+difference between one row and two.
+
 The tab strip is the board's header and stays put while the page scrolls under
 it, so the three trees and what each has cost are never off screen. It does not
 clip to get there: under 1180px, which is where the board column drops below the

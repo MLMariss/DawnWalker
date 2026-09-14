@@ -64,7 +64,7 @@
    'corruption-out', 'charlvl', 'charlvl-out', 'charlvl-ctl', 'theory',
    'manuals', 'synergy', 'm-sp', 'm-ts', 'm-bk', 'boardscroll',
    'ov-body', 'ov-note', 'ovdrawer', 'abils', 'abil-note', 'abildrawer', 'ultdrawer',
-   'side', 'hint-key', 'hint-how', 'pickmode',
+   'side', 'hint-key', 'hint-how', 'pickmode', 'barmore',
    'modal', 'modal-title', 'modal-body', 'loadedbar'].forEach(function (id) {
     el[id.replace(/-(\w)/g, function (_, c) { return c.toUpperCase(); })] = document.getElementById(id);
   });
@@ -1050,7 +1050,11 @@
     // quietly wiped the mode class on every render, a click included.
     document.body.className = 't-' + (tree() ? tree().key : 'wc') +
       (quickOn() ? '' : ' confirm-mode') +
-      (sheetOpen ? ' sheet-open' : '');
+      (sheetOpen ? ' sheet-open' : '') +
+      /* The bar's fold is the reader's, not the build's: it survives a render,
+         which this line rewrites wholesale. Forgetting it here is exactly the
+         bug the mode class had once already. */
+      (el.barmore && el.barmore.getAttribute('aria-expanded') === 'true' ? ' bar-open' : '');
     renderTabs();
     renderAbilities();
     renderUltimates();
@@ -1644,6 +1648,17 @@
     var onLayout = function () { sheetOpen = false; syncPickMode(); renderAll(); };
     if (MQ_SHEET.addEventListener) MQ_SHEET.addEventListener('change', onLayout);
     else if (MQ_SHEET.addListener) MQ_SHEET.addListener(onLayout);
+
+    /* The bar's own fold. It is a body class rather than a style on the groups
+       because what it switches is a layout — three rows instead of one — and
+       the stylesheet already owns which width that layout applies at. */
+    if (el.barmore) {
+      el.barmore.addEventListener('click', function () {
+        var open = el.barmore.getAttribute('aria-expanded') !== 'true';
+        el.barmore.setAttribute('aria-expanded', String(open));
+        document.body.classList.toggle('bar-open', open);
+      });
+    }
 
     if (el.pickmode) {
       el.pickmode.addEventListener('click', function () {
