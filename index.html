@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Blood of Dawnwalker Skill Tree Planner &amp; Build Calculator</title>
-<meta name="description" content="Free skill tree planner and build calculator for The Blood of Dawnwalker. Plan Witchcraft, Swordmastery and Vampirism perks, ultimates and abilities with prerequisites, corruption gates, skill point and manual totals, and shareable build links.">
+<meta name="description" content="Free skill tree planner for The Blood of Dawnwalker: every perk, ultimate and ability, with level costs, gates and shareable build links.">
 <!-- Search and link previews. The canonical URL is the one address every share
      of the planner should count towards: builds ride in the #b= fragment, which
      search engines ignore, so there is only ever one page here. To verify the
@@ -34,11 +34,12 @@
   "url": "https://mlmariss.github.io/DawnWalker/",
   "description": "Interactive skill tree planner and build calculator for The Blood of Dawnwalker, covering the Witchcraft, Swordmastery and Vampirism trees.",
   "applicationCategory": "GameApplication",
-  "operatingSystem": "Any",
+  "operatingSystem": "Any (web browser)",
   "browserRequirements": "Requires JavaScript",
   "isAccessibleForFree": true,
   "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-  "about": {"@type": "VideoGame", "name": "The Blood of Dawnwalker"}
+  "about": {"@type": "VideoGame", "name": "The Blood of Dawnwalker"},
+  "author": {"@type": "Person", "name": "MLMariss", "url": "https://github.com/MLMariss"}
 }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -62,10 +63,10 @@
 <header class="topbar">
   <div class="brand">
     <span class="brand-mark" aria-hidden="true"></span>
-    <h1 class="brand-text">
+    <span class="brand-text">
       <b>The Blood of Dawnwalker</b>
       <i>Skill Tree Planner</i>
-    </h1>
+    </span>
   </div>
 
   <!-- The running cost of the build, and the only numbers here that change on
@@ -161,6 +162,16 @@
   </div>
 </header>
 
+<!-- What the page is, in words, for anyone who arrives from a search and for the
+     crawlers that brought them: the page's one <h1> and the sentence a search
+     result or an AI answer can quote. One line on a desktop; on a phone the
+     sentence folds away and the heading alone stays. -->
+<div class="intro">
+  <h1>The Blood of Dawnwalker Skill Tree Planner</h1>
+  <p>Free planner for the Witchcraft, Swordmastery and Vampirism trees, with every
+     level&rsquo;s cost and gate read from the game&rsquo;s own skill screens.
+     <a href="#refdrawer" id="reflink">Full perk list</a></p>
+</div>
 <div class="loadedbar" id="loadedbar" hidden></div>
 
 <main class="stage">
@@ -208,29 +219,131 @@
         <span class="drawer-note">every perk, ultimate and ability in one list</span>
       </summary>
       <div class="ref">
-        <p class="ref-intro">Plan a build for <em>The Blood of Dawnwalker</em> before you spend a skill point. This planner lays out all three skill trees &mdash; Witchcraft, Swordmastery and Vampirism &mdash; with their 54 perks, 9 ultimate perks and 27 abilities. It follows prerequisites and corruption gates, totals the skill points, time segments and manuals a build needs, and saves any build as a link you can share.</p>
+        <p class="ref-intro">Every perk, ultimate perk and ability in <em>The Blood of Dawnwalker</em>&rsquo;s three skill trees &mdash; 54 perks, 9 ultimates and 27 abilities &mdash; with each level&rsquo;s effect, its skill point and time segment cost, and what gates it: a manual, a road shrine, a corruption level or a story quest.</p>
+        <p class="ref-src">Costs, gates and effect text were transcribed from the game&rsquo;s own skill screens and cross-checked against Game8 and Fextralife; <a href="https://github.com/MLMariss/DawnWalker/blob/main/VERIFICATION.md">VERIFICATION.md</a> lists every check and where the sources disagree. Damage figures are shown at character level 20. Made by MLMariss; the data and code are on <a href="https://github.com/MLMariss/DawnWalker">GitHub</a>.</p>
         <section class="ref-tree">
           <h2>Witchcraft skill tree</h2>
           <h3>Witchcraft perks</h3>
           <ul>
-            <li><b>Forager</b> <i>(2 levels, any time)</i> Double Harvest chance when gathering plants.</li>
-            <li><b>Bewitching Influence</b> <i>(3 levels, any time)</i> Better Prices and special offers in stores.</li>
-            <li><b>Unnatural Resilience</b> <i>(2 levels, day only)</i> Grants Armour when any Witchcraft Ability is active.</li>
-            <li><b>Witchcraft Mastery</b> <i>(4 levels, day only)</i> Witchcraft Abilities deal more Damage.</li>
-            <li><b>Herbal Remedies I</b> <i>(3 levels, any time)</i> Consumables with duration measured in time segments last longer.</li>
-            <li><b>Medicus I</b> <i>(3 levels, any time)</i> Increases the limit of Consumables in a Quickslot.</li>
-            <li><b>Forbidden Sigils</b> <i>(3 levels, day only)</i> Increases Witchcraft Ability Slots number.</li>
-            <li><b>Lasting Malediction</b> <i>(4 levels, day only)</i> Witchcraft Abilities last longer.</li>
-            <li><b>Frugal Witchcraft</b> <i>(3 levels, day only)</i> Defeating an enemy with a Witchcraft Ability restores Health based on the amount spent to cast it.</li>
-            <li><b>Amalgam</b> <i>(2 levels, any time)</i> Multiple Buffs from Consumables with time segments set as the duration, can be applied simultaneously.</li>
-            <li><b>Aether Flow</b> <i>(3 levels, day only)</i> Reduces Witchcraft Ability Cooldown.</li>
-            <li><b>Evil Eye</b> <i>(2 levels, day only)</i> Chance for Critical Witchcraft Ability cast.</li>
-            <li><b>Font of Life</b> <i>(1 level, day only, story unlock)</i> Passive regeneration of human health.</li>
-            <li><b>Herbal Remedies II</b> <i>(3 levels, any time)</i> Additional instant Heal from all Consumables.</li>
-            <li><b>Medicus II</b> <i>(3 levels, any time)</i> Craft more Items in a single batch.</li>
-            <li><b>Blasphemous Echo</b> <i>(2 levels, day only)</i> Increases Witchcraft Abilities Damage for each enemy currently affected by Witchcraft Abilities.</li>
-            <li><b>Potent Blood</b> <i>(2 levels, day only)</i> Chance for Witchcraft Abilities to not cost Health.</li>
-            <li><b>Unholy Fervour</b> <i>(2 levels, day only)</i> Chance for a refund of an Activation Charge after Witchcraft Ability use.</li>
+            <li><b>Forager</b> <i>(any time)</i> Double Harvest chance when gathering plants.
+              <ol class="ref-lv">
+                <li>Double Harvest : 50% chance. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>Double Harvest : 100% chance. <i>1 skill point, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Bewitching Influence</b> <i>(any time)</i> Better Prices and special offers in stores.
+              <ol class="ref-lv">
+                <li>-15% buying Prices. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>+15% selling Prices. <i>1 skill point, 1 time segment</i></li>
+                <li>Special offers will be available in some stores. <i>2 skill points, 1 time segment</i></li>
+              </ol>
+            </li>
+            <li><b>Unnatural Resilience</b> <i>(day only)</i> Grants Armour when any Witchcraft Ability is active.
+              <ol class="ref-lv">
+                <li>+25% Armour. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>+50% Armour. <i>1 skill point, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Witchcraft Mastery</b> <i>(day only)</i> Witchcraft Abilities deal more Damage.
+              <ol class="ref-lv">
+                <li>+15% Damage. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>50% chance to deal additional 242 Damage when using a Witchcraft Ability. <i>1 skill point, 1 time segment</i></li>
+                <li>+25% Damage. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+40% Damage. 100% chance to deal additional 242 Damage when using a Witchcraft Ability. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Herbal Remedies I</b> <i>(any time)</i> Consumables with duration measured in time segments last longer.
+              <ol class="ref-lv">
+                <li>+1 time segment to duration. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+2 time segments to duration. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+3 time segments to duration. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Medicus I</b> <i>(any time)</i> Increases the limit of Consumables in a Quickslot.
+              <ol class="ref-lv">
+                <li>6 maximum instances in a Quickslot. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>9 maximum instances in a Quickslot. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>12 maximum instances in a Quickslot. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Forbidden Sigils</b> <i>(day only)</i> Increases Witchcraft Ability Slots number.
+              <ol class="ref-lv">
+                <li>2 Slots available. <i>1 skill point, 1 time segment</i></li>
+                <li>3 Slots available. <i>1 skill point, 1 time segment</i></li>
+                <li>4 Slots available. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Lasting Malediction</b> <i>(day only)</i> Witchcraft Abilities last longer.
+              <ol class="ref-lv">
+                <li>+10% Duration. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+20% Duration. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+40% Duration. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>Extends Duration of active Witchcraft Abilities by 20% after using a Witchcraft Ability. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Frugal Witchcraft</b> <i>(day only)</i> Defeating an enemy with a Witchcraft Ability restores Health based on the amount spent to cast it.
+              <ol class="ref-lv">
+                <li>Restores 40% of the Health cost after defeating an enemy affected by Witchcraft Abilities. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Restores 80% of the Health cost after defeating an enemy affected by Witchcraft Abilities. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Restores 120% of the Health cost after defeating an enemy affected by Witchcraft Abilities. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Amalgam</b> <i>(any time)</i> Multiple Buffs from Consumables with time segments set as the duration, can be applied simultaneously.
+              <ol class="ref-lv">
+                <li>2 maximum simultaneous Buffs. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>3 maximum simultaneous Buffs. <i>1 skill point, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Aether Flow</b> <i>(day only)</i> Reduces Witchcraft Ability Cooldown.
+              <ol class="ref-lv">
+                <li>-10% Cooldowns. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>-20% Cooldowns. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>-5% Cooldowns on Critical Hit. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Evil Eye</b> <i>(day only)</i> Chance for Critical Witchcraft Ability cast.
+              <ol class="ref-lv">
+                <li>Critical Witchcraft Ability: 10% chance. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Critical Witchcraft Ability: 20% chance. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Font of Life</b> <i>(day only, story unlock)</i> Passive regeneration of human health.
+              <ol class="ref-lv">
+                <li>Story or quest unlock - no skill point or time cost listed <i>0 skill points, 0 time segments, story unlock</i></li>
+              </ol>
+            </li>
+            <li><b>Herbal Remedies II</b> <i>(any time)</i> Additional instant Heal from all Consumables.
+              <ol class="ref-lv">
+                <li>5% Health to the additional instant Heal. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>10% Health to the additional instant Heal. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>15% Health to the additional instant Heal. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Medicus II</b> <i>(any time)</i> Craft more Items in a single batch.
+              <ol class="ref-lv">
+                <li>Craft 2 Items items at once. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Craft 3 Items items at once. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>At the start of each Day, Craft 1 Item for free from all unlocked Recipes (Excluding Quest Recipes). <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Blasphemous Echo</b> <i>(day only)</i> Increases Witchcraft Abilities Damage for each enemy currently affected by Witchcraft Abilities.
+              <ol class="ref-lv">
+                <li>+10% Witchcraft Abilities Damage per enemy affected by Witchcraft Abilities. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+20% Witchcraft Abilities Damage per enemy affected by Witchcraft Abilities. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Potent Blood</b> <i>(day only)</i> Chance for Witchcraft Abilities to not cost Health.
+              <ol class="ref-lv">
+                <li>No Health cost: 20% chance. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>No Health cost: 40% chance. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Unholy Fervour</b> <i>(day only)</i> Chance for a refund of an Activation Charge after Witchcraft Ability use.
+              <ol class="ref-lv">
+                <li>Activation Charge refund : 20% chance. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Activation Charge refund : 40% chance. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
           </ul>
           <h3>Witchcraft ultimate perks</h3>
           <p>Three per tree, only one can ever be taken; the choice is permanent.</p>
@@ -241,41 +354,233 @@
           </ul>
           <h3>Witchcraft abilities</h3>
           <ul>
-            <li><b>Astral Communion</b> <i>(passive, 4 levels, story granted)</i> Activates dormant magic in places of power scattered throughout the Valley.</li>
-            <li><b>Burning Blood</b> <i>(active, 4 levels, story granted)</i> Deals Damage over time to a target.</li>
-            <li><b>Compel Soul</b> <i>(passive, 4 levels, story granted)</i> Allows you to speak with restless souls. Use together with objects associated with the dead to obtain additional information.</li>
-            <li><b>Cycle of Ruin</b> <i>(passive, 4 levels)</i> Extends Duration of currently active Witchcraft Abilities with each landed Attack, Block and Perfect Block.</li>
-            <li><b>Life Lock</b> <i>(active, 4 levels)</i> Blocks Damage and Reflects it back to the enemy.</li>
-            <li><b>Mercurial Fervour</b> <i>(passive, 4 levels)</i> Gain Haste in exploration by briefly slowing down the world around you.</li>
-            <li><b>Ravenous Flock</b> <i>(active, 4 levels)</i> Area Attack and Stun on target. Attacking the target triggers additional Area Attacks.</li>
-            <li><b>Soul Reaping</b> <i>(active, 4 levels)</i> Lifesteals target over time and keep him away.</li>
-            <li><b>Soul Stigma</b> <i>(active, 4 levels)</i> Higher Critical Chance and Critical Damage on target.</li>
-            <li><b>Unholy Vitality</b> <i>(passive, 4 levels)</i> Regenerates Health after using Active Abilities.</li>
+            <li><b>Astral Communion</b> <i>(passive, story granted)</i> Activates dormant magic in places of power scattered throughout the Valley.
+              <ol class="ref-lv">
+                <li>+0.4% permanent Witchcraft Ability Damage for each place of power exorcised. <i>1 skill point, 0 time segments, at a road shrine</i></li>
+                <li>+0.8% permanent Witchcraft Ability Damage for each place of power exorcised. <i>1 skill point, 0 time segments</i></li>
+                <li>+1.2% permanent Witchcraft Ability Damage for each place of power exorcised. <i>1 skill point, 0 time segments</i></li>
+                <li>+1.6% permanent Witchcraft Ability Damage for each place of power exorcised. <i>1 skill point, 0 time segments</i></li>
+              </ol>
+            </li>
+            <li><b>Burning Blood</b> <i>(active, story granted, costs 1 activation charge 15% health)</i> Deals Damage over time to a target.
+              <ol class="ref-lv">
+                <li>Deals 169 Damage per second. Duration 10s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Deals 176 Damage per second. Duration 12s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Deals 181 Damage per second. On Death, effect transfers to different enemy. Duration 14s. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>Deals 203 Damage per second. On Death, effect transfers to different enemy. Duration 16s. <i>3 skill points, 2 time segments, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Compel Soul</b> <i>(passive, story granted)</i> Allows you to speak with restless souls. Use together with objects associated with the dead to obtain additional information.
+              <ol class="ref-lv">
+                <li>-0.5% permanent Witchcraft Ability Cooldown for each soul compelled. <i>1 skill point, 0 time segments, at a road shrine</i></li>
+                <li>-1% permanent Witchcraft Ability Cooldown for each soul compelled. <i>1 skill point, 0 time segments</i></li>
+                <li>-1.5% permanent Witchcraft Ability Cooldown for each soul compelled. <i>1 skill point, 0 time segments</i></li>
+                <li>-2% permanent Witchcraft Ability Cooldown for each soul compelled. <i>1 skill point, 0 time segments</i></li>
+              </ol>
+            </li>
+            <li><b>Cycle of Ruin</b> <i>(passive)</i> Extends Duration of currently active Witchcraft Abilities with each landed Attack, Block and Perfect Block.
+              <ol class="ref-lv">
+                <li>Extends Duration of Witchcraft Abilities by 1s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Extends Duration of Witchcraft Abilities by 2s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Extends Duration of Witchcraft Abilities by 2s. Critical Hits extend Duration of Witchcraft Abilities by 4s. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>Extends Duration of Witchcraft Abilities by 3s. Critical Hits extend Duration of Witchcraft Abilities by 5s. +10% Witchcraft Ability Damage for each enemy currently affected by Witchcraft Abilities. <i>3 skill points, 2 time segments, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Life Lock</b> <i>(active, costs 2 activation charges 10% health)</i> Blocks Damage and Reflects it back to the enemy.
+              <ol class="ref-lv">
+                <li>Reflects 100% of Damage. Blocks 2 instances of Damage. Duration 90s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Reflects 120% of Damage. Blocks 3 instances of Damage. Duration 90s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Reflects 160% of Damage. Blocks 3 instances of Damage. Duration 90s. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>Reflects 200% of Damage. Blocks 4 instances of Damage. Duration 90s. <i>3 skill points, 2 time segments, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Mercurial Fervour</b> <i>(passive)</i> Gain Haste in exploration by briefly slowing down the world around you.
+              <ol class="ref-lv">
+                <li>Gain Haste. <i>1 skill point, 0 time segments, at a road shrine</i></li>
+                <li>Haste costs 50% less Stamina. <i>1 skill point, 0 time segments, needs a manual</i></li>
+                <li>Haste costs 50% less Stamina. Haste is 20% faster. <i>1 skill point, 0 time segments, needs a manual</i></li>
+                <li>Haste doesn't cost Stamina. Haste is 20% faster. <i>1 skill point, 0 time segments, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Ravenous Flock</b> <i>(active, costs 2 activation charges 40% health)</i> Area Attack and Stun on target. Attacking the target triggers additional Area Attacks.
+              <ol class="ref-lv">
+                <li>Area Damage 282. Ravenous Flock cancels after 1 hit. 100% Critical Hits on target. Duration 20s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Area Damage 310. Ravenous Flock cancels after 2 hits. 100% Critical Hits on target. Duration 20s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Area Damage 339. Ravenous Flock cancels after 3 hits. 100% Critical Hits on target. Duration 20s. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>Area Damage 367. Ravenous Flock cancels after 4 hits. 100% Critical Hits on target. Duration 20s. <i>3 skill points, 2 time segments, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Soul Reaping</b> <i>(active, costs 2 activation charges 15% health)</i> Lifesteals target over time and keep him away.
+              <ol class="ref-lv">
+                <li>103 Lifesteal per second. Duration 18s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>122 Lifesteal per second. Duration 24s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>141 Lifesteal per second. 20% Damage you receive transfers to the target. Duration 30s. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>160 Lifesteal per second. 40% Damage you receive transfers to the target. 500 Heal on target's Death. Duration 36s. <i>3 skill points, 2 time segments, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Soul Stigma</b> <i>(active, costs 1 activation charge 35% health)</i> Higher Critical Chance and Critical Damage on target.
+              <ol class="ref-lv">
+                <li>+35% Critical Hit chance. +10% Critical Damage. Duration 20s. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>+40% Critical Hit chance. +20% Critical Damage. Duration 25s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+45% Critical Hit chance. +30% Critical Damage. On Death, effect transfers to different enemy. Duration 30s. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>+50% Critical Hit chance. +40% Critical Damage. On Death, effect transfers to different enemy and Stuns him. Duration 35s. <i>3 skill points, 2 time segments, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Unholy Vitality</b> <i>(passive)</i> Regenerates Health after using Active Abilities.
+              <ol class="ref-lv">
+                <li>Regenerates 10% of Health over 10 seconds. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Regenerates 15% of Health over 10 seconds. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Regenerates 20% Health. Heal 20% of dealt Damage from Critical Hits on enemies affected by Witchcraft Abilities. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>Regenerates 25% Health. Heal 40% of dealt Damage from Critical Hits on enemies affected by Witchcraft Abilities. No Health cost for using Witchcraft Abilities when Health is below 30%. <i>3 skill points, 2 time segments, needs a manual</i></li>
+              </ol>
+            </li>
           </ul>
         </section>
         <section class="ref-tree">
           <h2>Swordmastery skill tree</h2>
           <h3>Swordmastery perks</h3>
           <ul>
-            <li><b>Omniblock</b> <i>(4 levels, any time)</i> Omniblock costs less Stamina.</li>
-            <li><b>Stinging Blade</b> <i>(4 levels, any time)</i> Increases Weapon Damage.</li>
-            <li><b>Endless Effort</b> <i>(4 levels, any time)</i> Increases Stamina.</li>
-            <li><b>Vigour</b> <i>(4 levels, any time)</i> Increases All Health Types.</li>
-            <li><b>Perfect Riposte</b> <i>(4 levels, any time)</i> Attack in Critical Direction after Perfect Block to deal Critical Damage.</li>
-            <li><b>Perfect Block</b> <i>(4 levels, any time)</i> Perfect Block restores more Stamina and Activation Charge.</li>
-            <li><b>Fate’s Favour</b> <i>(4 levels, any time)</i> Chance for Weapon Critical Hit.</li>
-            <li><b>Fleet of Foot</b> <i>(4 levels, any time)</i> Dodging cost less Stamina.</li>
-            <li><b>Pack Mule</b> <i>(3 levels, any time)</i> Increases Carry Weight.</li>
-            <li><b>Sustained Focus</b> <i>(4 levels, any time)</i> Increases Activation Charges number.</li>
-            <li><b>Second Skin I</b> <i>(3 levels, any time)</i> Decreases Medium Armour penalties.</li>
-            <li><b>Counterattack</b> <i>(3 levels, any time)</i> Attack after Perfect Block deals more Damage.</li>
-            <li><b>Precision</b> <i>(3 levels, any time)</i> Deal more Damage with Directional Attacks when directions don't repeat.</li>
-            <li><b>Master Fencer</b> <i>(3 levels, any time)</i> Increases Swordmastery Ability Slots number.</li>
-            <li><b>Renewed Focus</b> <i>(3 levels, any time)</i> Increases Activation Charge Restoration.</li>
-            <li><b>Sharp Eye</b> <i>(3 levels, any time)</i> Chance to Weaken enemy on Perfect Block. Weak enemy deals less and receives more Damage.</li>
-            <li><b>Growing Momentum</b> <i>(2 levels, any time)</i> Increases Weapon Damage with each Attack. Buff resets after receiving Damage.</li>
-            <li><b>Restless Blade</b> <i>(3 levels, any time)</i> Reduces Cooldowns of Swordmastery Abilities.</li>
-            <li><b>Second Skin II</b> <i>(3 levels, any time)</i> Decreases Heavy Armour penalties.</li>
+            <li><b>Omniblock</b> <i>(any time)</i> Omniblock costs less Stamina.
+              <ol class="ref-lv">
+                <li>-10% Stamina cost. <i>1 skill point, 0 time segments, at a road shrine</i></li>
+                <li>-20% Stamina cost. <i>1 skill point, 0 time segments</i></li>
+                <li>-30% Stamina cost. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>-40% Stamina cost. Directional Block works like Omniblock if wrong direction is chosen. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Stinging Blade</b> <i>(any time)</i> Increases Weapon Damage.
+              <ol class="ref-lv">
+                <li>+5% Weapon Damage. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>+10% Weapon Damage. <i>1 skill point, 0 time segments</i></li>
+                <li>+15% Weapon Damage. <i>1 skill point, 1 time segment</i></li>
+                <li>+20% Weapon Damage. <i>1 skill point, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Endless Effort</b> <i>(any time)</i> Increases Stamina.
+              <ol class="ref-lv">
+                <li>+25% maximum Stamina. <i>1 skill point, 0 time segments</i></li>
+                <li>+50% maximum Stamina. <i>1 skill point, 0 time segments</i></li>
+                <li>+75% maximum Stamina. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+100% maximum Stamina. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Vigour</b> <i>(any time)</i> Increases All Health Types.
+              <ol class="ref-lv">
+                <li>+10% maximum Health. <i>1 skill point, 0 time segments, at a road shrine</i></li>
+                <li>+20% maximum Health. <i>1 skill point, 0 time segments</i></li>
+                <li>+30% maximum Health. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+50% maximum Health. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Perfect Riposte</b> <i>(any time)</i> Attack in Critical Direction after Perfect Block to deal Critical Damage.
+              <ol class="ref-lv">
+                <li>Unlocks Perfect Riposte. <i>1 skill point, 1 time segment</i></li>
+                <li>+10% Damage on Perfect Riposte. <i>1 skill point, 1 time segment</i></li>
+                <li>Perfect Riposte can be performed after Perfect Dodge. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+20% Damage on Perfect Riposte. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Perfect Block</b> <i>(any time)</i> Perfect Block restores more Stamina and Activation Charge.
+              <ol class="ref-lv">
+                <li>+30% Stamina Restoration. <i>1 skill point, 1 time segment</i></li>
+                <li>+50% Activation Charge Restoration. <i>1 skill point, 1 time segment</i></li>
+                <li>+60% Stamina Restoration. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+100% Activation Charge Restoration. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Fate’s Favour</b> <i>(any time)</i> Chance for Weapon Critical Hit.
+              <ol class="ref-lv">
+                <li>Weapon Critical Hit : 6% chance. <i>1 skill point, 1 time segment</i></li>
+                <li>Weapon Critical Hit : 12% chance. <i>1 skill point, 1 time segment</i></li>
+                <li>Weapon Critical Hit : 18% chance. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+25% Weapon Critical Damage. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Fleet of Foot</b> <i>(any time)</i> Dodging cost less Stamina.
+              <ol class="ref-lv">
+                <li>-20% Stamina cost. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>Dodging an Attack at the last moment restores a portion of Activation Charge. <i>1 skill point, 1 time segment</i></li>
+                <li>-30% Stamina cost. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Killing an enemy Regenerates Stamina. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Pack Mule</b> <i>(any time)</i> Increases Carry Weight.
+              <ol class="ref-lv">
+                <li>+30 maximum Carry Weight. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>+60 maximum Carry Weight. <i>1 skill point, 1 time segment</i></li>
+                <li>+100 maximum Carry Weight. You can run while Encumbered. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Sustained Focus</b> <i>(any time)</i> Increases Activation Charges number.
+              <ol class="ref-lv">
+                <li>2 maximum Activation Charges. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>Start each combat with 1 full Activation Charge. <i>1 skill point, 1 time segment</i></li>
+                <li>3 maximum Activation Charges. <i>1 skill point, 1 time segment</i></li>
+                <li>4 maximum Activation Charges. <i>2 skill points, 1 time segment</i></li>
+              </ol>
+            </li>
+            <li><b>Second Skin I</b> <i>(any time)</i> Decreases Medium Armour penalties.
+              <ol class="ref-lv">
+                <li>-33% Medium Armour penalties. <i>1 skill point, 1 time segment</i></li>
+                <li>-66% Medium Armour penalties. <i>1 skill point, 1 time segment</i></li>
+                <li>-100% Medium Armour penalties. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Counterattack</b> <i>(any time)</i> Attack after Perfect Block deals more Damage.
+              <ol class="ref-lv">
+                <li>+10% Damage on Attack after Perfect Block. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+20% Damage on Attack after Perfect Block. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+10% Bleed chance on Attack after Perfect Block. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Precision</b> <i>(any time)</i> Deal more Damage with Directional Attacks when directions don't repeat.
+              <ol class="ref-lv">
+                <li>+10% Damage. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>-30% Stamina cost. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+20% Damage. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Master Fencer</b> <i>(any time)</i> Increases Swordmastery Ability Slots number.
+              <ol class="ref-lv">
+                <li>2 Slots available. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>3 Slots available. <i>1 skill point, 1 time segment</i></li>
+                <li>4 Slots available. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Renewed Focus</b> <i>(any time)</i> Increases Activation Charge Restoration.
+              <ol class="ref-lv">
+                <li>+15% Activation Charge passive Restoration. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+30% Activation Charge passive Restoration. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+50% Activation Charge Restoration from Attacks. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Sharp Eye</b> <i>(any time)</i> Chance to Weaken enemy on Perfect Block. Weak enemy deals less and receives more Damage.
+              <ol class="ref-lv">
+                <li>Weak chance 30%. Weak Duration 10s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Weak chance 60%. Weak Duration 10s. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>Weak chance 100%. Weak Duration 10s. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Growing Momentum</b> <i>(any time)</i> Increases Weapon Damage with each Attack. Buff resets after receiving Damage.
+              <ol class="ref-lv">
+                <li>+4% Weapon Damage per Attack. Up to +20% Weapon Damage. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>-8% Stamina cost per Weapon Attack. Up to -50% Stamina cost. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Restless Blade</b> <i>(any time)</i> Reduces Cooldowns of Swordmastery Abilities.
+              <ol class="ref-lv">
+                <li>-10% Cooldowns. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>-20% Cooldowns. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>-5% Cooldowns on Critical Hits. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Second Skin II</b> <i>(any time)</i> Decreases Heavy Armour penalties.
+              <ol class="ref-lv">
+                <li>-33% Heavy Armour penalties. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>-66% Heavy Armour penalties. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>-100% Heavy Armour penalties. <i>2 skill points, 1 time segment, needs a manual</i></li>
+              </ol>
+            </li>
           </ul>
           <h3>Swordmastery ultimate perks</h3>
           <p>Three per tree, only one can ever be taken; the choice is permanent.</p>
@@ -286,36 +591,181 @@
           </ul>
           <h3>Swordmastery abilities</h3>
           <ul>
-            <li><b>Adrenaline Rush</b> <i>(passive, 4 levels)</i> Increases Attack Damage after using Active Abilities.</li>
-            <li><b>Artery Strike</b> <i>(active, 4 levels)</i> Critical Attack with a chance of Decapitating the target.</li>
-            <li><b>Broad Swing</b> <i>(active, 4 levels)</i> Weapon Area Attack.</li>
-            <li><b>Charge</b> <i>(active, 4 levels)</i> Charge dealing Damage and Stunning a target and everyone on your way.</li>
-            <li><b>Dirty Trick</b> <i>(active, 4 levels, story granted)</i> Stuns and Damages a target and makes them vulnerable to Active Abilities.</li>
-            <li><b>Swiftness</b> <i>(passive, 4 levels)</i> Boosts Attack Speed after Perfect Block.</li>
-            <li><b>Walking Fortress</b> <i>(passive, 4 levels)</i> Perfect Block restores portion of Activation Charge.</li>
+            <li><b>Adrenaline Rush</b> <i>(passive)</i> Increases Attack Damage after using Active Abilities.
+              <ol class="ref-lv">
+                <li>+20% Attack Damage. Duration 6s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+30% Attack Damage. +50% passive Activation Charge Regeneration. Duration 6s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+40% Attack Damage. +100% passive Activation Charge Regeneration. Duration 6s. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>+50% Attack Damage. +150% passive Activation Charge Regeneration. Attacks restore 10% of Activation Charge. Duration 6s. <i>3 skill points, 2 time segments, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Artery Strike</b> <i>(active, costs 2 activation charges)</i> Critical Attack with a chance of Decapitating the target.
+              <ol class="ref-lv">
+                <li>Deals 450% Weapon Damage. Decapitation : 10% chance. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Deals 560% Weapon Damage. Decapitation : 20% chance. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Deals 680% Weapon Damage. Decapitation : 35% chance. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>Deals 800% Weapon Damage. Decapitation : 50% chance. Decapitation chance x2 on Bleeding enemies. <i>3 skill points, 2 time segments, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Broad Swing</b> <i>(active, costs 2 activation charges)</i> Weapon Area Attack.
+              <ol class="ref-lv">
+                <li>Deals 300% Weapon Damage. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>Deals 375% Weapon Damage. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Deals 450% Weapon Damage. For each enemy you hit, increase Broad Swing Damage by 10%. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>Deals 525% Weapon Damage. For each enemy you hit, increase Broad Swing Damage by 10%. <i>3 skill points, 2 time segments, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Charge</b> <i>(active, costs 1 activation charge)</i> Charge dealing Damage and Stunning a target and everyone on your way.
+              <ol class="ref-lv">
+                <li>Deals 200% Attack Damage. Stun Duration 2s. Bleed on target: 50% chance. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Deals 250% Attack Damage. Stun Duration 2s. Bleed on target: 100% chance. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Deals 300% Attack Damage. Stun Duration 2s. Bleed on target: 100% chance. +66% Bleed Duration. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>Deals 350% Attack Damage. Stun Duration 2s. Bleed on target: 100% chance. +66% Bleed Duration. 1 Activation Charge restore on kill. <i>3 skill points, 2 time segments, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Dirty Trick</b> <i>(active, story granted, costs 1 activation charge)</i> Stuns and Damages a target and makes them vulnerable to Active Abilities.
+              <ol class="ref-lv">
+                <li>Stun ends after 3 hits. Deals 242 Damage. +10% Damage from Active Abilities. Duration 15s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Stun ends after 4 hits. Deals 302 Damage. +20% Damage from Active Abilities. Duration 20s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Stuns in Area. Ends after 5 hits. Deals 363 Damage. +30% Damage from Active Abilities. Duration 25s. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>Stuns in Area. Ends after 6 hits. Deals 423 Damage. +50% Damage from Active Abilities. Duration 30s. -1 Activation Charge cost for Active Abilities used on Stunned enemies (minimum 1). <i>3 skill points, 2 time segments, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Swiftness</b> <i>(passive)</i> Boosts Attack Speed after Perfect Block.
+              <ol class="ref-lv">
+                <li>+10% Attack Speed. Duration 6s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+15% Attack Speed. Duration 8s. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>+20% Attack Speed. +5% Critical Hit chance. Duration 10s. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>+30% Attack Speed. +5% Critical Hit chance. Critical Hits cost no Stamina. Duration 12s. <i>3 skill points, 2 time segments, needs a manual</i></li>
+              </ol>
+            </li>
+            <li><b>Walking Fortress</b> <i>(passive)</i> Perfect Block restores portion of Activation Charge.
+              <ol class="ref-lv">
+                <li>Restores 10% of Activation Charge. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>Restores 15% of Activation Charge. -1s Cooldowns of Active Abilites after Directional Block or Perfect Block. <i>1 skill point, 1 time segment, needs a manual</i></li>
+                <li>Restores 20% of Activation Charge. -1s Cooldowns of Active Abilites after Directional Block or Perfect Block. <i>2 skill points, 1 time segment, needs a manual</i></li>
+                <li>Restores 25% of Activation Charge. -2s Cooldowns of Active Abilites after a Directional Block or a Perfect Block. -1 Activation Charge cost for the next Active Ability if used within 5s after a Perfect Block (minimum 1). <i>3 skill points, 2 time segments, needs a manual</i></li>
+              </ol>
+            </li>
           </ul>
         </section>
         <section class="ref-tree">
           <h2>Vampirism skill tree</h2>
           <h3>Vampirism perks</h3>
           <ul>
-            <li><b>Nourishing Blood</b> <i>(3 levels, night only)</i> Blood Drinking restores more Health.</li>
-            <li><b>Endless Hunger</b> <i>(3 levels, night only)</i> Increase Health Segments number.</li>
-            <li><b>Shadow Dweller</b> <i>(2 levels, night only)</i> Increases Shadowstep range.</li>
-            <li><b>Razorsharp Claws</b> <i>(4 levels, night only)</i> Increases Claw Damage.</li>
-            <li><b>Vrakhiri Might</b> <i>(3 levels, night only)</i> Increases Vampiric Ability Slots number.</li>
-            <li><b>Crimson Feast</b> <i>(3 levels, night only)</i> Grants Buffs when drinking Human Blood. Duration: 3 time segments.</li>
-            <li><b>Wild Blood</b> <i>(3 levels, night only)</i> Grants Buffs when drinking Animal Blood. Duration: 3 time segments.</li>
-            <li><b>Dimension Reach</b> <i>(3 levels, night only)</i> Decrease Planeshift Stamina cost.</li>
-            <li><b>Restless Claws</b> <i>(3 levels, night only)</i> Decrease Stamina cost of Claw Attacks.</li>
-            <li><b>Lasting Blood</b> <i>(2 levels, night only)</i> Vampiric Abilities cost less Health.</li>
-            <li><b>Hastened Corruption</b> <i>(3 levels, night only)</i> Corruption fills up faster.</li>
-            <li><b>Closing Wounds</b> <i>(2 levels, night only)</i> Slowly Regenerates Vampiric Health within the current Health Segment.</li>
-            <li><b>Mandrake Ward</b> <i>(1 level, night only, story unlock)</i> Once per night, lethal damage instead restores 3 health segments.</li>
-            <li><b>Clawpierce</b> <i>(3 levels, night only)</i> Chance for Claw Critical Hit.</li>
-            <li><b>Endless Ferocity</b> <i>(2 levels, night only)</i> Reduces Cooldowns of Vampiric Abilities.</li>
-            <li><b>Blood Theft</b> <i>(3 levels, night only)</i> Attacking restores Recently Lost Vampiric Health.</li>
-            <li><b>Dancing Claws</b> <i>(2 levels, night only)</i> Increases Claw Critical Chance with each Attack. Buff resets after receiving Damage or after a Critical Hit.</li>
+            <li><b>Nourishing Blood</b> <i>(night only)</i> Blood Drinking restores more Health.
+              <ol class="ref-lv">
+                <li>+10% Health Restoration. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>+20% Health Restoration. <i>1 skill point, 1 time segment, corruption 3</i></li>
+                <li>+40% Health Restoration. <i>2 skill points, 1 time segment, corruption 8</i></li>
+              </ol>
+            </li>
+            <li><b>Endless Hunger</b> <i>(night only)</i> Increase Health Segments number.
+              <ol class="ref-lv">
+                <li>3 maximum Health Segments. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>4 maximum Health Segments. <i>1 skill point, 1 time segment, corruption 5</i></li>
+                <li>5 maximum Health Segments. <i>1 skill point, 1 time segment, corruption 12</i></li>
+              </ol>
+            </li>
+            <li><b>Shadow Dweller</b> <i>(night only)</i> Increases Shadowstep range.
+              <ol class="ref-lv">
+                <li>11m Shadowstep range. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>14.5m Shadowstep range. -50% Shadowstep Stamina cost. <i>1 skill point, 1 time segment, corruption 11</i></li>
+              </ol>
+            </li>
+            <li><b>Razorsharp Claws</b> <i>(night only)</i> Increases Claw Damage.
+              <ol class="ref-lv">
+                <li>+5% Claw Damage. <i>1 skill point, 1 time segment, at a road shrine</i></li>
+                <li>+12% Claw Damage. <i>1 skill point, 1 time segment, corruption 4</i></li>
+                <li>+20% Claw Damage. <i>1 skill point, 1 time segment, corruption 9</i></li>
+                <li>+100% Activation Charge Restoration from Claw Attacks. <i>2 skill points, 1 time segment, corruption 12</i></li>
+              </ol>
+            </li>
+            <li><b>Vrakhiri Might</b> <i>(night only)</i> Increases Vampiric Ability Slots number.
+              <ol class="ref-lv">
+                <li>2 Slots available. <i>1 skill point, 1 time segment, corruption 4</i></li>
+                <li>3 Slots available. <i>1 skill point, 1 time segment, corruption 7</i></li>
+                <li>4 Slots available. <i>2 skill points, 1 time segment, corruption 11</i></li>
+              </ol>
+            </li>
+            <li><b>Crimson Feast</b> <i>(night only)</i> Grants Buffs when drinking Human Blood. Duration: 3 time segments.
+              <ol class="ref-lv">
+                <li>+10% Attack Damage. <i>1 skill point, 1 time segment, corruption 2</i></li>
+                <li>+15% Armour. <i>1 skill point, 1 time segment, corruption 5</i></li>
+                <li>+10% Critical Hit chance. <i>2 skill points, 1 time segment, corruption 10</i></li>
+              </ol>
+            </li>
+            <li><b>Wild Blood</b> <i>(night only)</i> Grants Buffs when drinking Animal Blood. Duration: 3 time segments.
+              <ol class="ref-lv">
+                <li>15% Activation Charge Passive Restoration. <i>1 skill point, 1 time segment, corruption 2</i></li>
+                <li>30% Activation Charge Passive Restoration. <i>1 skill point, 1 time segment, corruption 5</i></li>
+                <li>+1 filled Activation Charge at combat start. <i>2 skill points, 1 time segment, corruption 10</i></li>
+              </ol>
+            </li>
+            <li><b>Dimension Reach</b> <i>(night only)</i> Decrease Planeshift Stamina cost.
+              <ol class="ref-lv">
+                <li>-45% Stamina cost. <i>1 skill point, 1 time segment, corruption 2</i></li>
+                <li>-70% Stamina cost. <i>1 skill point, 1 time segment, corruption 6</i></li>
+                <li>-100% Stamina cost. <i>2 skill points, 1 time segment, corruption 13</i></li>
+              </ol>
+            </li>
+            <li><b>Restless Claws</b> <i>(night only)</i> Decrease Stamina cost of Claw Attacks.
+              <ol class="ref-lv">
+                <li>-15% Stamina cost. <i>1 skill point, 1 time segment, corruption 1</i></li>
+                <li>-30% Stamina cost. <i>1 skill point, 1 time segment, corruption 4</i></li>
+                <li>Refund 100% of Stamina spent on Attack, if blocked. <i>2 skill points, 1 time segment, corruption 9</i></li>
+              </ol>
+            </li>
+            <li><b>Lasting Blood</b> <i>(night only)</i> Vampiric Abilities cost less Health.
+              <ol class="ref-lv">
+                <li>-20% Health cost. <i>1 skill point, 1 time segment, corruption 5</i></li>
+                <li>-40% Health cost. <i>2 skill points, 1 time segment, corruption 10</i></li>
+              </ol>
+            </li>
+            <li><b>Hastened Corruption</b> <i>(night only)</i> Corruption fills up faster.
+              <ol class="ref-lv">
+                <li>+30% Corruption filling speed. <i>1 skill point, 1 time segment, corruption 1</i></li>
+                <li>Drink Blood at full Health to Overfeed. Temporary Health Segment and +50% Corruption filling speed while Overfed. <i>1 skill point, 1 time segment, corruption 4</i></li>
+                <li>+50% Corruption filling speed. +5% Vampiric Health for each Corruption Level. <i>2 skill points, 1 time segment, corruption 6</i></li>
+              </ol>
+            </li>
+            <li><b>Closing Wounds</b> <i>(night only)</i> Slowly Regenerates Vampiric Health within the current Health Segment.
+              <ol class="ref-lv">
+                <li>+2% Vampiric Health Segment Regeneration per second. <i>1 skill point, 1 time segment, corruption 3</i></li>
+                <li>+4% Vampiric Health Segment Regeneration per second. <i>2 skill points, 1 time segment, corruption 6</i></li>
+              </ol>
+            </li>
+            <li><b>Mandrake Ward</b> <i>(night only, story unlock)</i> Once per night, lethal damage instead restores 3 health segments.
+              <ol class="ref-lv">
+                <li>Story or quest unlock - no skill point or time cost listed <i>0 skill points, 0 time segments, story unlock</i></li>
+              </ol>
+            </li>
+            <li><b>Clawpierce</b> <i>(night only)</i> Chance for Claw Critical Hit.
+              <ol class="ref-lv">
+                <li>Claw Critical Hit : 10% chance. <i>1 skill point, 1 time segment, corruption 2</i></li>
+                <li>Claw Critical Hit : 20% chance. <i>1 skill point, 1 time segment, corruption 7</i></li>
+                <li>+25% Claw Critical Damage. <i>2 skill points, 1 time segment, corruption 13</i></li>
+              </ol>
+            </li>
+            <li><b>Endless Ferocity</b> <i>(night only)</i> Reduces Cooldowns of Vampiric Abilities.
+              <ol class="ref-lv">
+                <li>-20% Cooldowns. <i>1 skill point, 1 time segment, corruption 6</i></li>
+                <li>-4% Cooldowns on Critical Hits. <i>2 skill points, 1 time segment, corruption 12</i></li>
+              </ol>
+            </li>
+            <li><b>Blood Theft</b> <i>(night only)</i> Attacking restores Recently Lost Vampiric Health.
+              <ol class="ref-lv">
+                <li>Unlocks Blood Theft. <i>1 skill point, 1 time segment, corruption 4</i></li>
+                <li>Time window for restoring Recently Lost Vampiric Health lasts longer. <i>2 skill points, 1 time segment, corruption 8</i></li>
+                <li>30% increased effect of Blood Theft. <i>2 skill points, 1 time segment, corruption 11</i></li>
+              </ol>
+            </li>
+            <li><b>Dancing Claws</b> <i>(night only)</i> Increases Claw Critical Chance with each Attack. Buff resets after receiving Damage or after a Critical Hit.
+              <ol class="ref-lv">
+                <li>+4% Claw Critical Chance per Attack. Up to +40% Claw Critical Hit chance. <i>1 skill point, 1 time segment, corruption 9</i></li>
+                <li>+8% Claw Critical Chance per Attack. Up to +40% Claw Critical Hit chance. <i>2 skill points, 1 time segment, corruption 14</i></li>
+              </ol>
+            </li>
           </ul>
           <h3>Vampirism ultimate perks</h3>
           <p>Three per tree, only one can ever be taken; the choice is permanent.</p>
@@ -326,16 +776,86 @@
           </ul>
           <h3>Vampirism abilities</h3>
           <ul>
-            <li><b>Blood Surge</b> <i>(active, 4 levels)</i> Explodes target. Bosses receive Damage instead.</li>
-            <li><b>Crimson Rush</b> <i>(passive, 4 levels)</i> Increases Damage of Active Abilities, the higher your Health percentage is.</li>
-            <li><b>Death From Above</b> <i>(passive, 4 levels)</i> Instantly Kill a target below you. Bosses receive Damage instead.</li>
-            <li><b>Mesmerise</b> <i>(active, 4 levels)</i> Mind Control a target and force him to Fight on your side. Can't be used on Bosses.</li>
-            <li><b>Piercing Shriek</b> <i>(active, 4 levels)</i> Stuns all enemies in front of you, Weakens their Defence and Attack Damage. Blocking their attacks reflects Damage back at them.</li>
-            <li><b>Scarlet Shield</b> <i>(passive, 4 levels)</i> Health Regeneration chance after Block.</li>
-            <li><b>Shadowstorm</b> <i>(active, 4 levels)</i> Slows down Time around you.</li>
-            <li><b>Shapeshift</b> <i>(passive, 4 levels)</i> Shapeshift into a Wolf and gain Haste in exploration.</li>
-            <li><b>Shred</b> <i>(passive, 4 levels)</i> Bleed chance on your Weapon or Claw Attacks.</li>
-            <li><b>Voracious Bite</b> <i>(active, 4 levels, story granted)</i> Restores Health by drinking target's blood.</li>
+            <li><b>Blood Surge</b> <i>(active, costs 3 activation charges 25% health)</i> Explodes target. Bosses receive Damage instead.
+              <ol class="ref-lv">
+                <li>Area Damage 524 in 3m radius after Explosion. 1,834 Damage to Bosses. <i>1 skill point, 0 time segments, needs Vrakhir blood</i></li>
+                <li>Area Damage 655 in 4m radius after Explosion. 2,227 Damage to Bosses. <i>1 skill point, 1 time segment, corruption 10</i></li>
+                <li>Area Damage 786 in 5m radius after Explosion. 2,620 Damage to Bosses. <i>2 skill points, 1 time segment, corruption 12</i></li>
+                <li>Area Damage 917 in 6m radius after Explosion. 3,013 Damage to Bosses. <i>3 skill points, 2 time segments, corruption 14</i></li>
+              </ol>
+            </li>
+            <li><b>Crimson Rush</b> <i>(passive)</i> Increases Damage of Active Abilities, the higher your Health percentage is.
+              <ol class="ref-lv">
+                <li>Up to +25% Active Ability Damage. <i>1 skill point, 1 time segment, corruption 3</i></li>
+                <li>Up to +30% Active Ability Damage. <i>1 skill point, 1 time segment, corruption 7</i></li>
+                <li>Up to +35% Active Ability Damage. <i>2 skill points, 1 time segment, corruption 11</i></li>
+                <li>Up to +40% Active Ability Damage. <i>3 skill points, 2 time segments, corruption 14</i></li>
+              </ol>
+            </li>
+            <li><b>Death From Above</b> <i>(passive)</i> Instantly Kill a target below you. Bosses receive Damage instead.
+              <ol class="ref-lv">
+                <li>1,703 Damage to Bosses and Tough enemies. <i>1 skill point, 1 time segment, corruption 3</i></li>
+                <li>1,965 Damage to Bosses and Tough enemies. +20% Attack Damage for 15s. <i>1 skill point, 1 time segment, corruption 7</i></li>
+                <li>2,227 Damage to Bosses and Tough enemies. +40% Attack Damage for 15s. <i>2 skill points, 1 time segment, corruption 10</i></li>
+                <li>2,489 Damage to Bosses and Tough enemies. +60% Attack Damage for 15s. Restores 1 Activation Charge. <i>2 skill points, 1 time segment, corruption 13</i></li>
+              </ol>
+            </li>
+            <li><b>Mesmerise</b> <i>(active, costs 2 activation charges 30% health)</i> Mind Control a target and force him to Fight on your side. Can't be used on Bosses.
+              <ol class="ref-lv">
+                <li>Duration 25s. <i>1 skill point, 0 time segments, needs Vrakhir blood</i></li>
+                <li>+25% to target's Damage. Duration 35s. <i>1 skill point, 1 time segment, corruption 9</i></li>
+                <li>+50% to target's Damage. Duration 45s. <i>2 skill points, 1 time segment, corruption 12</i></li>
+                <li>+75% to target's Damage. Target's Attacks restore 20% of Activation Charge. Duration 60s. <i>3 skill points, 2 time segments, corruption 14</i></li>
+              </ol>
+            </li>
+            <li><b>Piercing Shriek</b> <i>(active, costs 1 activation charge 20% health)</i> Stuns all enemies in front of you, Weakens their Defence and Attack Damage. Blocking their attacks reflects Damage back at them.
+              <ol class="ref-lv">
+                <li>Stun Duration 2s. +15% Damage to targets and -15% Damage dealt by targets. Block reflects 10% of Damage back to the attacker. Perfect Block reflects 40%. Duration 25s. <i>1 skill point, 0 time segments, needs Vrakhir blood</i></li>
+                <li>Stun Duration 3s. +20% Damage to targets and -20% Damage dealt by targets. Block reflects 15% of Damage back to the attacker. Perfect Block reflects 60%. Duration 35s. <i>1 skill point, 1 time segment, corruption 7</i></li>
+                <li>Stun Duration 4s. +25% Damage to targets and -25% Damage dealt by targets. Block reflects 20% of Damage back to the attacker. Perfect Block reflects 80%. Duration 45s. <i>2 skill points, 1 time segment, corruption 11</i></li>
+                <li>Stun Duration 5s. +30% Damage to targets and -30% Damage dealt by targets. Block reflects 25% of Damage back to the attacker. Perfect Block reflects 100%. Extends the Duration of effects on attackers by 100%. Duration 60s. <i>3 skill points, 2 time segments, corruption 13</i></li>
+              </ol>
+            </li>
+            <li><b>Scarlet Shield</b> <i>(passive)</i> Health Regeneration chance after Block.
+              <ol class="ref-lv">
+                <li>Restore 20% of Health Segment after Perfect Block. 20% chance to also trigger after Directional Block and 10% chance after Omniblock. <i>1 skill point, 0 time segments, needs Vrakhir blood</i></li>
+                <li>Restore 25% of Health Segment after Perfect Block. 20% chance to also trigger after Directional Block and 15% chance after Omniblock. <i>1 skill point, 1 time segment, corruption 6</i></li>
+                <li>Restore 25% of Health Segment after Perfect Block. 20% chance to also trigger after Directional Block and 20% chance after Omniblock. Attack after Perfect Block heals you for 10% of dealt Damage. <i>2 skill points, 1 time segment, corruption 10</i></li>
+                <li>Restore 30% of Health Segment after Perfect Block. 30% chance to also trigger after Directional Block and 25% chance after Omniblock. Attack after Perfect Block heals you for 10% of dealt Damage. 25% chance for any Block to become Perfect Block. <i>3 skill points, 2 time segments, corruption 13</i></li>
+              </ol>
+            </li>
+            <li><b>Shadowstorm</b> <i>(active, costs 2 activation charges 15% health)</i> Slows down Time around you.
+              <ol class="ref-lv">
+                <li>Duration 4s. <i>1 skill point, 0 time segments, needs Vrakhir blood</i></li>
+                <li>Duration 5s. <i>1 skill point, 1 time segment, corruption 8</i></li>
+                <li>+20% Attack Damage. Duration 6s. <i>2 skill points, 1 time segment, corruption 11</i></li>
+                <li>+25% Attack Damage. Extend Duration by 1s on enemy kill. Duration 7s. <i>3 skill points, 2 time segments, corruption 14</i></li>
+              </ol>
+            </li>
+            <li><b>Shapeshift</b> <i>(passive)</i> Shapeshift into a Wolf and gain Haste in exploration.
+              <ol class="ref-lv">
+                <li>Gain Haste. <i>1 skill point, 0 time segments, corruption 1</i></li>
+                <li>Haste costs 50% less Stamina. <i>1 skill point, 0 time segments, corruption 6</i></li>
+                <li>Haste costs 50% less Stamina. Haste is 20% faster. <i>1 skill point, 0 time segments, corruption 9</i></li>
+                <li>Haste doesn't cost Stamina. Haste is 20% faster. <i>1 skill point, 0 time segments, corruption 12</i></li>
+              </ol>
+            </li>
+            <li><b>Shred</b> <i>(passive)</i> Bleed chance on your Weapon or Claw Attacks.
+              <ol class="ref-lv">
+                <li>20% Bleed chance. <i>1 skill point, 1 time segment, corruption 1</i></li>
+                <li>25% Bleed chance. +25% Bleed Damage. <i>1 skill point, 1 time segment, corruption 5</i></li>
+                <li>30% Bleed chance. +50% Bleed Damage. <i>2 skill points, 1 time segment, corruption 9</i></li>
+                <li>35% Bleed chance. +100% Bleed Damage. 262 Damage when Bleed is reapplied. <i>3 skill points, 2 time segments, corruption 13</i></li>
+              </ol>
+            </li>
+            <li><b>Voracious Bite</b> <i>(active, story granted, costs 1 activation charge)</i> Restores Health by drinking target's blood.
+              <ol class="ref-lv">
+                <li>Restores 60% of Health Segment. 366 Damage to target. <i>1 skill point, 1 time segment</i></li>
+                <li>Restores 80% of Health Segment. 445 Damage to target. <i>1 skill point, 1 time segment, corruption 3</i></li>
+                <li>Restores 100% of Health Segment. 524 Damage to target. +10% Claw Damage for 30s. <i>2 skill points, 1 time segment, corruption 8</i></li>
+                <li>Restores 120% of Health Segment. 602 Damage to target. +25% Claw Damage for 60s. No Cooldown if you kill the target. <i>3 skill points, 2 time segments, corruption 14</i></li>
+              </ol>
+            </li>
           </ul>
         </section>
       </div>

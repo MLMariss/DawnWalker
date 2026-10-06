@@ -12,7 +12,7 @@ long and mentions no perk by name, so it cannot be found by searching for one.
 
 This puts the registries into the page itself: a folded "Perk & Ability
 Reference" drawer under the board, listing every perk, ultimate and ability with
-its one-line effect. It is real, visible content (open the drawer and read it),
+every level's effect, cost and gate. It is real, visible content (open the drawer and read it),
 not text hidden for crawlers, and it is generated rather than written by hand so
 it cannot drift from the data the planner uses. The block sits between the
 `seo:index` markers in index.html; edit this script, not the markers' contents.
@@ -31,6 +31,8 @@ PAGE = 'index.html'
 SITEMAP = 'sitemap.xml'
 SITE = 'https://mlmariss.github.io/DawnWalker/'
 TREES = ('Witchcraft', 'Swordmastery', 'Vampirism')
+REPO = 'https://github.com/MLMariss/DawnWalker'
+VERIFY = REPO + '/blob/main/VERIFICATION.md'
 
 BEGIN = '<!-- seo:index -->'
 END = '<!-- /seo:index -->'
@@ -47,29 +49,68 @@ def levels(n):
     return '1 level' if n == 1 else '%d levels' % n
 
 
-def perk_li(p):
-    bits = [levels(p['max_level'])]
+def plural(n, word):
+    return '%d %s%s' % (n, word, '' if n == 1 else 's')
+
+
+def gate(g):
+    """The level's gate as a reader would say it, or None when there is none."""
+    if g == 'none':
+        return None
+    if g == 'manual':
+        return 'needs a manual'
+    if g == 'road shrine':
+        return 'at a road shrine'
+    if g == 'vrakhir blood':
+        return 'needs Vrakhir blood'
+    if g == 'quest':
+        return 'story unlock'
+    return g  # "corruption 7" reads as it is
+
+
+def levels_ol(rows, indent):
+    """One line per level: the effect, then what it costs and what gates it.
+       This is the part no other site carries in full, so it is the part worth
+       putting in front of a crawler."""
+    out = [indent + '<ol class="ref-lv">']
+    for r in rows:
+        cost = [plural(r['skill_points'], 'skill point'),
+                plural(r['time_segments'], 'time segment')]
+        if gate(r['gate']):
+            cost.append(gate(r['gate']))
+        effect = e(r['effect']) + ' ' if r['effect'] else ''
+        out.append(indent + '  <li>%s<i>%s</i></li>' % (effect, ', '.join(cost)))
+    out.append(indent + '</ol>')
+    return out
+
+
+def perk_li(p, indent):
+    bits = []
     if p.get('active_time') in TIMES:
         bits.append(TIMES[p['active_time']])
     if p.get('quest_unlock'):
         bits.append('story unlock')
-    return '<li><b>%s</b> <i>(%s)</i> %s</li>' % (
-        e(p['name']), ', '.join(bits), e(p['effect']))
+    note = ' <i>(%s)</i>' % ', '.join(bits) if bits else ''
+    return ([indent + '<li><b>%s</b>%s %s' % (e(p['name']), note, e(p['effect']))]
+            + levels_ol(p['levels'], indent + '  ') + [indent + '</li>'])
 
 
-def ult_li(u):
+def ult_li(u, indent):
     alias = ' <i>(also listed as %s)</i>' % e(u['alias']) if u.get('alias') else ''
     c = u['cost']
-    return '<li><b>%s</b>%s %s <i>Requires %s; %d skill points, %d time segments.</i></li>' % (
+    return [indent + '<li><b>%s</b>%s %s <i>Requires %s; %s, %s.</i></li>' % (
         e(u['name']), alias, e(u['effect']), e(u['requirement']),
-        c['skill_points'], c['time_segments'])
+        plural(c['skill_points'], 'skill point'), plural(c['time_segments'], 'time segment'))]
 
 
-def abil_li(a):
-    bits = [a['kind'], levels(a['max_level'])]
+def abil_li(a, indent):
+    bits = [a['kind']]
     if a.get('story_granted'):
         bits.append('story granted')
-    return '<li><b>%s</b> <i>(%s)</i> %s</li>' % (e(a['name']), ', '.join(bits), e(a['effect']))
+    if a['use_cost']['charges'] or a['use_cost']['health_percent']:
+        bits.append('costs ' + e(a['use_cost']['text']).lower())
+    return ([indent + '<li><b>%s</b> <i>(%s)</i> %s' % (e(a['name']), ', '.join(bits), e(a['effect']))]
+            + levels_ol(a['levels'], indent + '  ') + [indent + '</li>'])
 
 
 def render(perks, abils, indent):
@@ -85,12 +126,16 @@ def render(perks, abils, indent):
         '    <span class="drawer-note">every perk, ultimate and ability in one list</span>',
         '  </summary>',
         '  <div class="ref">',
-        '    <p class="ref-intro">Plan a build for <em>The Blood of Dawnwalker</em> before you '
-        'spend a skill point. This planner lays out all three skill trees &mdash; Witchcraft, '
-        'Swordmastery and Vampirism &mdash; with their %d perks, %d ultimate perks and %d '
-        'abilities. It follows prerequisites and corruption gates, totals the skill points, '
-        'time segments and manuals a build needs, and saves any build as a link you can '
-        'share.</p>' % (n_perks, n_ults, n_abils),
+        '    <p class="ref-intro">Every perk, ultimate perk and ability in <em>The Blood of '
+        'Dawnwalker</em>&rsquo;s three skill trees &mdash; %d perks, %d ultimates and %d '
+        'abilities &mdash; with each level&rsquo;s effect, its skill point and time segment '
+        'cost, and what gates it: a manual, a road shrine, a corruption level or a story '
+        'quest.</p>' % (n_perks, n_ults, n_abils),
+        '    <p class="ref-src">Costs, gates and effect text were transcribed from the '
+        'game&rsquo;s own skill screens and cross-checked against Game8 and Fextralife; '
+        '<a href="%s">VERIFICATION.md</a> lists every check and where the sources disagree. '
+        'Damage figures are shown at character level %d. Made by MLMariss; the data and code '
+        'are on <a href="%s">GitHub</a>.</p>' % (VERIFY, perks['scaling']['anchor_level'], REPO),
     ]
     for t in TREES:
         tree = perks['trees'][t]
@@ -100,20 +145,23 @@ def render(perks, abils, indent):
             '      <h3>%s perks</h3>' % t,
             '      <ul>',
         ]
-        out += ['        ' + perk_li(p) for p in tree['perks']]
+        for p in tree['perks']:
+            out += perk_li(p, '        ')
         out += [
             '      </ul>',
             '      <h3>%s ultimate perks</h3>' % t,
             '      <p>%s</p>' % e(tree['ultimate_rule']),
             '      <ul>',
         ]
-        out += ['        ' + ult_li(u) for u in tree['ultimates']]
+        for u in tree['ultimates']:
+            out += ult_li(u, '        ')
         out += [
             '      </ul>',
             '      <h3>%s abilities</h3>' % t,
             '      <ul>',
         ]
-        out += ['        ' + abil_li(a) for a in abils['trees'][t]['abilities']]
+        for a in abils['trees'][t]['abilities']:
+            out += abil_li(a, '        ')
         out += ['      </ul>', '    </section>']
     out += ['  </div>', '</details>', END]
     return '\n'.join(indent + line if line else line for line in out)

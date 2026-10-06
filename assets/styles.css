@@ -177,6 +177,23 @@ a:hover{color:var(--gold-2)}
 .topbar,.loadedbar{
   padding-inline:max(var(--gutter),calc((100% - var(--shell)) / 2 + var(--gutter)));
 }
+/* The intro line under the bar: the page's <h1> and one sentence saying what it
+   is, for a visitor arriving from a search. One line that never wraps; where the
+   sentence will not fit it is cut, and on a phone it goes and the heading stays. */
+.intro{
+  flex:none;display:flex;align-items:baseline;gap:14px;min-width:0;
+  padding-block:6px 0;
+  padding-inline:max(var(--gutter),calc((100% - var(--shell)) / 2 + var(--gutter)));
+}
+.intro h1{margin:0;flex:none;font-size:13px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--gold-2)}
+.intro p{margin:0;min-width:0;font-size:13px;color:var(--text-faint);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:760px){
+  .intro{padding-block:6px 2px}
+  .intro h1{font-size:12px;letter-spacing:.08em}
+  .intro p{display:none}
+}
 .brand{display:flex;align-items:center;gap:11px;min-width:0;flex:0 1 auto}
 /* The hex ratio. A pointy-top hexagon is taller than it is wide — width is
    height x sqrt(3)/2 — so drawing this clip-path in a square box stretches it
@@ -189,9 +206,6 @@ a:hover{color:var(--gold-2)}
   background:linear-gradient(150deg,var(--gold),var(--blood));
 }
 .brand-text{display:flex;flex-direction:column;line-height:1.2;min-width:0}
-/* The brand is the page's <h1>, for crawlers and screen readers; it keeps the
-   look it had as a span. */
-h1.brand-text{margin:0;font:inherit}
 .brand-text b{font-size:14px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-2);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand-text i{font-style:normal;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);
@@ -650,6 +664,9 @@ body.confirm-mode .abil.selected{box-shadow:0 0 0 1px var(--accent),0 0 18px -4p
 .ref h2{margin:18px 0 2px;font-size:14px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-2)}
 .ref h3{margin:12px 0 4px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint)}
 .ref p{margin:0 0 6px}
+.ref-src{font-size:13px;color:var(--text-faint)}
+.ref-lv{margin:2px 0 6px;padding-left:22px;font-size:13px}
+.ref-lv li{margin:1px 0}
 .ref ul{margin:0;padding-left:18px}
 .ref li{margin:3px 0}
 .ref li b{color:var(--text);font-weight:600}

@@ -1729,6 +1729,19 @@
        hands it the column and folds the perk panel to its hero; clicking that
        hero closes the overview again, which is what puts the perk back and
        returns the overview to the bottom of the column. */
+    /* The intro line's "Full perk list" is a real link for crawlers, but its
+       fragment would replace the #b= build link in the address bar and fall
+       into the hashchange handler above. So it opens the drawer itself. */
+    var reflink = document.getElementById('reflink');
+    var refdrawer = document.getElementById('refdrawer');
+    if (reflink && refdrawer) {
+      reflink.addEventListener('click', function (e) {
+        e.preventDefault();
+        refdrawer.open = true;
+        refdrawer.scrollIntoView({ block: 'start' });
+      });
+    }
+
     el.ovdrawer.addEventListener('toggle', function () {
       el.side.classList.toggle('ov-open', el.ovdrawer.open);
     });

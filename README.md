@@ -261,13 +261,17 @@ points nowhere by default. Saving, loading, codes and links all work.
 The planner draws itself from `data/` with script, which most crawlers never run.
 So that the page can be found by searching for a perk, `tools/build_seo.py` writes
 every perk, ultimate and ability into a folded **Perk & Ability Reference** drawer
-in `index.html`, and writes `sitemap.xml`. Rerun it after any change to
-`data/perks.json` or `data/abilities.json`. The deploy checks it and fails if the
-output is stale:
+in `index.html`. Each entry lists every level's effect, skill point and time segment
+cost and gate, plus where the data came from. The script also writes `sitemap.xml`.
+Rerun it after any change to `data/perks.json` or `data/abilities.json`. The deploy
+checks it and fails if the output is stale:
 
 ```sh
 python3 tools/build_seo.py
 ```
+
+The page's `<h1>` and the one-sentence summary under the top bar are written into
+the HTML by hand. Keep them in step with the `<title>` and meta description.
 
 The page's `<head>` also has a canonical URL, Open Graph and Twitter preview tags
 (the preview image is `og-image.png`) and JSON-LD structured data.
@@ -287,7 +291,10 @@ The site still has to be submitted to search engines, which can't be done from t
 
 There is no `robots.txt`. Crawlers only read it at the root of the domain
 (`mlmariss.github.io/robots.txt`), which this project site doesn't control, and
-without one everything is allowed anyway.
+without one everything is allowed anyway. That includes AI search crawlers
+(OAI-SearchBot, PerplexityBot, Claude-SearchBot) and AI training crawlers (GPTBot,
+ClaudeBot, Google-Extended). To block training but stay in AI search, the rules have
+to go in a `robots.txt` in a separate `MLMariss.github.io` repository.
 
 ## Community builds
 
