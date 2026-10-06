@@ -231,6 +231,7 @@ api/schema.sql                 its three tables
 api/migrations/                one file per schema change, for a database already live
 api/README.md                  how to deploy it, and how to moderate the list
 tools/extract_ability_icons.py cuts ability marks out of skill-screen shots
+tools/build_seo.py             writes the plain-text perk reference into index.html, and sitemap.xml
 VERIFICATION.md                what was checked, and where the sources disagreed
 ```
 
@@ -254,6 +255,39 @@ publishing the folder as-is.
 
 Served locally the community tab says there is no list, because `data/community.json`
 points nowhere by default. Saving, loading, codes and links all work.
+
+## Search engines
+
+The planner draws itself from `data/` with script, which most crawlers never run.
+So that the page can be found by searching for a perk, `tools/build_seo.py` writes
+every perk, ultimate and ability into a folded **Perk & Ability Reference** drawer
+in `index.html`, and writes `sitemap.xml`. Rerun it after any change to
+`data/perks.json` or `data/abilities.json`. The deploy checks it and fails if the
+output is stale:
+
+```sh
+python3 tools/build_seo.py
+```
+
+The page's `<head>` also has a canonical URL, Open Graph and Twitter preview tags
+(the preview image is `og-image.png`) and JSON-LD structured data.
+
+The site still has to be submitted to search engines, which can't be done from the repo:
+
+1. **Google Search Console**: add a URL-prefix property for
+   `https://mlmariss.github.io/DawnWalker/`. Choose the *HTML tag* method, paste
+   the tag where the comment in `index.html`'s `<head>` says, deploy, then click
+   Verify. Under Sitemaps, submit `sitemap.xml`. Then use URL Inspection and click
+   *Request indexing*.
+2. **Bing Webmaster Tools**: import the site from Search Console. This also covers
+   DuckDuckGo and Yahoo.
+3. **Links**: put the URL in the repository's About → Website field, and share it
+   where players look for builds. A new site with no inbound links is found late
+   and ranks low.
+
+There is no `robots.txt`. Crawlers only read it at the root of the domain
+(`mlmariss.github.io/robots.txt`), which this project site doesn't control, and
+without one everything is allowed anyway.
 
 ## Community builds
 

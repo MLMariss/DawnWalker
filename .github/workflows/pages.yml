@@ -36,6 +36,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The perk reference and sitemap are committed output of build_seo.py;
+      # this fails the deploy if data/ changed and they were not regenerated.
+      - name: Verify the perk reference matches data/
+        run: python3 tools/build_seo.py --check
+
       - name: Stamp asset URLs with the commit SHA
         run: python3 tools/stamp_assets.py "${GITHUB_SHA:0:8}"
 

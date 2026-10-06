@@ -3,8 +3,44 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Blood of Dawnwalker — Skill Tree Planner</title>
-<meta name="description" content="Interactive skill tree planner for The Blood of Dawnwalker: Witchcraft, Swordmastery and Vampirism, with prerequisites, corruption gates, manual tracking and a live build summary.">
+<title>The Blood of Dawnwalker Skill Tree Planner &amp; Build Calculator</title>
+<meta name="description" content="Free skill tree planner and build calculator for The Blood of Dawnwalker. Plan Witchcraft, Swordmastery and Vampirism perks, ultimates and abilities with prerequisites, corruption gates, skill point and manual totals, and shareable build links.">
+<!-- Search and link previews. The canonical URL is the one address every share
+     of the planner should count towards: builds ride in the #b= fragment, which
+     search engines ignore, so there is only ever one page here. To verify the
+     site in Google Search Console, paste the tag it gives you below this line:
+     <meta name="google-site-verification" content="..."> -->
+<link rel="canonical" href="https://mlmariss.github.io/DawnWalker/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0b0908">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Dawnwalker Skill Tree Planner">
+<meta property="og:title" content="The Blood of Dawnwalker Skill Tree Planner">
+<meta property="og:description" content="Plan Witchcraft, Swordmastery and Vampirism builds: every perk, ultimate and ability, with skill point, time segment and manual totals and shareable build links.">
+<meta property="og:url" content="https://mlmariss.github.io/DawnWalker/">
+<meta property="og:image" content="https://mlmariss.github.io/DawnWalker/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Witchcraft skill tree in the Blood of Dawnwalker planner">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Blood of Dawnwalker Skill Tree Planner">
+<meta name="twitter:description" content="Plan Witchcraft, Swordmastery and Vampirism builds with every perk, ultimate and ability.">
+<meta name="twitter:image" content="https://mlmariss.github.io/DawnWalker/og-image.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "The Blood of Dawnwalker Skill Tree Planner",
+  "url": "https://mlmariss.github.io/DawnWalker/",
+  "description": "Interactive skill tree planner and build calculator for The Blood of Dawnwalker, covering the Witchcraft, Swordmastery and Vampirism trees.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "isAccessibleForFree": true,
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "about": {"@type": "VideoGame", "name": "The Blood of Dawnwalker"}
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
@@ -26,10 +62,10 @@
 <header class="topbar">
   <div class="brand">
     <span class="brand-mark" aria-hidden="true"></span>
-    <span class="brand-text">
+    <h1 class="brand-text">
       <b>The Blood of Dawnwalker</b>
       <i>Skill Tree Planner</i>
-    </span>
+    </h1>
   </div>
 
   <!-- The running cost of the build, and the only numbers here that change on
@@ -162,6 +198,149 @@
       </summary>
       <div class="abils" id="abils"></div>
     </details>
+    <!-- The plain-text reference: the one part of the page that is in the HTML
+         rather than drawn by app.js, so crawlers and link previews can read it.
+         Generated from data/ by tools/build_seo.py; do not edit by hand. -->
+    <!-- seo:index -->
+    <details class="drawer" id="refdrawer">
+      <summary>
+        <span class="drawer-title">Perk &amp; Ability Reference</span>
+        <span class="drawer-note">every perk, ultimate and ability in one list</span>
+      </summary>
+      <div class="ref">
+        <p class="ref-intro">Plan a build for <em>The Blood of Dawnwalker</em> before you spend a skill point. This planner lays out all three skill trees &mdash; Witchcraft, Swordmastery and Vampirism &mdash; with their 54 perks, 9 ultimate perks and 27 abilities. It follows prerequisites and corruption gates, totals the skill points, time segments and manuals a build needs, and saves any build as a link you can share.</p>
+        <section class="ref-tree">
+          <h2>Witchcraft skill tree</h2>
+          <h3>Witchcraft perks</h3>
+          <ul>
+            <li><b>Forager</b> <i>(2 levels, any time)</i> Double Harvest chance when gathering plants.</li>
+            <li><b>Bewitching Influence</b> <i>(3 levels, any time)</i> Better Prices and special offers in stores.</li>
+            <li><b>Unnatural Resilience</b> <i>(2 levels, day only)</i> Grants Armour when any Witchcraft Ability is active.</li>
+            <li><b>Witchcraft Mastery</b> <i>(4 levels, day only)</i> Witchcraft Abilities deal more Damage.</li>
+            <li><b>Herbal Remedies I</b> <i>(3 levels, any time)</i> Consumables with duration measured in time segments last longer.</li>
+            <li><b>Medicus I</b> <i>(3 levels, any time)</i> Increases the limit of Consumables in a Quickslot.</li>
+            <li><b>Forbidden Sigils</b> <i>(3 levels, day only)</i> Increases Witchcraft Ability Slots number.</li>
+            <li><b>Lasting Malediction</b> <i>(4 levels, day only)</i> Witchcraft Abilities last longer.</li>
+            <li><b>Frugal Witchcraft</b> <i>(3 levels, day only)</i> Defeating an enemy with a Witchcraft Ability restores Health based on the amount spent to cast it.</li>
+            <li><b>Amalgam</b> <i>(2 levels, any time)</i> Multiple Buffs from Consumables with time segments set as the duration, can be applied simultaneously.</li>
+            <li><b>Aether Flow</b> <i>(3 levels, day only)</i> Reduces Witchcraft Ability Cooldown.</li>
+            <li><b>Evil Eye</b> <i>(2 levels, day only)</i> Chance for Critical Witchcraft Ability cast.</li>
+            <li><b>Font of Life</b> <i>(1 level, day only, story unlock)</i> Passive regeneration of human health.</li>
+            <li><b>Herbal Remedies II</b> <i>(3 levels, any time)</i> Additional instant Heal from all Consumables.</li>
+            <li><b>Medicus II</b> <i>(3 levels, any time)</i> Craft more Items in a single batch.</li>
+            <li><b>Blasphemous Echo</b> <i>(2 levels, day only)</i> Increases Witchcraft Abilities Damage for each enemy currently affected by Witchcraft Abilities.</li>
+            <li><b>Potent Blood</b> <i>(2 levels, day only)</i> Chance for Witchcraft Abilities to not cost Health.</li>
+            <li><b>Unholy Fervour</b> <i>(2 levels, day only)</i> Chance for a refund of an Activation Charge after Witchcraft Ability use.</li>
+          </ul>
+          <h3>Witchcraft ultimate perks</h3>
+          <p>Three per tree, only one can ever be taken; the choice is permanent.</p>
+          <ul>
+            <li><b>Aether Cascade</b> <i>(also listed as Arcane Cascade)</i> +20% Witchcraft damage for each ability used, up to +100%. Resets after combat. <i>Requires 35 points in tree; 4 skill points, 2 time segments.</i></li>
+            <li><b>Entwined Torment</b> The first Witchcraft ability used in a fight hits 2 enemies. <i>Requires 35 points in tree; 4 skill points, 2 time segments.</i></li>
+            <li><b>Runic Bulwark</b> 15% chance to apply a random hex on a perfect block. <i>Requires 35 points in tree; 4 skill points, 2 time segments.</i></li>
+          </ul>
+          <h3>Witchcraft abilities</h3>
+          <ul>
+            <li><b>Astral Communion</b> <i>(passive, 4 levels, story granted)</i> Activates dormant magic in places of power scattered throughout the Valley.</li>
+            <li><b>Burning Blood</b> <i>(active, 4 levels, story granted)</i> Deals Damage over time to a target.</li>
+            <li><b>Compel Soul</b> <i>(passive, 4 levels, story granted)</i> Allows you to speak with restless souls. Use together with objects associated with the dead to obtain additional information.</li>
+            <li><b>Cycle of Ruin</b> <i>(passive, 4 levels)</i> Extends Duration of currently active Witchcraft Abilities with each landed Attack, Block and Perfect Block.</li>
+            <li><b>Life Lock</b> <i>(active, 4 levels)</i> Blocks Damage and Reflects it back to the enemy.</li>
+            <li><b>Mercurial Fervour</b> <i>(passive, 4 levels)</i> Gain Haste in exploration by briefly slowing down the world around you.</li>
+            <li><b>Ravenous Flock</b> <i>(active, 4 levels)</i> Area Attack and Stun on target. Attacking the target triggers additional Area Attacks.</li>
+            <li><b>Soul Reaping</b> <i>(active, 4 levels)</i> Lifesteals target over time and keep him away.</li>
+            <li><b>Soul Stigma</b> <i>(active, 4 levels)</i> Higher Critical Chance and Critical Damage on target.</li>
+            <li><b>Unholy Vitality</b> <i>(passive, 4 levels)</i> Regenerates Health after using Active Abilities.</li>
+          </ul>
+        </section>
+        <section class="ref-tree">
+          <h2>Swordmastery skill tree</h2>
+          <h3>Swordmastery perks</h3>
+          <ul>
+            <li><b>Omniblock</b> <i>(4 levels, any time)</i> Omniblock costs less Stamina.</li>
+            <li><b>Stinging Blade</b> <i>(4 levels, any time)</i> Increases Weapon Damage.</li>
+            <li><b>Endless Effort</b> <i>(4 levels, any time)</i> Increases Stamina.</li>
+            <li><b>Vigour</b> <i>(4 levels, any time)</i> Increases All Health Types.</li>
+            <li><b>Perfect Riposte</b> <i>(4 levels, any time)</i> Attack in Critical Direction after Perfect Block to deal Critical Damage.</li>
+            <li><b>Perfect Block</b> <i>(4 levels, any time)</i> Perfect Block restores more Stamina and Activation Charge.</li>
+            <li><b>Fate’s Favour</b> <i>(4 levels, any time)</i> Chance for Weapon Critical Hit.</li>
+            <li><b>Fleet of Foot</b> <i>(4 levels, any time)</i> Dodging cost less Stamina.</li>
+            <li><b>Pack Mule</b> <i>(3 levels, any time)</i> Increases Carry Weight.</li>
+            <li><b>Sustained Focus</b> <i>(4 levels, any time)</i> Increases Activation Charges number.</li>
+            <li><b>Second Skin I</b> <i>(3 levels, any time)</i> Decreases Medium Armour penalties.</li>
+            <li><b>Counterattack</b> <i>(3 levels, any time)</i> Attack after Perfect Block deals more Damage.</li>
+            <li><b>Precision</b> <i>(3 levels, any time)</i> Deal more Damage with Directional Attacks when directions don't repeat.</li>
+            <li><b>Master Fencer</b> <i>(3 levels, any time)</i> Increases Swordmastery Ability Slots number.</li>
+            <li><b>Renewed Focus</b> <i>(3 levels, any time)</i> Increases Activation Charge Restoration.</li>
+            <li><b>Sharp Eye</b> <i>(3 levels, any time)</i> Chance to Weaken enemy on Perfect Block. Weak enemy deals less and receives more Damage.</li>
+            <li><b>Growing Momentum</b> <i>(2 levels, any time)</i> Increases Weapon Damage with each Attack. Buff resets after receiving Damage.</li>
+            <li><b>Restless Blade</b> <i>(3 levels, any time)</i> Reduces Cooldowns of Swordmastery Abilities.</li>
+            <li><b>Second Skin II</b> <i>(3 levels, any time)</i> Decreases Heavy Armour penalties.</li>
+          </ul>
+          <h3>Swordmastery ultimate perks</h3>
+          <p>Three per tree, only one can ever be taken; the choice is permanent.</p>
+          <ul>
+            <li><b>Last Stand</b> +100% Weapon Damage when Health is below 30%. <i>Requires 35 points in tree; 4 skill points, 2 time segments.</i></li>
+            <li><b>Sword Sage</b> Reset Active Ability Cooldowns on enemy killing. <i>Requires 35 points in tree; 4 skill points, 2 time segments.</i></li>
+            <li><b>Tactical Mastery</b> -1 Activation Charge cost to all Active Abilities (minimum 1). <i>Requires 35 points in tree; 4 skill points, 2 time segments.</i></li>
+          </ul>
+          <h3>Swordmastery abilities</h3>
+          <ul>
+            <li><b>Adrenaline Rush</b> <i>(passive, 4 levels)</i> Increases Attack Damage after using Active Abilities.</li>
+            <li><b>Artery Strike</b> <i>(active, 4 levels)</i> Critical Attack with a chance of Decapitating the target.</li>
+            <li><b>Broad Swing</b> <i>(active, 4 levels)</i> Weapon Area Attack.</li>
+            <li><b>Charge</b> <i>(active, 4 levels)</i> Charge dealing Damage and Stunning a target and everyone on your way.</li>
+            <li><b>Dirty Trick</b> <i>(active, 4 levels, story granted)</i> Stuns and Damages a target and makes them vulnerable to Active Abilities.</li>
+            <li><b>Swiftness</b> <i>(passive, 4 levels)</i> Boosts Attack Speed after Perfect Block.</li>
+            <li><b>Walking Fortress</b> <i>(passive, 4 levels)</i> Perfect Block restores portion of Activation Charge.</li>
+          </ul>
+        </section>
+        <section class="ref-tree">
+          <h2>Vampirism skill tree</h2>
+          <h3>Vampirism perks</h3>
+          <ul>
+            <li><b>Nourishing Blood</b> <i>(3 levels, night only)</i> Blood Drinking restores more Health.</li>
+            <li><b>Endless Hunger</b> <i>(3 levels, night only)</i> Increase Health Segments number.</li>
+            <li><b>Shadow Dweller</b> <i>(2 levels, night only)</i> Increases Shadowstep range.</li>
+            <li><b>Razorsharp Claws</b> <i>(4 levels, night only)</i> Increases Claw Damage.</li>
+            <li><b>Vrakhiri Might</b> <i>(3 levels, night only)</i> Increases Vampiric Ability Slots number.</li>
+            <li><b>Crimson Feast</b> <i>(3 levels, night only)</i> Grants Buffs when drinking Human Blood. Duration: 3 time segments.</li>
+            <li><b>Wild Blood</b> <i>(3 levels, night only)</i> Grants Buffs when drinking Animal Blood. Duration: 3 time segments.</li>
+            <li><b>Dimension Reach</b> <i>(3 levels, night only)</i> Decrease Planeshift Stamina cost.</li>
+            <li><b>Restless Claws</b> <i>(3 levels, night only)</i> Decrease Stamina cost of Claw Attacks.</li>
+            <li><b>Lasting Blood</b> <i>(2 levels, night only)</i> Vampiric Abilities cost less Health.</li>
+            <li><b>Hastened Corruption</b> <i>(3 levels, night only)</i> Corruption fills up faster.</li>
+            <li><b>Closing Wounds</b> <i>(2 levels, night only)</i> Slowly Regenerates Vampiric Health within the current Health Segment.</li>
+            <li><b>Mandrake Ward</b> <i>(1 level, night only, story unlock)</i> Once per night, lethal damage instead restores 3 health segments.</li>
+            <li><b>Clawpierce</b> <i>(3 levels, night only)</i> Chance for Claw Critical Hit.</li>
+            <li><b>Endless Ferocity</b> <i>(2 levels, night only)</i> Reduces Cooldowns of Vampiric Abilities.</li>
+            <li><b>Blood Theft</b> <i>(3 levels, night only)</i> Attacking restores Recently Lost Vampiric Health.</li>
+            <li><b>Dancing Claws</b> <i>(2 levels, night only)</i> Increases Claw Critical Chance with each Attack. Buff resets after receiving Damage or after a Critical Hit.</li>
+          </ul>
+          <h3>Vampirism ultimate perks</h3>
+          <p>Three per tree, only one can ever be taken; the choice is permanent.</p>
+          <ul>
+            <li><b>Lethal Crescendo</b> +20% Claw Damage after killing an enemy or depleting a Health Segment of a Boss. Can stack. Resets at the end of combat. <i>Requires Corruption 15; 4 skill points, 2 time segments.</i></li>
+            <li><b>Renounce Death</b> Gain Lifesteal on Attacks and Immortality instead of dying once per combat. Duration 10s. <i>Requires Corruption 15; 4 skill points, 2 time segments.</i></li>
+            <li><b>Sanguine Renewal</b> Voracious Bite resets all Active Abilities Cooldowns. <i>Requires Corruption 15; 4 skill points, 2 time segments.</i></li>
+          </ul>
+          <h3>Vampirism abilities</h3>
+          <ul>
+            <li><b>Blood Surge</b> <i>(active, 4 levels)</i> Explodes target. Bosses receive Damage instead.</li>
+            <li><b>Crimson Rush</b> <i>(passive, 4 levels)</i> Increases Damage of Active Abilities, the higher your Health percentage is.</li>
+            <li><b>Death From Above</b> <i>(passive, 4 levels)</i> Instantly Kill a target below you. Bosses receive Damage instead.</li>
+            <li><b>Mesmerise</b> <i>(active, 4 levels)</i> Mind Control a target and force him to Fight on your side. Can't be used on Bosses.</li>
+            <li><b>Piercing Shriek</b> <i>(active, 4 levels)</i> Stuns all enemies in front of you, Weakens their Defence and Attack Damage. Blocking their attacks reflects Damage back at them.</li>
+            <li><b>Scarlet Shield</b> <i>(passive, 4 levels)</i> Health Regeneration chance after Block.</li>
+            <li><b>Shadowstorm</b> <i>(active, 4 levels)</i> Slows down Time around you.</li>
+            <li><b>Shapeshift</b> <i>(passive, 4 levels)</i> Shapeshift into a Wolf and gain Haste in exploration.</li>
+            <li><b>Shred</b> <i>(passive, 4 levels)</i> Bleed chance on your Weapon or Claw Attacks.</li>
+            <li><b>Voracious Bite</b> <i>(active, 4 levels, story granted)</i> Restores Health by drinking target's blood.</li>
+          </ul>
+        </section>
+      </div>
+    </details>
+    <!-- /seo:index -->
 
     <p class="hint">
       <span id="hint-how"></span>
